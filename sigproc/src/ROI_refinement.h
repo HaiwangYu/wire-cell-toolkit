@@ -95,7 +95,7 @@ namespace WireCell{
       SignalROIChList rois_u_loose;
       SignalROIChList rois_v_loose;
 
-      std::set<std::pair<int, int>> proteced_rois; //using chid and start_bin as id
+      std::multimap<std::pair<int, int>, std::pair<int, int> > proteced_rois; //using chid and start_bin as id
    
     
       SignalROIMap front_rois;
