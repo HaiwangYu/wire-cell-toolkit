@@ -268,7 +268,7 @@ void OmnibusSigProc::configure(const WireCell::Configuration& config)
       ++osp_channel_number;
     }
   }
-
+  m_timers.insert({"ROI_refinement",0});
 }
 
 WireCell::Configuration OmnibusSigProc::default_configuration() const
@@ -1375,9 +1375,11 @@ bool OmnibusSigProc::operator()(const input_pointer& in, output_pointer& out)
 
   // create a class for ROIs ... 
   ROI_formation roi_form(m_cmm, m_nwires[0], m_nwires[1], m_nwires[2], m_nticks, m_th_factor_ind, m_th_factor_col, m_pad, m_asy, m_rebin, m_l_factor, m_l_max_th, m_l_factor1, m_l_short_length, m_l_jump_one_bin);
-  ROI_refinement roi_refine(m_cmm, m_nwires[0], m_nwires[1], m_nwires[2],m_r_th_factor,m_r_fake_signal_low_th,m_r_fake_signal_high_th,m_r_fake_signal_low_th_ind_factor,m_r_fake_signal_high_th_ind_factor,m_r_pad,m_r_break_roi_loop,m_r_th_peak,m_r_sep_peak,m_r_low_peak_sep_threshold_pre,m_r_max_npeaks,m_r_sigma,m_r_th_percent,m_isWrapped);//
-
+  ROI_refinement roi_refine(m_cmm, m_nwires[0], m_nwires[1], m_nwires[2],m_r_th_factor,m_r_fake_signal_low_th,m_r_fake_signal_high_th,m_r_fake_signal_low_th_ind_factor,m_r_fake_signal_high_th_ind_factor,m_r_pad,m_r_break_roi_loop,m_r_th_peak,m_r_sep_peak,m_r_low_peak_sep_threshold_pre,m_r_max_npeaks,m_r_sigma,m_r_th_percent,m_isWrapped);//  
   
+  std::clock_t start;
+  double duration = 0;
+
   const std::vector<float>* perplane_thresholds[3] = {
     &roi_form.get_uplane_rms(),
     &roi_form.get_vplane_rms(),
@@ -1427,10 +1429,13 @@ bool OmnibusSigProc::operator()(const input_pointer& in, output_pointer& out)
     if (m_use_roi_debug_mode and iplane==2) save_data(*itraces, loose_lf_traces, iplane, perwire_rmses, dummy);
 
     // Refine ROIs
+    start = std::clock();
     roi_refine.load_data(iplane, m_r_data[iplane], roi_form);
+    duration += (std::clock() - start) / (double)CLOCKS_PER_SEC;
   }
   
   for (int iplane = 0; iplane != 3; ++iplane){
+    start = std::clock();
     
     // roi_refine.refine_data(iplane, roi_form);
 
@@ -1452,9 +1457,11 @@ bool OmnibusSigProc::operator()(const input_pointer& in, output_pointer& out)
       save_mproi(*itraces, mp2_roi_traces, iplane,
                roi_refine.get_mp2_rois());
     }
+    duration += (std::clock() - start) / (double)CLOCKS_PER_SEC;
   }
 
   for (int iplane = 0; iplane != 3; ++iplane){
+    start = std::clock();
     const std::vector<float>& perwire_rmses = *perplane_thresholds[iplane];
 
     for (int qx = 0; qx != m_r_break_roi_loop; qx++) {
@@ -1485,6 +1492,8 @@ bool OmnibusSigProc::operator()(const input_pointer& in, output_pointer& out)
       roi_refine.CleanUpInductionROIs(iplane);
     }
     roi_refine.ExtendROIs(iplane);
+    
+    duration += (std::clock() - start) / (double)CLOCKS_PER_SEC;
 
     if (m_use_roi_debug_mode) {
       save_ext_roi(*itraces, extend_roi_traces, iplane,
@@ -1507,6 +1516,10 @@ bool OmnibusSigProc::operator()(const input_pointer& in, output_pointer& out)
     m_c_data[iplane].resize(0,0); // clear memory
     m_r_data[iplane].resize(0,0); // clear memory
   }
+
+  log->info("OmnibugSigProc::Timer: ROI_refinement: {} sec/event", duration);
+  m_timers["ROI_refinement"] += duration;
+  log->info("OmnibugSigProc::Timer: ROI_refinement: {} sec total", m_timers["ROI_refinement"]);
 
   SimpleFrame* sframe = new SimpleFrame(in->ident(), in->time(),
                                         ITrace::shared_vector(itraces),

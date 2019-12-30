@@ -243,6 +243,7 @@ namespace WireCell {
       bool m_sparse;
       
       Log::logptr_t log;
+      std::unordered_map<std::string, float> m_timers;
 
     };
   }
