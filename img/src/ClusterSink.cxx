@@ -69,6 +69,8 @@ std::string vector_stringer(const cluster_node_t& n)
     typename Type::shared_vector sv = std::get<typename Type::shared_vector>(n.ptr);
     std::stringstream ss;
     ss << n.code() << "#" << sv->size();
+    ss << "|";
+    for(auto ch : *sv) ss << ch->ident() << "|";
     return ss.str();
 }
 
