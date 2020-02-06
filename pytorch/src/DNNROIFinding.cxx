@@ -64,7 +64,8 @@ void Pytorch::DNNROIFinding::configure(const WireCell::Configuration &cfg) {
   m_timers.insert({"eigen2tensor",0});
   m_timers.insert({"forward",0});
   m_timers.insert({"tensor2eigen",0});
-  m_timers.insert({"h5",0});
+  m_timers.insert({"h5eval",0});
+  m_timers.insert({"eigen2frame",0});
 }
 
 WireCell::Configuration Pytorch::DNNROIFinding::default_configuration() const {
@@ -356,8 +357,6 @@ bool Pytorch::DNNROIFinding::operator()(const IFrame::pointer &inframe,
   // apply ROI
   auto sp_charge = mask(decon_charge_eigen.transpose(), mask_e, 0.7);
   sp_charge = baseline_subtraction(sp_charge);
-  // sp_charge = upsample(sp_charge, 10);
-  sp_charge = sp_charge;
   
   start = std::clock();
   duration = 0;
@@ -373,10 +372,13 @@ bool Pytorch::DNNROIFinding::operator()(const IFrame::pointer &inframe,
     h5::write<float>(fd, aname, sp_charge.data(), h5::count{ncols, nrows}, h5::chunk{ncols, nrows} | h5::gzip{2});
   }
   duration += (std::clock() - start) / (double)CLOCKS_PER_SEC;
-  l->info("h5: {}", duration);
-  m_timers["h5"] += duration;
+  l->info("h5eval: {}", duration);
+  m_timers["h5eval"] += duration;
 
   //eigen to frame
+  start = std::clock();
+  duration = 0;
+  
   ITrace::vector* itraces = new ITrace::vector;
   IFrame::trace_list_t trace_index;
   eigen_to_traces(sp_charge, *itraces, trace_index, m_cfg["cbeg"].asInt(), m_cfg["nticks"].asInt(), false);
@@ -391,6 +393,10 @@ bool Pytorch::DNNROIFinding::operator()(const IFrame::pointer &inframe,
              itraces->size(), trace_index.size());
 
   outframe = IFrame::pointer(sframe);
+  
+  duration += (std::clock() - start) / (double)CLOCKS_PER_SEC;
+  l->info("eigen2frame: {}", duration);
+  m_timers["eigen2frame"] += duration;
   
   l->info("timer summary:");
   for (auto pair : m_timers) {
