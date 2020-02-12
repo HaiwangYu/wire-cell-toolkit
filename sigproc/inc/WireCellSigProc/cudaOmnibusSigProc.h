@@ -8,7 +8,8 @@
 #include "WireCellUtil/Array.h"
 #include "WireCellUtil/Logging.h"
 
-#include "config.h"
+// #include "config.h"
+#define HAVE_CUDA_H
 
 #include <list>
 #include <complex>

@@ -723,7 +723,7 @@ void cudaOmnibusSigProc::init_overall_response(IFrame::pointer frame)
 #ifdef HAVE_CUDA_H
 void cudaOmnibusSigProc::restore_baseline_cuda(Array::array_xxf& arr){
 
-  //double wstart, wend;
+  double wstart, wend;
   //double wstart_p, wend_p;
   //double part1 = 0.0;
   //double part2 = 0.0;
@@ -731,14 +731,15 @@ void cudaOmnibusSigProc::restore_baseline_cuda(Array::array_xxf& arr){
 
   
 
-  //wstart = omp_get_wtime();
+  wstart = omp_get_wtime();
   
   //log->debug("cudaOmnibusSigProc::restore_baseline_cuda() : {}, {}", arr.rows(), arr.cols());
-  //restore_baseline_CUDA(arr.data(), arr.rows(), arr.cols());
-  //wend = omp_get_wtime();
-  //g_restore_baseline += wend - wstart;
+  restore_baseline_CUDA(arr.data(), arr.rows(), arr.cols());
+  wend = omp_get_wtime();
+  m_timers["restore_baseline_cuda"] += wend - wstart;
+  // g_restore_baseline += wend - wstart;
   //log->debug("cudaOmnibusSigProc::restore_baseline_cuda() : total running time : {}",  g_restore_baseline);
-  //return;
+  return;
 
   for (int i=0;i!=arr.rows();i++){
     //wstart_p = omp_get_wtime();
@@ -1676,6 +1677,10 @@ bool cudaOmnibusSigProc::operator()(const input_pointer& in, output_pointer& out
              gauss_traces.size(), m_gauss_tag, m_frame_tag);
 
   out = IFrame::pointer(sframe);
+
+  for (auto t : m_timers) {
+    log->info("timers: {} : {} ms", t.first, t.second*1000);
+  }
   
   return true;
 }
