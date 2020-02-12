@@ -1,9 +1,20 @@
 #include "WireCellGen/GaussianDiffusion.h"
 
 #include <iostream>		// debugging
+#include <omp.h>
 
 using namespace WireCell;
 using namespace std;
+
+
+double g_set_sampling_part1 = 0.0;
+double g_set_sampling_part2 = 0.0;
+double g_set_sampling_part3 = 0.0;
+double g_set_sampling_part4 = 0.0;
+double g_set_sampling_part5 = 0.0;
+
+
+
 
 std::vector<double> Gen::GausDesc::sample(double start, double step, int nsamples) const
 {
@@ -131,12 +142,15 @@ void Gen::GaussianDiffusion::set_sampling(const Binning& tbin, // overall time t
         return;
     }
 
+    double wstart, wend;
+
+
+    wstart = omp_get_wtime();
     /// Sample time dimension
     auto tval_range = m_time_desc.sigma_range(nsigma);
     auto tbin_range = tbin.sample_bin_range(tval_range.first, tval_range.second);
     const size_t ntss = tbin_range.second - tbin_range.first;
     m_toffset_bin = tbin_range.first;
-    //auto tvec =  m_time_desc.sample(tbin.center(m_toffset_bin), tbin.binsize(), ntss);
     auto tvec =  m_time_desc.binint(tbin.edge(m_toffset_bin), tbin.binsize(), ntss);
 
     if (!ntss) {
@@ -149,7 +163,6 @@ void Gen::GaussianDiffusion::set_sampling(const Binning& tbin, // overall time t
     auto pbin_range = pbin.sample_bin_range(pval_range.first, pval_range.second);
     const size_t npss = pbin_range.second - pbin_range.first;
     m_poffset_bin = pbin_range.first;
-    //auto pvec = m_pitch_desc.sample(pbin.center(m_poffset_bin), pbin.binsize(), npss);
     auto pvec = m_pitch_desc.binint(pbin.edge(m_poffset_bin), pbin.binsize(), npss);
     
 
@@ -158,7 +171,6 @@ void Gen::GaussianDiffusion::set_sampling(const Binning& tbin, // overall time t
         return;
     }
 
-    // weightstrat = 1;
 
     // make charge weights for later interpolation.
     /// fixme: for hanyu.
@@ -169,7 +181,12 @@ void Gen::GaussianDiffusion::set_sampling(const Binning& tbin, // overall time t
     if(weightstrat == 1){
         m_qweights.resize(npss, 0.5);
     }
+    wend = omp_get_wtime();
+    g_set_sampling_part1 += wend - wstart;
 
+
+
+    wstart = omp_get_wtime();
     // start making the time vs impact patch of charge.
     patch_t ret = patch_t::Zero(npss, ntss);
     double raw_sum=0.0;
@@ -183,46 +200,37 @@ void Gen::GaussianDiffusion::set_sampling(const Binning& tbin, // overall time t
 	}
     }
 
-    // Depo charge should be in units of "e" so negative, but
-    // explicitly track sign in case positive charge is given.
-    const double depo_charge = m_deposition->charge();
-    const double charge_sign = depo_charge < 0 ? -1 : 1;
-
     // normalize to total charge
-    ret *= depo_charge / raw_sum;
+    ret *= m_deposition->charge() / raw_sum;
+    wend = omp_get_wtime();
+    g_set_sampling_part2 += wend - wstart;
+
+
+    //cout << "set_sampling() : npss=" << npss << ", ntss=" << ntss << ", m_deposition->charge() = " << m_deposition->charge() << ", raw_sum=" << raw_sum << endl;
+
+
+    wstart = omp_get_wtime();
+    const double charge_sign = m_deposition->charge() < 0 ? -1 : 1;
 
     double fluc_sum = 0;
     if (fluctuate) {
         double unfluc_sum = 0;
 
 	for (size_t ip = 0; ip < npss; ++ip) {
-	    for (size_t it = 0; it < ntss; ++it) {
-		const double oldval = ret(ip,it);
-                unfluc_sum += oldval;
-                // should be a multinomial distribution, n_i follows binomial distribution
-                // but n_i, n_j has covariance -n_tot * p_i * p_j
-                // normalize later to approximate this multinomial distribution (how precise?)
-                // how precise? better than poisson and 10000 total charge corresponds to a <1% level error.
-                double number = 0.0;
-                const double relval = oldval/depo_charge;
-                if (relval >= 1.0) {
-                    number = (int)std::abs(depo_charge);
-                }
-                else {
-                    number = fluctuate->binomial((int)std::abs(depo_charge),
-                                                 relval);
-                }
-                // the charge should be negative -- ionization electrons
-                number *= charge_sign;
-                fluc_sum += number;
-                ret(ip,it) = number;
-	    }
+	  for (size_t it = 0; it < ntss; ++it) {
+	    const float oldval = ret(ip,it);
+            unfluc_sum += oldval;
+            // should be a multinomial distribution, n_i follows binomial distribution
+            // but n_i, n_j has covariance -n_tot * p_i * p_j
+            // normalize later to approximate this multinomial distribution (how precise?)
+            // how precise? better than poisson and 10000 total charge corresponds to a <1% level error.
+            float number = fluctuate->binomial((int)(std::abs(m_deposition->charge())), oldval/m_deposition->charge());
+            //the charge should be netagive -- ionization electrons
+	    fluc_sum += charge_sign*number;
+	    ret(ip,it) = charge_sign*number;
+	  }
 	}
         if (fluc_sum == 0) {
-           // cerr << "No net charge after fluctuation. Total unfluctuated = "
-           //      << unfluc_sum
-           //      << " Qdepo = " << m_deposition->charge()
-           //      << endl;
            return;
         }
         else {
@@ -231,20 +239,11 @@ void Gen::GaussianDiffusion::set_sampling(const Binning& tbin, // overall time t
     }
 
 
-    {                           // debugging
-        //double retsum=0.0;
-        //for (size_t ip = 0; ip < npss; ++ip) {
-        //    for (size_t it = 0; it < ntss; ++it) {
-        //        retsum += ret(ip,it);
-        //    }
-        //}
-        // cerr << "GaussianDiffusion: Q in electrons: depo=" << m_deposition->charge()/units::eplus
-        //      << " rawsum=" << raw_sum/units::eplus << " flucsum=" << fluc_sum/units::eplus
-        //      << " returned=" << retsum/units::eplus << endl;
-    }
-
-
     m_patch = ret;
+    wend = omp_get_wtime();
+    g_set_sampling_part3 += wend - wstart;
+
+
 }
 
 void Gen::GaussianDiffusion::clear_sampling(){

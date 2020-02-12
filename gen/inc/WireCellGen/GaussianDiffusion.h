@@ -9,6 +9,10 @@
 #include <memory>
 #include <iostream>
 
+#include <cuda.h>
+#include <curand.h>
+
+
 namespace WireCell {
     namespace Gen {
 
@@ -100,7 +104,17 @@ namespace WireCell {
                               double nsigma = 3.0, 
                               IRandom::pointer fluctuate=nullptr, 
                               unsigned int weightstrat = 1/*see BinnedDiffusion ImpactDataCalculationStrategy*/);
+            #ifdef HAVE_CUDA_H
+            void set_sampling_CUDA(double* pvec_D, double* tvec_D, float* patch_D, float* rand_D, curandGenerator_t* gen,
+                              const Binning& tbin, const Binning& pbin,
+                              double nsigma = 3.0, 
+                              IRandom::pointer fluctuate=nullptr, 
+                              unsigned int weightstrat = 1/*see BinnedDiffusion ImpactDataCalculationStrategy*/);
+            #endif
 	    void clear_sampling();
+
+
+
 
 	    /// Get the diffusion patch as an array of N_pitch rows X
 	    /// N_time columns.  Index as patch(i_pitch, i_time).
@@ -135,6 +149,12 @@ namespace WireCell {
 
             int m_toffset_bin;
             int m_poffset_bin;
+
+        private:
+            #ifdef HAVE_CUDA_H
+            void sampling_CUDA(double* pvec, const size_t npss, double* tvec, const size_t ntss, float* output, const double sign, const double charge, double* pvec_D, double* tvec_D, float* patch_D, bool fluc, float* rand_D, curandGenerator_t* gen);
+            #endif
+
 	};
     }
 }

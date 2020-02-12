@@ -11,6 +11,10 @@
 #include <deque>
 #include <Eigen/Sparse>
 
+#include <cuda.h>
+#include <curand.h>
+
+
 namespace WireCell {
     namespace Gen {
 
@@ -53,6 +57,9 @@ namespace WireCell {
 	    BinnedDiffusion_transform(const Pimpos& pimpos, const Binning& tbins,
 			    double nsigma=3.0, IRandom::pointer fluctuate=nullptr,
                             ImpactDataCalculationStrategy calcstrat = linear);
+            #ifdef HAVE_CUDA_H
+            virtual ~BinnedDiffusion_transform();
+            #endif
 
             const Pimpos& pimpos() const { return m_pimpos; }
             const Binning& tbins() const { return m_tbins; }
@@ -119,6 +126,22 @@ namespace WireCell {
 
             int m_outside_pitch;
             int m_outside_time;
+
+            #ifdef HAVE_CUDA_H
+            double* m_pvec_D;
+            double* m_tvec_D;
+            float* m_patch_D;
+            float* m_rand_D;
+            curandGenerator_t m_Gen;
+            #endif
+
+        private:
+            #ifdef HAVE_CUDA_H
+            void init_Device();
+            void clear_Device();
+            #endif
+
+
 	};
 
 

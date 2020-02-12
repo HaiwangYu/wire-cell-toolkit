@@ -3,10 +3,25 @@
 #include "WireCellUtil/Units.h"
 
 #include <iostream>             // debug
+#include <omp.h>
 #include <unordered_map>
 using namespace std;
 
 using namespace WireCell;
+
+double g_get_charge_vec_time_part1 = 0.0;
+double g_get_charge_vec_time_part2 = 0.0;
+double g_get_charge_vec_time_part3 = 0.0;
+double g_get_charge_vec_time_part4 = 0.0;
+double g_get_charge_vec_time_part5 = 0.0;
+
+extern double g_set_sampling_part1;
+extern double g_set_sampling_part2;
+extern double g_set_sampling_part3;
+extern double g_set_sampling_part4;
+extern double g_set_sampling_part5;
+
+extern size_t g_total_sample_size;
 
 // bool Gen::GausDiffTimeCompare::operator()(const std::shared_ptr<Gen::GaussianDiffusion>& lhs, const std::shared_ptr<Gen::GaussianDiffusion>& rhs) const
 // {
@@ -32,7 +47,18 @@ Gen::BinnedDiffusion_transform::BinnedDiffusion_transform(const Pimpos& pimpos, 
     , m_outside_pitch(0)
     , m_outside_time(0)
 {
+#ifdef HAVE_CUDA_H    
+    init_Device();
+#endif    
 }
+
+
+#ifdef HAVE_CUDA_H    
+Gen::BinnedDiffusion_transform::~BinnedDiffusion_transform() {
+    clear_Device();
+}
+#endif    
+
 
 bool Gen::BinnedDiffusion_transform::add(IDepo::pointer depo, double sigma_time, double sigma_pitch)
 {
@@ -221,6 +247,10 @@ void Gen::BinnedDiffusion_transform::get_charge_matrix(std::vector<Eigen::Sparse
 
 // a new function to generate the result for the entire frame ... 
 void Gen::BinnedDiffusion_transform::get_charge_vec(std::vector<std::vector<std::tuple<int,int, double> > >& vec_vec_charge, std::vector<int>& vec_impact){
+
+  double wstart, wend, wstart2, wend2;
+
+  wstart = omp_get_wtime();
   const auto ib = m_pimpos.impact_binning();
 
   // map between reduced impact # to array # 
@@ -232,7 +262,13 @@ void Gen::BinnedDiffusion_transform::get_charge_vec(std::vector<std::vector<std:
     std::unordered_map<long int, int> map_pair_pos;
     vec_map_pair_pos.push_back(map_pair_pos);
   }
+  wend = omp_get_wtime();
+  g_get_charge_vec_time_part1 += wend - wstart;
+  cout << "get_charge_vec() : get_charge_vec() part1 running time : " << g_get_charge_vec_time_part1 << endl;
 
+
+  
+  wstart = omp_get_wtime();
   const auto rb = m_pimpos.region_binning();
   // map between impact # to channel #
   std::map<int, int> map_imp_ch;
@@ -240,43 +276,37 @@ void Gen::BinnedDiffusion_transform::get_charge_vec(std::vector<std::vector<std:
   std::map<int, int> map_imp_redimp;
 
 
-  //std::cout << ib.nbins() << " " << rb.nbins() << std::endl;
   for (int wireind=0;wireind!=rb.nbins();wireind++){
     int wire_imp_no = m_pimpos.wire_impact(wireind);
     std::pair<int,int> imps_range = m_pimpos.wire_impacts(wireind);
     for (int imp_no = imps_range.first; imp_no != imps_range.second; imp_no ++){
       map_imp_ch[imp_no] = wireind;
       map_imp_redimp[imp_no] = imp_no - wire_imp_no;
-      
-      //  std::cout << imp_no << " " << wireind << " " << wire_imp_no << " " << ib.center(imp_no) << " " << rb.center(wireind) << " " <<  ib.center(imp_no) - rb.center(wireind) << std::endl;
-      // std::cout << imp_no << " " << map_imp_ch[imp_no] << " " << map_imp_redimp[imp_no] << std::endl;
     }
   }
 
-  //  std::unordered_map<stgsd::tuple<int,int,int>, int> map_tuple_pos;
   
-  
-  
-  //  int min_redimp =  m_pimpos.wire_impacts(2).first - m_pimpos.wire_impact(2);
-  //  int max_redimp =  m_pimpos.wire_impacts(2).second - 1 - m_pimpos.wire_impact(2);
   int min_imp = 0;
   int max_imp = ib.nbins();
-
-  // std::cout << min_redimp << " " << max_redimp << " " << max_imp << std::endl;
-
   int counter = 0;
 
-  // std::set<std::shared_ptr<GaussianDiffusion>, GausDiffTimeCompare> m_diffs1;
-  // for (auto diff : m_diffs){
-  //    diff->set_sampling(m_tbins, ib, m_nsigma, m_fluctuate, m_calcstrat);
-  //    m_diffs1.insert(diff);
-  // }
+  wend = omp_get_wtime();
+  g_get_charge_vec_time_part2 += wend - wstart;
+  cout << "get_charge_vec() : get_charge_vec() part2 running time : " << g_get_charge_vec_time_part2 << endl;
   
-  
+
+
+
+  wstart = omp_get_wtime();
   for (auto diff : m_diffs){
-    //    std::cout << diff->depo()->time() << std::endl
-    //diff->set_sampling(m_tbins, ib, m_nsigma, 0, m_calcstrat);
+    wstart2 = omp_get_wtime();
+    #ifdef HAVE_CUDA_H
+    diff->set_sampling_CUDA(m_pvec_D, m_tvec_D, m_patch_D, m_rand_D, &m_Gen, m_tbins, ib, m_nsigma, m_fluctuate, m_calcstrat);
+    #else
     diff->set_sampling(m_tbins, ib, m_nsigma, m_fluctuate, m_calcstrat);
+    #endif
+    wend2 = omp_get_wtime();
+    g_get_charge_vec_time_part4 += wend2 - wstart2;
     counter ++;
     
     const auto patch = diff->patch();
@@ -288,7 +318,6 @@ void Gen::BinnedDiffusion_transform::get_charge_vec(std::vector<std::vector<std:
     const int np = patch.rows();
     const int nt = patch.cols();
 
-    // std::cout << np << " " << nt << std::endl;
     
     for (int pbin = 0; pbin != np; pbin++){
       int abs_pbin = pbin + poffset_bin;
@@ -306,79 +335,50 @@ void Gen::BinnedDiffusion_transform::get_charge_vec(std::vector<std::vector<std:
       auto& next_vec_charge = vec_vec_charge.at(next_array_num_redimp);
 
       for (int tbin = 0; tbin!= nt; tbin++){
-	int abs_tbin = tbin + toffset_bin;
-	double charge = patch(pbin, tbin);
+        int abs_tbin = tbin + toffset_bin;
+        double charge = patch(pbin, tbin);
 
-	// if (map_imp_ch[abs_pbin]==1459){
-	//   std::cout << pbin+poffset_bin << " " << pbin << " " << tbin << " " << charge << " " << std::endl;
-	// }
-	//	std::cout << pbin << " " << tbin << " " << patch(pbin,tbin) << std::endl;
-	// figure out how to convert the abs_pbin to fine position
-	// figure out how to use the weight given the above ???
-	// the other side
-	//	if (map_imp_redimp[abs_pbin]==max_redimp){
-	//  vec_vec_charge.at(map_redimp_vec[min_redimp]).push_back(std::make_tuple(map_imp_ch[abs_pbin]+1,abs_tbin,charge*(1-weight)));
-	//}else{
-	//}
-
-       long int index1 = channel*100000 + abs_tbin;
-       auto it = map_pair_pos.find(index1);
-       if (it == map_pair_pos.end()){
-         map_pair_pos[index1] = vec_charge.size();
-         vec_charge.emplace_back(channel, abs_tbin, charge*weight);
+        long int index1 = channel*100000 + abs_tbin;
+        auto it = map_pair_pos.find(index1);
+        if (it == map_pair_pos.end()){
+          map_pair_pos[index1] = vec_charge.size();
+          vec_charge.emplace_back(channel, abs_tbin, charge*weight);
 	}else{
-         std::get<2>(vec_charge.at(it->second)) += charge * weight;
+          std::get<2>(vec_charge.at(it->second)) += charge * weight;
 	}
 
-       auto it1 = next_map_pair_pos.find(index1);
-       if (it1 == next_map_pair_pos.end()){
-         next_map_pair_pos[index1] = next_vec_charge.size();
-         next_vec_charge.emplace_back(channel, abs_tbin, charge*(1-weight));
+        auto it1 = next_map_pair_pos.find(index1);
+        if (it1 == next_map_pair_pos.end()){
+          next_map_pair_pos[index1] = next_vec_charge.size();
+          next_vec_charge.emplace_back(channel, abs_tbin, charge*(1-weight));
 	}else{
-         std::get<2>(next_vec_charge.at(it1->second)) += charge*(1-weight);
+          std::get<2>(next_vec_charge.at(it1->second)) += charge*(1-weight);
 	}
-	
-	// if (map_tuple_pos.find(std::make_tuple(map_redimp_vec[map_imp_redimp[abs_pbin]],map_imp_ch[abs_pbin],abs_tbin))==map_tuple_pos.end()){
-	//   map_tuple_pos[std::make_tuple(map_redimp_vec[map_imp_redimp[abs_pbin]],map_imp_ch[abs_pbin],abs_tbin)] = vec_vec_charge.at(map_redimp_vec[map_imp_redimp[abs_pbin] ]).size();
-	//   vec_vec_charge.at(map_redimp_vec[map_imp_redimp[abs_pbin] ]).push_back(std::make_tuple(map_imp_ch[abs_pbin],abs_tbin,charge*weight));
-	// }else{
-	//   std::get<2>(vec_vec_charge.at(map_redimp_vec[map_imp_redimp[abs_pbin] ]).at(map_tuple_pos[std::make_tuple(map_redimp_vec[map_imp_redimp[abs_pbin]],map_imp_ch[abs_pbin],abs_tbin)])) += charge * weight;
-	// }
-	
-	// if (map_tuple_pos.find(std::make_tuple(map_redimp_vec[map_imp_redimp[abs_pbin]+1],map_imp_ch[abs_pbin],abs_tbin))==map_tuple_pos.end()){
-	//   map_tuple_pos[std::make_tuple(map_redimp_vec[map_imp_redimp[abs_pbin]+1],map_imp_ch[abs_pbin],abs_tbin)] = vec_vec_charge.at(map_redimp_vec[map_imp_redimp[abs_pbin]+1]).size();
-	//   vec_vec_charge.at(map_redimp_vec[map_imp_redimp[abs_pbin]+1]).push_back(std::make_tuple(map_imp_ch[abs_pbin],abs_tbin,charge*(1-weight)));
-	// }else{
-	//   std::get<2>(vec_vec_charge.at(map_redimp_vec[map_imp_redimp[abs_pbin]+1]).at(map_tuple_pos[std::make_tuple(map_redimp_vec[map_imp_redimp[abs_pbin]+1],map_imp_ch[abs_pbin],abs_tbin)]) ) += charge*(1-weight);
-	// }
-	
 	
       }
     }
 
     if (counter % 5000==0){
-      // std::vector<std::tuple<int,int,int> > del_keys;
-      // for (auto it  = map_tuple_pos.begin(); it!=map_tuple_pos.end(); it++){
-      // 	if (get<2>(it->first) < toffset_bin - 60){
-      // 	  del_keys.push_back(it->first);
-      // 	}
-      // }
-      // for (auto it = del_keys.begin(); it!=del_keys.end(); it++){
-      // 	map_tuple_pos.erase(*it);
-      // }
-      // map_tuple_pos.clear();
       for (auto it = vec_map_pair_pos.begin(); it != vec_map_pair_pos.end(); it++){
 	it->clear();
       }
     }
 
-    
     diff->clear_sampling();
-    // need to figure out wire #, time #, charge, and weight ...
   }
+  wend = omp_get_wtime();
+  g_get_charge_vec_time_part3 += wend - wstart;
+  cout << "get_charge_vec() : get_charge_vec() part3 running time : " << g_get_charge_vec_time_part3 << endl;
+  cout << "get_charge_vec() : set_sampling() running time : " << g_get_charge_vec_time_part4 << ", counter : " << counter << endl;
+  cout << "get_charge_vec() : m_fluctuate : " << m_fluctuate << endl;
 
-  //
-  
+#ifdef HAVE_CUDA_H
+  cout << "get_charge_vec() CUDA : set_sampling() part1 time : " << g_set_sampling_part1 << ", part2 (CUDA) time : " << g_set_sampling_part2 << endl;
+  cout << "GaussianDiffusion::sampling_CUDA() part3 time : " << g_set_sampling_part3 << ", part4 time : " << g_set_sampling_part4 << ", part5 time : " << g_set_sampling_part5 << endl;
+  cout << "GaussianDiffusion::sampling_CUDA() : g_total_sample_size : " << g_total_sample_size << endl;
+#else
+  cout << "get_charge_vec() : set_sampling() part1 time : " << g_set_sampling_part1 << ", part2 time : " << g_set_sampling_part2 << ", part3 time : " << g_set_sampling_part3 << endl;
+#endif
 }
 
 

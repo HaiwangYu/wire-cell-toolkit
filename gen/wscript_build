@@ -1,5 +1,5 @@
 # -*- python -*-
-bld.smplpkg('WireCellGen', use='WireCellIface WireCellUtil',
+bld.smplpkg('WireCellGen', use='WireCellIface WireCellUtil CUDA',
             app_use='DYNAMO BOOST',
             test_use='JSONCPP JSONNET BOOST')
 
