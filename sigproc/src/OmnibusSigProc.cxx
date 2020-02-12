@@ -281,6 +281,7 @@ void OmnibusSigProc::configure(const WireCell::Configuration& config)
     }
   }
 
+  m_timers.insert({"restore_baseline",0});
 }
 
 WireCell::Configuration OmnibusSigProc::default_configuration() const
@@ -870,7 +871,8 @@ void OmnibusSigProc::init_overall_response(IFrame::pointer frame)
   
 }
 
-void OmnibusSigProc::restore_baseline(Array::array_xxf& arr){
+void OmnibusSigProc::restore_baseline(Array::array_xxf& arr){  double wstart, wend;
+  std::clock_t start = std::clock();
   
   for (int i=0;i!=arr.rows();i++){
     Waveform::realseq_t signal(arr.cols());
@@ -901,6 +903,7 @@ void OmnibusSigProc::restore_baseline(Array::array_xxf& arr){
 	arr(i,j) -= baseline;
     }
   }
+  m_timers["restore_baseline"] += (std::clock()-start)/(double)CLOCKS_PER_SEC;
 }
 
 
@@ -1580,6 +1583,10 @@ bool OmnibusSigProc::operator()(const input_pointer& in, output_pointer& out)
              gauss_traces.size(), m_gauss_tag, m_frame_tag);
 
   out = IFrame::pointer(sframe);
+
+  for (auto t : m_timers) {
+    log->info("timers: {} : {} ms", t.first, t.second*1000);
+  }
   
   return true;
 }
