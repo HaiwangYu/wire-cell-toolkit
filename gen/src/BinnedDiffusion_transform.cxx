@@ -299,6 +299,7 @@ void Gen::BinnedDiffusion_transform::get_charge_vec(std::vector<std::vector<std:
 
   wstart = omp_get_wtime();
   for (auto diff : m_diffs){
+    if(diff->depo()->charge()==0) continue;
     wstart2 = omp_get_wtime();
     #ifdef HAVE_CUDA_H
     diff->set_sampling_CUDA(m_pvec_D, m_tvec_D, m_patch_D, m_rand_D, &m_Gen, m_tbins, ib, m_nsigma, m_fluctuate, m_calcstrat);

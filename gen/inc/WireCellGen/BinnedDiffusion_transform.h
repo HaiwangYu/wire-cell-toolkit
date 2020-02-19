@@ -11,8 +11,11 @@
 #include <deque>
 #include <Eigen/Sparse>
 
-#include <cuda.h>
-#include <curand.h>
+#include "config.h"
+#ifdef HAVE_CUDA_H
+  #include <cuda.h>
+  #include <curand.h>
+#endif
 
 
 namespace WireCell {

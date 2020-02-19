@@ -9,8 +9,11 @@
 #include <memory>
 #include <iostream>
 
-#include <cuda.h>
-#include <curand.h>
+#include "config.h"
+#ifdef HAVE_CUDA_H
+  #include <cuda.h>
+  #include <curand.h>
+#endif
 
 
 namespace WireCell {
