@@ -14,6 +14,7 @@ using namespace WireCell;
 
 Gen::FrameFanin::FrameFanin(size_t multiplicity)
     : m_multiplicity(multiplicity)
+    , l(Log::logger("glue"))
 {
 }
 Gen::FrameFanin::~FrameFanin()
@@ -71,6 +72,10 @@ std::vector<std::string> Gen::FrameFanin::input_types()
 
 bool Gen::FrameFanin::operator()(const input_vector& invec, output_pointer& out)
 {
+    l->info("FrameFanin: START");
+    for (const auto& fr : invec) {
+      l->info("{}", fr);
+    }
     out = nullptr;
     size_t neos = 0;
     for (const auto& fr : invec) {
@@ -83,6 +88,7 @@ bool Gen::FrameFanin::operator()(const input_vector& invec, output_pointer& out)
     }
     if (neos) {
         std::cerr << "Gen::FrameFanin: " << neos << " input frames missing\n";
+        return true;
     }
 
     if (invec.size() != m_multiplicity) {
@@ -169,6 +175,7 @@ bool Gen::FrameFanin::operator()(const input_vector& invec, output_pointer& out)
     }
 
     out = IFrame::pointer(sf);
+    l->info("FrameFanin: END");
     return true;
 }
 

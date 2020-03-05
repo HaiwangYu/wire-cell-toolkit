@@ -1344,11 +1344,13 @@ void OmnibusSigProc::decon_2D_charge(int plane){
 
 bool OmnibusSigProc::operator()(const input_pointer& in, output_pointer& out)
 {
+  log->info("OmnibusSigProc {} : START", m_anode->ident());
   out = nullptr;
   if (!in) {
     log->debug("OmnibusSigProc: see EOS");
     return true;
   }
+  log->info("OmnibusSigProc {} processing frame {}", m_anode->ident(), in->ident());
   const size_t ntraces = in->traces()->size();
   if (ntraces) {
     log->debug("OmnibusSigProc: receive frame {} with {} traces",
@@ -1580,7 +1582,8 @@ bool OmnibusSigProc::operator()(const input_pointer& in, output_pointer& out)
              gauss_traces.size(), m_gauss_tag, m_frame_tag);
 
   out = IFrame::pointer(sframe);
-  
+
+  log->info("OmnibusSigProc {} : END frame {}", m_anode->ident(), in->ident());
   return true;
 }
 

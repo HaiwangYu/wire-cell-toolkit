@@ -19,6 +19,7 @@ Gen::DumpFrames::~DumpFrames()
 
 bool Gen::DumpFrames::operator()(const IFrame::pointer& frame)
 {
+    log->info("DumpFrames: START: {}", frame);
     if (!frame) {
         log->debug("frame sink sees EOS");
         return true;
@@ -49,6 +50,7 @@ bool Gen::DumpFrames::operator()(const IFrame::pointer& frame)
         ss << "]";
     }
     log->debug(ss.str());
+    log->info("DumpFrames: END: {}", frame);
     return true;
 }
 

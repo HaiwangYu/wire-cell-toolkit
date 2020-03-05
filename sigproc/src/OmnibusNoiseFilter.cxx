@@ -99,10 +99,12 @@ WireCell::Configuration OmnibusNoiseFilter::default_configuration() const
 
 bool OmnibusNoiseFilter::operator()(const input_pointer& inframe, output_pointer& outframe)
 {
+    log->info("OmnibusNoiseFilter {} : START", m_intag);
     if (!inframe) {             // eos
         outframe = nullptr;
         return true;
     }
+    log->info("frame::ident: {}", inframe->ident());
 
     auto traces = wct::sigproc::tagged_traces(inframe, m_intag);
     if (traces.empty()) {
@@ -253,6 +255,7 @@ bool OmnibusNoiseFilter::operator()(const input_pointer& inframe, output_pointer
     sframe->tag_frame("noisefilter");
     outframe = IFrame::pointer(sframe);
 
+    log->info("OmnibusNoiseFilter {} : END: {}", m_intag, inframe->ident());
     return true;
 }
 

@@ -39,6 +39,9 @@ namespace WireCell {
 
 	    /// IFrameFilter interface.
 	    virtual bool operator()(const input_pointer& in, output_pointer& out);
+      
+      /// OmnibusNoiseFilter is stateless
+      virtual int concurrency() { return 0; }
 
 	    /// IConfigurable interface.
 	    virtual void configure(const WireCell::Configuration& config);
