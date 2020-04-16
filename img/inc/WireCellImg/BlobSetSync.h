@@ -4,31 +4,32 @@
 #ifndef WIRECELL_IMG_BLOBSETSYNC
 #define WIRECELL_IMG_BLOBSETSYNC
 
-#include "WireCellIface/IConfigurable.h"
 #include "WireCellIface/IBlobSetFanin.h"
+#include "WireCellIface/IConfigurable.h"
 #include "WireCellUtil/Logging.h"
 
-namespace WireCell {
-    namespace Img {
-
-        class BlobSetSync : public IBlobSetFanin, public IConfigurable {
-        public:
+namespace WireCell
+{
+    namespace Img
+    {
+        class BlobSetSync : public IBlobSetFanin, public IConfigurable
+        {
+           public:
             BlobSetSync();
             virtual ~BlobSetSync();
 
             // IConfigurable
-            virtual void configure(const WireCell::Configuration& cfg);
+            virtual void configure(const WireCell::Configuration &cfg);
             virtual WireCell::Configuration default_configuration() const;
 
-            virtual std::vector<std::string>  input_types();
-            virtual bool operator()(const input_vector& invec, output_pointer& out);
-            
-        private:
+            virtual std::vector<std::string> input_types();
+            virtual bool operator()(const input_vector &invec, output_pointer &out);
+
+           private:
             size_t m_multiplicity;
             Log::logptr_t l;
         };
-    }
-}
+    }  // namespace Img
+}  // namespace WireCell
 
 #endif
-

@@ -6,17 +6,17 @@
 #ifndef WIRECELL_ITENSOR
 #define WIRECELL_ITENSOR
 
-#include "WireCellIface/IData.h"
-#include <vector>
-#include <cstddef>              // std::byte
-#include <typeinfo>
+#include <cstddef>  // std::byte
 #include <typeindex>
+#include <typeinfo>
+#include <vector>
+#include "WireCellIface/IData.h"
 
-namespace WireCell {
-
-    class ITensor : public IData<ITensor> {
-    public:
-
+namespace WireCell
+{
+    class ITensor : public IData<ITensor>
+    {
+       public:
         /// Shape gives size of each dimension.  Size of shape give Ndim.
         typedef std::vector<size_t> shape_t;
         /// Storage order.  Empty implies C order.
@@ -31,17 +31,17 @@ namespace WireCell {
         virtual shape_t shape() const = 0;
 
         /// The storage order of the tensor in the data array.
-        virtual order_t order() const {
-            return order_t();   // default is C storage order
+        virtual order_t order() const
+        {
+            return order_t();  // default is C storage order
         }
 
         /// The tensor store data array.
-        virtual const std::byte* data() const = 0;
+        virtual const std::byte *data() const = 0;
         /// The store size.  Size divided by product of shape gives
         /// word size
         virtual size_t size() const = 0;
-
     };
-}
+}  // namespace WireCell
 
 #endif

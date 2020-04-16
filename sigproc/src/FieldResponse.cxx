@@ -3,23 +3,17 @@
 
 #include "WireCellUtil/NamedFactory.h"
 
-WIRECELL_FACTORY(FieldResponse,
-                 WireCell::SigProc::FieldResponse,
+WIRECELL_FACTORY(FieldResponse, WireCell::SigProc::FieldResponse,
                  WireCell::IFieldResponse, WireCell::IConfigurable)
 
 using namespace WireCell;
 
-
-
-SigProc::FieldResponse::FieldResponse(const char* frfilename)
-    : m_fname(frfilename)
+SigProc::FieldResponse::FieldResponse(const char *frfilename)
+  : m_fname(frfilename)
 {
 }
 
-SigProc::FieldResponse::~FieldResponse()
-{
-}
-
+SigProc::FieldResponse::~FieldResponse() {}
 
 WireCell::Configuration SigProc::FieldResponse::default_configuration() const
 {
@@ -28,18 +22,18 @@ WireCell::Configuration SigProc::FieldResponse::default_configuration() const
     return cfg;
 }
 
-void SigProc::FieldResponse::configure(const WireCell::Configuration& cfg)
+void SigProc::FieldResponse::configure(const WireCell::Configuration &cfg)
 {
     m_fname = get(cfg, "filename", m_fname);
-    if (m_fname.empty()) {
+    if (m_fname.empty())
+    {
         THROW(ValueError() << errmsg{"must give field response filename"});
     }
     m_fr = Response::Schema::load(m_fname.c_str());
 }
 
-
-
-const Response::Schema::FieldResponse& SigProc::FieldResponse::field_response() const
+const Response::Schema::FieldResponse &
+SigProc::FieldResponse::field_response() const
 {
     return m_fr;
 }

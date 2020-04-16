@@ -8,14 +8,13 @@
 #ifndef WIRECELL_PLANEDIFFUSER
 #define WIRECELL_PLANEDIFFUSER
 
-namespace WireCell {
-
-    class PlaneDiffuser : public IDiffuser, public IConfigurable {
-    public:
-
+namespace WireCell
+{
+    class PlaneDiffuser : public IDiffuser, public IConfigurable
+    {
+       public:
     };
 
-}
+}  // namespace WireCell
 
 #endif
-

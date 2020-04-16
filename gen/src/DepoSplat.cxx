@@ -7,51 +7,45 @@
 
 #include <iostream>
 
-WIRECELL_FACTORY(DepoSplat, WireCell::Gen::DepoSplat,
-                 WireCell::IDuctor, WireCell::IConfigurable)
-
-
-
+WIRECELL_FACTORY(DepoSplat, WireCell::Gen::DepoSplat, WireCell::IDuctor,
+                 WireCell::IConfigurable)
 
 using namespace WireCell;
 
 Gen::DepoSplat::DepoSplat()
-    : Ductor()
-    , l(Log::logger("sim"))
+  : Ductor()
+  , l(Log::logger("sim"))
 {
 }
 
-Gen::DepoSplat::~DepoSplat()
-{
-}
-
+Gen::DepoSplat::~DepoSplat() {}
 
 ITrace::vector Gen::DepoSplat::process_face(IAnodeFace::pointer face,
-                                            const IDepo::vector& depos)
+                                            const IDepo::vector &depos)
 
 {
-    const int time_offset = 2; // # of ticks
+    const int time_offset = 2;  // # of ticks
     // const double difusion_scaler = 6.;
-    const double charge_scaler = 1.; //18.; 
+    const double charge_scaler = 1.;  // 18.;
 
     // channel-charge map
-    std::unordered_map<int, std::vector<float> > chch;
+    std::unordered_map<int, std::vector<float>> chch;
 
     // tick-edged bins
-    Binning tbins(m_readout_time/m_tick, m_start_time,
-                  m_start_time+m_readout_time);
+    Binning tbins(m_readout_time / m_tick, m_start_time,
+                  m_start_time + m_readout_time);
 
     int iplane = -1;
-    for (auto plane : face->planes()) {
+    for (auto plane : face->planes())
+    {
         ++iplane;
 
-        const Pimpos* pimpos = plane->pimpos();
+        const Pimpos *pimpos = plane->pimpos();
 
         // wire-centered pitch bins
-        const Binning& wbins = pimpos->region_binning();
-        
+        const Binning &wbins = pimpos->region_binning();
 
-        auto& wires = plane->wires();
+        auto &wires = plane->wires();
 
         // std::cerr << "splat: plane " << plane->planeid() << " "
         //           << "wbins:" << wbins << " "
@@ -60,34 +54,42 @@ ITrace::vector Gen::DepoSplat::process_face(IAnodeFace::pointer face,
         //           << "#depos:" << depos.size() << "\n";
 
         int idepo = 0;
-        for (auto depo : depos) {
-
+        for (auto depo : depos)
+        {
             // const double tsig = depo->extent_long() * difusion_scaler;
             // const double psig = depo->extent_tran() * difusion_scaler;
-            
+
             double sigma_L = depo->extent_long();
             double sigma_T = depo->extent_tran();
 
             // l->info("dirft: sigma_L: {} sigma_T: {}", sigma_L, sigma_T);
 
-            if (true) {
-              int nrebin=1;
-              double time_slice_width = nrebin * m_drift_speed * m_tick; // units::mm
-              double add_sigma_L = 1.428249  * time_slice_width / nrebin / (m_tick/units::us); // units::mm
-              sigma_L = sqrt( pow(depo->extent_long(),2) + pow(add_sigma_L,2) );// / time_slice_width;
+            if (true)
+            {
+                int nrebin = 1;
+                double time_slice_width = nrebin * m_drift_speed * m_tick;  // units::mm
+                double add_sigma_L = 1.428249 * time_slice_width / nrebin /
+                                     (m_tick / units::us);  // units::mm
+                sigma_L = sqrt(pow(depo->extent_long(), 2) +
+                               pow(add_sigma_L, 2));  // / time_slice_width;
             }
 
-            if (true) {
-              double add_sigma_T = wbins.binsize();
-              if (iplane==0) add_sigma_T *= (0.402993*0.3);
-              else if (iplane==1) add_sigma_T *= (0.402993*0.5);
-              else if (iplane==2) add_sigma_T *= (0.188060*0.2);
-              sigma_T = sqrt( pow(depo->extent_tran(),2) + pow(add_sigma_T,2) ); // / wbins.binsize();
+            if (true)
+            {
+                double add_sigma_T = wbins.binsize();
+                if (iplane == 0)
+                    add_sigma_T *= (0.402993 * 0.3);
+                else if (iplane == 1)
+                    add_sigma_T *= (0.402993 * 0.5);
+                else if (iplane == 2)
+                    add_sigma_T *= (0.188060 * 0.2);
+                sigma_T = sqrt(pow(depo->extent_tran(), 2) +
+                               pow(add_sigma_T, 2));  // / wbins.binsize();
             }
 
             // l->info("final: sigma_L: {} sigma_T: {}", sigma_L, sigma_T);
 
-            const double tsig = sigma_L/m_drift_speed;
+            const double tsig = sigma_L / m_drift_speed;
             const double psig = sigma_T;
 
             const double pwid = m_nsigma * psig;
@@ -96,50 +98,60 @@ ITrace::vector Gen::DepoSplat::process_face(IAnodeFace::pointer face,
             const double twid = m_nsigma * tsig;
             const double tcen = depo->time();
 
-            const int pbeg = std::max(wbins.bin(pcen-pwid), 0);
-            const int pend = std::min(wbins.bin(pcen+pwid)+1, (int)wires.size());
-            const int tbeg = std::max(tbins.bin(tcen-twid), 0); // fixme what limits
-            const int tend = std::min(tbins.bin(tcen+twid)+1, tbins.nbins()-1); //  to enforce here?
+            const int pbeg = std::max(wbins.bin(pcen - pwid), 0);
+            const int pend = std::min(wbins.bin(pcen + pwid) + 1, (int) wires.size());
+            const int tbeg = std::max(tbins.bin(tcen - twid), 0);  // fixme what limits
+            const int tend = std::min(tbins.bin(tcen + twid) + 1,
+                                      tbins.nbins() - 1);  //  to enforce here?
 
-            if(tbeg > tend) continue;
-            
-            if(tbeg<0) continue;
+            if (tbeg > tend)
+                continue;
+
+            if (tbeg < 0)
+                continue;
 
             Gen::GausDesc time_desc(tcen, tsig);
             Gen::GausDesc pitch_desc(pcen, psig);
 
-            auto gd = std::make_shared<Gen::GaussianDiffusion>(depo, time_desc, pitch_desc);
+            auto gd =
+                std::make_shared<Gen::GaussianDiffusion>(depo, time_desc, pitch_desc);
             gd->set_sampling(tbins, wbins, m_nsigma, 0, 1);
             const auto patch = gd->patch();
 
             // std::stringstream ss;
             // ss << "splat: depo=" << depo->pos()/units::mm << "mm "
             //           << "@" << depo->time()*m_drift_speed<< " mm "
-            //           << "p=(" << pcen << "+-" << pwid << "), t=(" << tcen << "+-" << twid << ") "
-            //           << "pi=[" << pbeg << " " << pend << "], ti=[" << tbeg << " " << tend << "]";
+            //           << "p=(" << pcen << "+-" << pwid << "), t=(" << tcen << "+-"
+            //           << twid << ") "
+            //           << "pi=[" << pbeg << " " << pend << "], ti=[" << tbeg << " "
+            //           << tend << "]";
             // l->info(ss.str());
             // l->info("tsig: {} m_drift_speed: {} ", tsig, m_drift_speed);
             // l->info("psig: {}", psig);
-            // l->info("tbins: ({},{}) nbin: {}", tbins.min(), tbins.max(), tbins.nbins() );
-            // l->info("wbins: ({},{}) nbin: {}", wbins.min(), wbins.max(), wbins.nbins() );
-            // l->info("tbin range: ({},{})", tbeg, tend );
-            // l->info("wbin range: ({},{})", pbeg, pend );
-            // l->info("gd->offset: {}, {}", gd->toffset_bin(), gd->poffset_bin());
-            // l->info("patch bins: {}, {}", patch.cols(), patch.rows());
-            // l->info("\n");
+            // l->info("tbins: ({},{}) nbin: {}", tbins.min(), tbins.max(),
+            // tbins.nbins() ); l->info("wbins: ({},{}) nbin: {}", wbins.min(),
+            // wbins.max(), wbins.nbins() ); l->info("tbin range: ({},{})", tbeg, tend
+            // ); l->info("wbin range: ({},{})", pbeg, pend ); l->info("gd->offset:
+            // {}, {}", gd->toffset_bin(), gd->poffset_bin()); l->info("patch bins:
+            // {}, {}", patch.cols(), patch.rows()); l->info("\n");
 
-            for (int ip = pbeg; ip < pend; ++ip) {
+            for (int ip = pbeg; ip < pend; ++ip)
+            {
                 auto irow = ip - gd->poffset_bin();
-                if (irow <0 or irow >= patch.rows()) continue;
+                if (irow < 0 or irow >= patch.rows())
+                    continue;
                 auto iwire = wires[ip];
-                auto& charge = chch[iwire->channel()];
-                if ((int)charge.size() < tend) {
+                auto &charge = chch[iwire->channel()];
+                if ((int) charge.size() < tend)
+                {
                     charge.resize(tend, 0.0);
                 }
-                for (int it = tbeg; it < tend; ++it) {
+                for (int it = tbeg; it < tend; ++it)
+                {
                     auto icol = it - gd->toffset_bin() + time_offset;
-                    if (icol <0 or icol >= patch.cols()) continue;
-                    charge[it] += std::abs(patch(irow, icol)*charge_scaler);
+                    if (icol < 0 or icol >= patch.cols())
+                        continue;
+                    charge[it] += std::abs(patch(irow, icol) * charge_scaler);
                 }
             }
             ++idepo;
@@ -148,9 +160,10 @@ ITrace::vector Gen::DepoSplat::process_face(IAnodeFace::pointer face,
 
     // make output traces
     ITrace::vector traces;
-    for (auto& chchit : chch) {
+    for (auto &chchit : chch)
+    {
         const int chid = chchit.first;
-        auto& chv = chchit.second;
+        auto &chv = chchit.second;
         auto trace = std::make_shared<SimpleTrace>(chid, 0, chv);
         traces.push_back(trace);
     }

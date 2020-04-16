@@ -1,5 +1,5 @@
-#include "WireCellUtil/Interpolate.h"
 #include <boost/math/interpolators/cubic_b_spline.hpp>
+#include "WireCellUtil/Interpolate.h"
 
 #include <iostream>
 
@@ -16,12 +16,10 @@ int main()
 
     linterp<double> lin(f.begin(), f.end(), x0, xstep);
 
-    for (double x = 0; x < x0 + xstep*10; x += 0.1*xstep) {
-        std::cout << std::setprecision(3)
-                  << std::fixed << "x=" << x
-                  << "\tlin(x)=" << lin(x)
-                  << "\tspline(x)=" << spline(x)
-                  << "\n";
+    for (double x = 0; x < x0 + xstep * 10; x += 0.1 * xstep)
+    {
+        std::cout << std::setprecision(3) << std::fixed << "x=" << x
+                  << "\tlin(x)=" << lin(x) << "\tspline(x)=" << spline(x) << "\n";
     }
     return 0;
 }

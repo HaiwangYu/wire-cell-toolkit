@@ -1,12 +1,12 @@
 #include "WireCellGen/ImpactData.h"
 
-#include <iostream>             // debugging
+#include <iostream>  // debugging
 
 using namespace WireCell;
 using namespace std;
 
 Gen::ImpactData::ImpactData(int impact)
-    : m_impact(impact)
+  : m_impact(impact)
 {
 }
 void Gen::ImpactData::add(GaussianDiffusion::pointer diffusion)
@@ -14,66 +14,60 @@ void Gen::ImpactData::add(GaussianDiffusion::pointer diffusion)
     m_diffusions.push_back(diffusion);
 }
 
-Waveform::realseq_t& Gen::ImpactData::waveform() const
-{
-    return m_waveform;
-}
+Waveform::realseq_t &Gen::ImpactData::waveform() const { return m_waveform; }
 
-Waveform::compseq_t& Gen::ImpactData::spectrum() const
-{
-    return m_spectrum;
-}
+Waveform::compseq_t &Gen::ImpactData::spectrum() const { return m_spectrum; }
 
-Waveform::realseq_t& Gen::ImpactData::weightform() const
-{
-    return m_weights;
-}
+Waveform::realseq_t &Gen::ImpactData::weightform() const { return m_weights; }
 
-Waveform::compseq_t& Gen::ImpactData::weight_spectrum() const
+Waveform::compseq_t &Gen::ImpactData::weight_spectrum() const
 {
     return m_weight_spectrum;
 }
 
 void Gen::ImpactData::calculate(int nticks) const
 {
-    if (m_waveform.size() > 0) {
+    if (m_waveform.size() > 0)
+    {
         return;
     }
     m_waveform.resize(nticks, 0.0);
     m_weights.resize(nticks, 0.0);
 
-    for (auto diff : m_diffusions) {
-
-	const auto patch = diff->patch();
-	const auto qweight = diff->weights();
+    for (auto diff : m_diffusions)
+    {
+        const auto patch = diff->patch();
+        const auto qweight = diff->weights();
 
         const int poffset_bin = diff->poffset_bin();
         const int pbin = m_impact - poffset_bin;
         const int np = patch.rows();
-        if (pbin<0 || pbin >= np) {
+        if (pbin < 0 || pbin >= np)
+        {
             continue;
         }
 
         const int toffset_bin = diff->toffset_bin();
         const int nt = patch.cols();
 
-	//	std::cout << pbin << " " << poffset_bin << " " << m_impact << std::endl;
-	
-        for (int tbin=0; tbin<nt; ++tbin) {
-            const int absbin = tbin+toffset_bin;
+        //	std::cout << pbin << " " << poffset_bin << " " << m_impact << std::endl;
+
+        for (int tbin = 0; tbin < nt; ++tbin)
+        {
+            const int absbin = tbin + toffset_bin;
             m_waveform[absbin] += patch(pbin, tbin);
 
-	    //  std::cout << pbin << " " << tbin << " " << patch(pbin,tbin) << std::endl;
-	    
+            //  std::cout << pbin << " " << tbin << " " << patch(pbin,tbin) <<
+            //  std::endl;
+
             // for interpolation
-            m_weights[absbin] += qweight[pbin]*patch(pbin, tbin);
+            m_weights[absbin] += qweight[pbin] * patch(pbin, tbin);
         }
     }
 
     m_spectrum = Waveform::dft(m_waveform);
     m_weight_spectrum = Waveform::dft(m_weights);
 }
-
 
 // std::pair<int,int> Gen::ImpactData::strip() const
 // {
@@ -89,21 +83,23 @@ void Gen::ImpactData::calculate(int nticks) const
 std::pair<double, double> Gen::ImpactData::span(double nsigma) const
 {
     int ncount = -1;
-    double tmin=0, tmax=0;
-    for (auto diff : m_diffusions) {
+    double tmin = 0, tmax = 0;
+    for (auto diff : m_diffusions)
+    {
         ++ncount;
-        
+
         auto td = diff->time_desc();
 
-        const double ltmin = td.center - td.sigma*nsigma;
-        const double ltmax = td.center + td.sigma*nsigma;
-        if (!ncount) {
+        const double ltmin = td.center - td.sigma * nsigma;
+        const double ltmax = td.center + td.sigma * nsigma;
+        if (!ncount)
+        {
             tmin = ltmin;
             tmax = ltmax;
             continue;
         }
         tmin = std::min(tmin, ltmin);
         tmax = std::max(tmax, ltmax);
-    }        
-    return std::make_pair(tmin,tmax);
+    }
+    return std::make_pair(tmin, tmax);
 }

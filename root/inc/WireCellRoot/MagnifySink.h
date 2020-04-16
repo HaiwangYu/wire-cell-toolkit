@@ -1,4 +1,4 @@
-/** Sink data to a file format used by the "Magnify" GUI . 
+/** Sink data to a file format used by the "Magnify" GUI .
  *
  * This is technically a "filter" as it passes on its input.  This
  * allows an instance of the sink to sit in the middle of some longer
@@ -12,39 +12,41 @@
 #ifndef WIRECELLROOT_MAGNIFYFILESINK
 #define WIRECELLROOT_MAGNIFYFILESINK
 
-#include "WireCellIface/IFrameFilter.h"
-#include "WireCellIface/IConfigurable.h"
 #include "WireCellIface/IAnodePlane.h"
+#include "WireCellIface/IConfigurable.h"
+#include "WireCellIface/IFrameFilter.h"
 #include "WireCellUtil/Logging.h"
 
 class TFile;
 
-namespace WireCell {
-    namespace Root {
-
-        class MagnifySink : public IFrameFilter, public IConfigurable {
-        public:
-
+namespace WireCell
+{
+    namespace Root
+    {
+        class MagnifySink : public IFrameFilter, public IConfigurable
+        {
+           public:
             MagnifySink();
             virtual ~MagnifySink();
 
             /// IFrameSink
-	    virtual bool operator()(const IFrame::pointer& in, IFrame::pointer& out);
+            virtual bool operator()(const IFrame::pointer &in, IFrame::pointer &out);
 
             /// IConfigurable
             virtual WireCell::Configuration default_configuration() const;
-            virtual void configure(const WireCell::Configuration& config);
-        private:
+            virtual void configure(const WireCell::Configuration &config);
+
+           private:
             Configuration m_cfg;
             IAnodePlane::pointer m_anode;
 
-	    int m_nrebin;
-	    void create_file();
-	    void do_shunt(TFile* output_tf);
+            int m_nrebin;
+            void create_file();
+            void do_shunt(TFile *output_tf);
 
             Log::logptr_t log;
         };
-    }
-}
+    }  // namespace Root
+}  // namespace WireCell
 
 #endif

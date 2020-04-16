@@ -1,28 +1,29 @@
 #ifndef WIRECELLIMG_SLICESSINK
 #define WIRECELLIMG_SLICESSINK
 
-#include "WireCellIface/ISliceFrameSink.h"
 #include "WireCellIface/IConfigurable.h"
+#include "WireCellIface/ISliceFrameSink.h"
 
-namespace WireCell {
-    namespace Img {
-
-        class SlicesSink: public ISliceFrameSink , public IConfigurable {
-        public:
+namespace WireCell
+{
+    namespace Img
+    {
+        class SlicesSink : public ISliceFrameSink, public IConfigurable
+        {
+           public:
             SlicesSink();
-            virtual ~SlicesSink() ;
+            virtual ~SlicesSink();
 
             // IConfigurable
-            virtual void configure(const WireCell::Configuration& cfg);
+            virtual void configure(const WireCell::Configuration &cfg);
             virtual WireCell::Configuration default_configuration() const;
 
+            bool operator()(const ISliceFrame::pointer &sf);
 
-            bool operator()(const ISliceFrame::pointer& sf);
-
-        private:
+           private:
             Configuration m_cfg;
         };
-    }
-}
+    }  // namespace Img
+}  // namespace WireCell
 
 #endif

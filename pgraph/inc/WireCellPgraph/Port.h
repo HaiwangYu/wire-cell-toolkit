@@ -5,16 +5,15 @@
 
 #include <boost/any.hpp>
 
-#include <string>
-#include <vector>
 #include <deque>
 #include <memory>
+#include <string>
+#include <vector>
 
-
-
-namespace WireCell {
-    namespace Pgraph {
-
+namespace WireCell
+{
+    namespace Pgraph
+    {
         // The type of data passed in the graph.
         typedef boost::any Data;
         // A buffer of data.  It is a std::deque instead of a
@@ -28,12 +27,20 @@ namespace WireCell {
 
         class Node;
 
-        class Port {
-        public:
-            enum Type { tail=0, output=0, head=1, input=1, ntypes=2 };
+        class Port
+        {
+           public:
+            enum Type
+            {
+                tail = 0,
+                output = 0,
+                head = 1,
+                input = 1,
+                ntypes = 2
+            };
 
-            Port(Node* node, Type type, std::string signature,std::string name="");
-                
+            Port(Node *node, Type type, std::string signature, std::string name = "");
+
             bool isinput();
             bool isoutput();
             Edge edge();
@@ -52,23 +59,23 @@ namespace WireCell {
             Data get(bool pop = true);
 
             // Put the data onto the queue.
-            void put(Data& data);
+            void put(Data &data);
 
-	    // Get back the associated Node.
-	    Node* node();
+            // Get back the associated Node.
+            Node *node();
 
-            const std::string& name();
-            const std::string& signature();
+            const std::string &name();
+            const std::string &signature();
 
-        private:
-            Node* m_node;       // node to which port belongs
+           private:
+            Node *m_node;  // node to which port belongs
             Type m_type;
             std::string m_name, m_sig;
             Edge m_edge;
         };
 
         typedef std::vector<Port> PortList;
-    }
-}
+    }  // namespace Pgraph
+}  // namespace WireCell
 
 #endif

@@ -10,21 +10,21 @@
 
 #include <vector>
 
-namespace WireCell {
-
-    class IWaveform : IData<IWaveform> {
-    public:
+namespace WireCell
+{
+    class IWaveform : IData<IWaveform>
+    {
+       public:
         typedef std::vector<float> sequence_type;
 
-        virtual ~IWaveform() ;
+        virtual ~IWaveform();
         // The starting point of the sampling
         virtual double waveform_start() const = 0;
         // The sampling period aka bin width
         virtual double waveform_period() const = 0;
-        // The collection of samples 
-        virtual const sequence_type& waveform_samples() const = 0;
-        
+        // The collection of samples
+        virtual const sequence_type &waveform_samples() const = 0;
     };
-}
+}  // namespace WireCell
 
 #endif

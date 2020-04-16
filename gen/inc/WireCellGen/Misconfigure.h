@@ -1,11 +1,11 @@
 /** This component will output a "misconfigured" trace for each input
  * trace.
- * 
+ *
  * It does this by filtering out an assumed electronics response
- * function and applying a new one.  
+ * function and applying a new one.
  *
  * Note, traces are "misconfigured" independently even if multiple
- * traces exist on the same channel.  
+ * traces exist on the same channel.
  *
  * By default the output traces will be sized larger than input by
  * nsamples-1.  If the "truncated" option is true then the output
@@ -21,32 +21,34 @@
 #ifndef WIRECELLGEN_MISCONFIGURE
 #define WIRECELLGEN_MISCONFIGURE
 
-#include "WireCellIface/IFrameFilter.h"
 #include "WireCellIface/IConfigurable.h"
+#include "WireCellIface/IFrameFilter.h"
 #include "WireCellUtil/Waveform.h"
 
 #include <unordered_set>
 
-namespace WireCell {
-    namespace Gen {
-
-        class Misconfigure : public IFrameFilter, public IConfigurable {
-        public:
+namespace WireCell
+{
+    namespace Gen
+    {
+        class Misconfigure : public IFrameFilter, public IConfigurable
+        {
+           public:
             Misconfigure();
             virtual ~Misconfigure();
 
             // IFrameFilter
-            virtual bool operator()(const input_pointer& in, output_pointer& out);
+            virtual bool operator()(const input_pointer &in, output_pointer &out);
 
             // IConfigurable
             virtual WireCell::Configuration default_configuration() const;
-            virtual void configure(const WireCell::Configuration& cfg);
+            virtual void configure(const WireCell::Configuration &cfg);
 
-        private:
-            Waveform::realseq_t  m_from, m_to;
+           private:
+            Waveform::realseq_t m_from, m_to;
             bool m_truncate;
         };
-    }
-}
+    }  // namespace Gen
+}  // namespace WireCell
 
 #endif

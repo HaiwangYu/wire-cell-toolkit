@@ -3,14 +3,14 @@
 
 #include "WireCellIface/IAnodeFace.h"
 
-
-namespace WireCell {
-    namespace Gen {
-
-        class AnodeFace : public IAnodeFace {
-        public:
-            
-            AnodeFace(int ident, IWirePlane::vector planes, const BoundingBox& sensvol);
+namespace WireCell
+{
+    namespace Gen
+    {
+        class AnodeFace : public IAnodeFace
+        {
+           public:
+            AnodeFace(int ident, IWirePlane::vector planes, const BoundingBox &sensvol);
 
             /// Return the ident number of this face.
             virtual int ident() const { return m_ident; }
@@ -22,19 +22,17 @@ namespace WireCell {
             virtual IWirePlane::pointer plane(int ident) const;
             virtual IWirePlane::vector planes() const { return m_planes; }
 
-
             virtual BoundingBox sensitive() const { return m_bb; }
 
-            virtual const RayGrid::Coordinates& raygrid() const { return m_coords; }
+            virtual const RayGrid::Coordinates &raygrid() const { return m_coords; }
 
-
-        private:
+           private:
             int m_ident;
             IWirePlane::vector m_planes;
             BoundingBox m_bb;
             RayGrid::Coordinates m_coords;
         };
-    }
-}
+    }  // namespace Gen
+}  // namespace WireCell
 
 #endif

@@ -4,5 +4,3 @@
 int testcuda();
 
 #endif
-
-

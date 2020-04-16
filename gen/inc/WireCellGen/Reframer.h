@@ -1,4 +1,4 @@
-/** 
+/**
    A reframer takes makes a "rectangular" frame filled with samples
    from the tagged traces of its input.  This new frame has exactly
    one trace for each channel and each trace is padded to span a
@@ -30,29 +30,31 @@
 #ifndef WIRECELL_GEN_REFRAMER
 #define WIRECELL_GEN_REFRAMER
 
-#include "WireCellIface/IFrameFilter.h"
-#include "WireCellIface/IConfigurable.h"
 #include "WireCellIface/IAnodePlane.h"
+#include "WireCellIface/IConfigurable.h"
+#include "WireCellIface/IFrameFilter.h"
 #include "WireCellUtil/Logging.h"
 
-#include <vector>
 #include <string>
+#include <vector>
 
-namespace WireCell {
-    namespace Gen {
-
-        class Reframer : public IFrameFilter, public IConfigurable {
-        public:
+namespace WireCell
+{
+    namespace Gen
+    {
+        class Reframer : public IFrameFilter, public IConfigurable
+        {
+           public:
             Reframer();
             virtual ~Reframer();
 
-            virtual void configure(const WireCell::Configuration& config);
+            virtual void configure(const WireCell::Configuration &config);
             virtual WireCell::Configuration default_configuration() const;
 
-            virtual bool operator()(const input_pointer& inframe, output_pointer& outframe);
+            virtual bool operator()(const input_pointer &inframe,
+                                    output_pointer &outframe);
 
-        private:
-
+           private:
             IAnodePlane::pointer m_anode;
 
             // Consider traces with these tags.  No tags mean all traces.
@@ -62,6 +64,6 @@ namespace WireCell {
             int m_tbin, m_nticks;
             Log::logptr_t log;
         };
-    }
-}
+    }  // namespace Gen
+}  // namespace WireCell
 #endif

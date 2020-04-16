@@ -6,21 +6,23 @@
 #ifndef WIRECELLGEN_MEGAANODEPLANE
 #define WIRECELLGEN_MEGAANODEPLANE
 
+#include <vector>
 #include "WireCellGen/AnodePlane.h"
 #include "WireCellIface/IAnodePlane.h"
 #include "WireCellIface/IConfigurable.h"
-#include <vector>
 
-namespace WireCell {
-    namespace Gen {
-
-        class MegaAnodePlane: public IAnodePlane, public IConfigurable {
-        public:
+namespace WireCell
+{
+    namespace Gen
+    {
+        class MegaAnodePlane : public IAnodePlane, public IConfigurable
+        {
+           public:
             // MegaAnodePlane();
             virtual ~MegaAnodePlane() {}
 
             // IConfigurable interface
-            virtual void configure(const WireCell::Configuration& config);
+            virtual void configure(const WireCell::Configuration &config);
             virtual WireCell::Configuration default_configuration() const;
 
             // IAnodePlane interface
@@ -33,26 +35,17 @@ namespace WireCell {
 
             // The number of faces is kind of a ill defined quantity
             // for the mega anode plane.
-            virtual int nfaces() const  {
-                return m_anodes[0]->nfaces();
-            }
+            virtual int nfaces() const { return m_anodes[0]->nfaces(); }
 
             // Implemented with dummies
-            virtual int ident() const {
-                return -1;
-            }
-            virtual IAnodeFace::pointer face(int ident) const {
-                return nullptr;
-            } 
-            virtual IAnodeFace::vector faces() const {
-                return IAnodeFace::vector();
-            }
+            virtual int ident() const { return -1; }
+            virtual IAnodeFace::pointer face(int ident) const { return nullptr; }
+            virtual IAnodeFace::vector faces() const { return IAnodeFace::vector(); }
 
-       	private:
+           private:
             std::vector<IAnodePlane::pointer> m_anodes;
-
         };
-    }
-}
+    }  // namespace Gen
+}  // namespace WireCell
 
 #endif

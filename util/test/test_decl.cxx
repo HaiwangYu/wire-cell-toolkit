@@ -2,34 +2,29 @@
 #include <typeinfo>
 using namespace std;
 
-struct Base {
+struct Base
+{
     virtual ~Base() {}
     virtual void any() = 0;
 };
-struct A : public Base {
+struct A : public Base
+{
     virtual ~A() {}
 
-    void a() {
-	cerr << "Hi (a)\n";
-    }
+    void a() { cerr << "Hi (a)\n"; }
 
-    virtual void any() {
-	cerr << "Hi from any (a)\n";
-    }
+    virtual void any() { cerr << "Hi from any (a)\n"; }
 };
-struct B : public Base {
+struct B : public Base
+{
     virtual ~B() {}
-    void b() {
-	cerr << "Hi (b)\n";
-    }
+    void b() { cerr << "Hi (b)\n"; }
 
-    virtual void any() {
-	cerr << "Hi from any (b)\n";
-    }
+    virtual void any() { cerr << "Hi from any (b)\n"; }
 };
 
-Base* make_a() { return new A; }
-Base* make_b() { return new B; }
+Base *make_a() { return new A; }
+Base *make_b() { return new B; }
 
 int main()
 {
@@ -44,7 +39,6 @@ int main()
 
     // aa->any();
     // aa->a();
-
 
     return 0;
 }

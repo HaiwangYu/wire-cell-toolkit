@@ -2,167 +2,195 @@
 #define WIRECELL_CONFIGURATION
 
 #include <json/json.h>
-#include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
 
 #include <sstream>
 #include <vector>
 
-namespace WireCell {
-
+namespace WireCell
+{
     /** The Wire Cell Toolkit configuration layer uses Json::Value
-        objects for its transient data model.        
-     
-        The Configuration type is a recursive in that one
-        Configuration object may contain others.
-     
-        The WCT assumes an Object Configuration Protocol is
-        implemented by the "client" code that uses the toolkit.  See
-        for example the reference implementation in the wire-cell
-        command line program.  This protocol consists of:
+    objects for its transient data model.
 
-        1) Creation of the list of Configuration objects,
-        typically via WireCell::Persist::load().
+    The Configuration type is a recursive in that one
+    Configuration object may contain others.
 
-        2) Iterating this list and for each suitable Configuration
-        object instantiating the appropriately matching IConfigurable
-        via the WireCell::NamedFactory facility.
+    The WCT assumes an Object Configuration Protocol is
+    implemented by the "client" code that uses the toolkit.  See
+    for example the reference implementation in the wire-cell
+    command line program.  This protocol consists of:
 
-        3) Obtaining the default Configuration object from the
-        IConfigurable and merging the user-supplied on top of it.
+    1) Creation of the list of Configuration objects,
+    typically via WireCell::Persist::load().
 
-        4) Passing the resulting Configuration object to the
-        IConfigurable::configure() method.
+    2) Iterating this list and for each suitable Configuration
+    object instantiating the appropriately matching IConfigurable
+    via the WireCell::NamedFactory facility.
 
-        A suitable Configuration object must have two top level keys
-        and may have a third optional key:
+    3) Obtaining the default Configuration object from the
+    IConfigurable and merging the user-supplied on top of it.
 
-       - type :: must match the "component class name" (as given as
-         first argument to the WIRECELL_FACTORY() macro in the
-         implementation file)
+    4) Passing the resulting Configuration object to the
+    IConfigurable::configure() method.
 
-       - data :: an object which follows a schema which is specific to
-         each IConfigurable implementation.  
+    A suitable Configuration object must have two top level keys
+    and may have a third optional key:
 
-       - name :: an optional Instance Name.  If not given, the default instance of the type will be used.
-     */
+   - type :: must match the "component class name" (as given as
+     first argument to the WIRECELL_FACTORY() macro in the
+     implementation file)
+
+   - data :: an object which follows a schema which is specific to
+     each IConfigurable implementation.
+
+   - name :: an optional Instance Name.  If not given, the default instance of
+   the type will be used.
+ */
 
     typedef Json::Value Configuration;
 
     /// For persistence use WireCell::Persist::load() and
     /// WireCell::Persist::dump().
 
-
     /// The following functions provide some access methods which add
     /// some value beyond what Json::Value provides including some
     /// support for basic WCT types.
 
-    
     /// Convert a configuration value to a particular type.
-    template<typename T>
-    T convert(const Configuration& cfg, const T& def = T()) {
-	return def;
+    template <typename T>
+    T convert(const Configuration &cfg, const T &def = T())
+    {
+        return def;
     }
-    template<>
-    inline
-    bool convert<bool>(const Configuration& cfg, const bool& def) {
-        if (cfg.isNull()) return def;
-	return cfg.asBool();
+    template <>
+    inline bool convert<bool>(const Configuration &cfg, const bool &def)
+    {
+        if (cfg.isNull())
+            return def;
+        return cfg.asBool();
     }
-    template<>
-    inline
-    int convert<int>(const Configuration& cfg, const int& def) {
-        if (cfg.isNull()) return def;
-	return cfg.asInt();
+    template <>
+    inline int convert<int>(const Configuration &cfg, const int &def)
+    {
+        if (cfg.isNull())
+            return def;
+        return cfg.asInt();
     }
-    template<>
-    inline
-    float convert<float>(const Configuration& cfg, const float& def) {
-        if (cfg.isNull()) return def;
-	return cfg.asDouble();
+    template <>
+    inline float convert<float>(const Configuration &cfg, const float &def)
+    {
+        if (cfg.isNull())
+            return def;
+        return cfg.asDouble();
     }
-    template<>
-    inline
-    double convert<double>(const Configuration& cfg, const double& def) {
-        if (cfg.isNull()) return def;
-	return cfg.asDouble();
+    template <>
+    inline double convert<double>(const Configuration &cfg, const double &def)
+    {
+        if (cfg.isNull())
+            return def;
+        return cfg.asDouble();
     }
-    template<> 
-    inline
-    std::string convert<std::string>(const Configuration& cfg, const std::string& def) {
-        if (cfg.isNull()) return def;
-	return cfg.asString();
+    template <>
+    inline std::string convert<std::string>(const Configuration &cfg,
+                                            const std::string &def)
+    {
+        if (cfg.isNull())
+            return def;
+        return cfg.asString();
     }
-    template<>
-    inline			// fixme: ignores default
-    std::vector<std::string> convert< std::vector<std::string> >(const Configuration& cfg, const std::vector<std::string>& def) {
-	std::vector<std::string> ret;
-	for (auto v : cfg) {
-	    ret.push_back(convert<std::string>(v));
-	}
-	return ret;
+    template <>
+    inline  // fixme: ignores default
+        std::vector<std::string>
+        convert<std::vector<std::string>>(const Configuration &cfg,
+                                          const std::vector<std::string> &def)
+    {
+        std::vector<std::string> ret;
+        for (auto v : cfg)
+        {
+            ret.push_back(convert<std::string>(v));
+        }
+        return ret;
     }
-    template<>
-    inline			// fixme: ignores default
-    std::vector<int> convert< std::vector<int> >(const Configuration& cfg, const std::vector<int>& def) {
-	std::vector<int> ret;
-	for (auto v : cfg) {
-	    ret.push_back(convert<int>(v));
-	}
-	return ret;
+    template <>
+    inline  // fixme: ignores default
+        std::vector<int>
+        convert<std::vector<int>>(const Configuration &cfg,
+                                  const std::vector<int> &def)
+    {
+        std::vector<int> ret;
+        for (auto v : cfg)
+        {
+            ret.push_back(convert<int>(v));
+        }
+        return ret;
     }
-    template<>
-    inline			// fixme: ignores default
-    std::vector<double> convert< std::vector<double> >(const Configuration& cfg, const std::vector<double>& def) {
-	std::vector<double> ret;
-	for (auto v : cfg) {
-	    ret.push_back(convert<double>(v));
-	}
-	return ret;
+    template <>
+    inline  // fixme: ignores default
+        std::vector<double>
+        convert<std::vector<double>>(const Configuration &cfg,
+                                     const std::vector<double> &def)
+    {
+        std::vector<double> ret;
+        for (auto v : cfg)
+        {
+            ret.push_back(convert<double>(v));
+        }
+        return ret;
     }
     // for Point and Ray converters, see Point.h
 
-
     /// Follow a dot.separated.path and return the branch there.
-    Configuration branch(Configuration cfg, const std::string& dotpath);
+    Configuration branch(Configuration cfg, const std::string &dotpath);
 
     /// Merge dictionary b into a, return a
-    Configuration update(Configuration& a, Configuration& b);
+    Configuration update(Configuration &a, Configuration &b);
 
     /// Return an array which is composed of the array b appended to the array a.
     // fixme: this should be called "extend".
-    Configuration append(Configuration& a, Configuration& b);
+    Configuration append(Configuration &a, Configuration &b);
 
     /// Return dictionary in given list if it value at dotpath matches
-    template<typename T>
-    Configuration find(Configuration& lst, const std::string& dotpath, const T& val) {
-	for (auto ent : lst) {
-	    auto maybe = branch(ent, dotpath);
-	    if (maybe.isNull()) { continue; }
-	    if (convert<T>(maybe) == val) { return maybe; }
-	}
-	return Configuration();
+    template <typename T>
+    Configuration find(Configuration &lst, const std::string &dotpath,
+                       const T &val)
+    {
+        for (auto ent : lst)
+        {
+            auto maybe = branch(ent, dotpath);
+            if (maybe.isNull())
+            {
+                continue;
+            }
+            if (convert<T>(maybe) == val)
+            {
+                return maybe;
+            }
+        }
+        return Configuration();
     }
 
     /// Get value in configuration at the dotted path from or return default.
-    template<typename T>
-    T get(Configuration cfg, const std::string& dotpath, const T& def = T()) {
-	return convert(branch(cfg, dotpath), def);
+    template <typename T>
+    T get(Configuration cfg, const std::string &dotpath, const T &def = T())
+    {
+        return convert(branch(cfg, dotpath), def);
     }
 
     /// Put value in configuration at the dotted path.
-    template<typename T>
-    void put(Configuration& cfg, const std::string& dotpath, const T& val) {
-	Configuration* ptr = &cfg;
-	std::vector<std::string> path;
-	boost::algorithm::split(path, dotpath, boost::algorithm::is_any_of("."));
-	for (auto name : path) {
-	    ptr = &(*ptr)[name];
-	}
-	*ptr = val;
+    template <typename T>
+    void put(Configuration &cfg, const std::string &dotpath, const T &val)
+    {
+        Configuration *ptr = &cfg;
+        std::vector<std::string> path;
+        boost::algorithm::split(path, dotpath, boost::algorithm::is_any_of("."));
+        for (auto name : path)
+        {
+            ptr = &(*ptr)[name];
+        }
+        *ptr = val;
     }
 
-
-} // namespace WireCell
+}  // namespace WireCell
 
 #endif

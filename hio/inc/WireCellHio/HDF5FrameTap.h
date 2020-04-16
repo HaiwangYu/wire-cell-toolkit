@@ -14,40 +14,44 @@
 
 #include "WireCellIface/IAnodePlane.h"
 #include "WireCellIface/IConfigurable.h"
-#include "WireCellIface/IFrameSink.h"
 #include "WireCellIface/IFrameFilter.h"
+#include "WireCellIface/IFrameSink.h"
 #include "WireCellUtil/Logging.h"
 
-namespace WireCell {
-namespace Hio {
+namespace WireCell
+{
+    namespace Hio
+    {
+        class HDF5FrameTap : public IFrameFilter, public IConfigurable
+        {
+           public:
+            HDF5FrameTap();
+            virtual ~HDF5FrameTap();
 
-class HDF5FrameTap : public IFrameFilter, public IConfigurable {
-public:
-  HDF5FrameTap();
-  virtual ~HDF5FrameTap();
+            /// working operation - interface from IFrameFilter
+            /// executed when called by pgrapher
+            virtual bool operator()(const IFrame::pointer &inframe,
+                                    IFrame::pointer &outframe);
 
-  /// working operation - interface from IFrameFilter
-  /// executed when called by pgrapher
-  virtual bool operator()(const IFrame::pointer &inframe, IFrame::pointer& outframe);
+            /// interfaces from IConfigurable
 
-  /// interfaces from IConfigurable
+            /// exeexecuted once at node creation
+            virtual WireCell::Configuration default_configuration() const;
 
-  /// exeexecuted once at node creation
-  virtual WireCell::Configuration default_configuration() const;
+            /// executed once after node creation
+            virtual void configure(const WireCell::Configuration &config);
 
-  /// executed once after node creation
-  virtual void configure(const WireCell::Configuration &config);
+           private:
+            Configuration m_cfg;  /// copy of configuration
+            IAnodePlane::pointer
+                m_anode;  /// pointer to some APA, needed to associate chnnel ID to planes
 
-private:
-  Configuration m_cfg; /// copy of configuration
-  IAnodePlane::pointer m_anode; /// pointer to some APA, needed to associate chnnel ID to planes
+            int m_save_count;  // count frames saved
 
-  int m_save_count;   // count frames saved
-  
-  /// SPD logger
-  Log::logptr_t l;
-};
-} // namespace Hio
-} // namespace WireCell
+            /// SPD logger
+            Log::logptr_t l;
+        };
+    }  // namespace Hio
+}  // namespace WireCell
 
 #endif

@@ -8,11 +8,12 @@
 
 #include "WireCellUtil/IComponent.h"
 
-namespace WireCell {
-
-    class IChannelStatus : public IComponent<IChannelStatus> {
-    public:
-        virtual ~IChannelStatus() ;
+namespace WireCell
+{
+    class IChannelStatus : public IComponent<IChannelStatus>
+    {
+       public:
+        virtual ~IChannelStatus();
 
         /// Return the current gain for the preamplifier in units of
         /// [voltage]/[charge].
@@ -21,8 +22,7 @@ namespace WireCell {
         /// Return the current shaping time of the preamplifier for
         /// the given channel in units of [time].
         virtual double preamp_shaping(int chid) const = 0;
-
     };
-}
+}  // namespace WireCell
 
 #endif

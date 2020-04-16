@@ -2,14 +2,15 @@
 
 using namespace WireCell;
 
-IWirePlane::~IWirePlane()
-{
-}
+IWirePlane::~IWirePlane() {}
 
 WirePlaneId IWirePlane::planeid() const
 {
     static const WirePlaneId bogus(kUnknownLayer, -1, -1);
-    const IWire::vector& w = wires();
-    if (w.empty()) { return bogus; }
+    const IWire::vector &w = wires();
+    if (w.empty())
+    {
+        return bogus;
+    }
     return w.front()->planeid();
 }

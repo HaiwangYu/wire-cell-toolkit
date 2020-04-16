@@ -1,4 +1,4 @@
-/** 
+/**
 
     A blob is a region in the 2D plane transverse to the drift
     direction.  It is made up of a number of logically coplanar
@@ -20,22 +20,20 @@
 
 #include "WireCellUtil/RayTiling.h"
 
-namespace WireCell {
-
-
-    class IBlob : public IData<IBlob> {
-    public:
-
-
+namespace WireCell
+{
+    class IBlob : public IData<IBlob>
+    {
+       public:
         virtual ~IBlob();
-        
+
         // An identifier for this blob.
         virtual int ident() const = 0;
-        
+
         // An associated value, aka "charge", may be 0.0.
         virtual float value() const = 0;
 
-        // And its uncertainty.  A "weight" is considered 1.0/uncertainty, 
+        // And its uncertainty.  A "weight" is considered 1.0/uncertainty,
         virtual float uncertainty() const = 0;
 
         // Return the anode plane face the blob was made on.
@@ -46,10 +44,9 @@ namespace WireCell {
 
         // Return the blob data describing the shape in terms of
         // wire-in-plane indices
-        virtual const RayGrid::Blob& shape() const  = 0;
-
+        virtual const RayGrid::Blob &shape() const = 0;
     };
 
-}
+}  // namespace WireCell
 
 #endif

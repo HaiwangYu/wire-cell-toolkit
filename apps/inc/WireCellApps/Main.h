@@ -9,21 +9,19 @@
 #define WIRECELL_MAIN
 
 #include "WireCellUtil/ConfigManager.h"
-#include "WireCellUtil/PluginManager.h"
 #include "WireCellUtil/Persist.h"
+#include "WireCellUtil/PluginManager.h"
 
 #include "WireCellUtil/Logging.h"
 
 #include <string>
 #include <vector>
 
-
-
-namespace WireCell {
-    class Main {
-
-    public:
-
+namespace WireCell
+{
+    class Main
+    {
+       public:
         Main();
         ~Main();
 
@@ -34,46 +32,44 @@ namespace WireCell {
         ///
         /// Or, one can use subsequent methods for more fine-grained
         /// setup and execution.
-        int cmdline(int argc, char* argv[]);
-
+        int cmdline(int argc, char *argv[]);
 
         /// Individual setup methods called by cmdline() or called
         /// explicitly by external application/frameork:
 
         /// Add an IApplication component to execute as a `type:name`
         /// string.
-        void add_app(const std::string& tn);
+        void add_app(const std::string &tn);
 
         /// Append a top-level JSON/Jsonnet configuration file to the
         /// configuration sequence.
-        void add_config(const std::string& filename);
+        void add_config(const std::string &filename);
 
         /// Bind an external scalar value to a variable so that it may
         /// be referenced in the configuration files (via
         /// std.extVar()).
-        void add_var(const std::string& name, const std::string& value);
+        void add_var(const std::string &name, const std::string &value);
 
         /// Bind external configuration code (in Jsonnet language) to
         /// a variable so that its may be referenced the configuration
         /// files (via std.extVar())
-        void add_code(const std::string& name, const std::string& value);
+        void add_code(const std::string &name, const std::string &value);
 
         /// Add an element to the configuration path in which
         /// configuration files may be found.
-        void add_path(const std::string& dirname);
+        void add_path(const std::string &dirname);
 
         /// Add a plugin library in which components may be found.
         /// The libname may lack the initial "lib" prefix and file
         /// extension.
-        void add_plugin(const std::string& libname);
-
+        void add_plugin(const std::string &libname);
 
         /// Add a log sink, reserved names 'stdout' and 'stderr' or a filename.
-        void add_logsink(const std::string& log, const std::string& level="");
+        void add_logsink(const std::string &log, const std::string &level = "");
 
         /// Set a minimum level to emit a message for a given
         /// log. (levels: critical, error, warn, info, debug, trace).
-        void set_loglevel(const std::string& log, const std::string& level="");
+        void set_loglevel(const std::string &log, const std::string &level = "");
 
         /// Call once after all setup has been done and before
         /// running.
@@ -85,15 +81,12 @@ namespace WireCell {
         /// Call to finalize any terminal components.
         void finalize();
 
-    private:
+       private:
         ConfigManager m_cfgmgr;
         std::vector<std::string> m_plugins, m_apps, m_cfgfiles, m_load_path;
         Persist::externalvars_t m_extvars, m_extcode;
         Log::logptr_t l;
-
     };
 
-
-
-}
+}  // namespace WireCell
 #endif

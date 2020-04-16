@@ -5,14 +5,14 @@
 #include "WireCellIface/IWireSummarizer.h"
 #include "WireCellIface/IWireSummary.h"
 
+#include "WireCellUtil/BoundingBox.h"
+#include "WireCellUtil/MemUsage.h"
+#include "WireCellUtil/Point.h"
 #include "WireCellUtil/Testing.h"
 #include "WireCellUtil/TimeKeeper.h"
-#include "WireCellUtil/MemUsage.h"
-#include "WireCellUtil/BoundingBox.h"
-#include "WireCellUtil/Point.h"
 
-#include "WireCellUtil/PluginManager.h"
 #include "WireCellUtil/NamedFactory.h"
+#include "WireCellUtil/PluginManager.h"
 
 #include "TH1F.h"
 #include "TLine.h"
@@ -27,15 +27,13 @@ using namespace WireCell;
 using namespace WireCell::Test;
 using namespace std;
 
-
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
     TimeKeeper tk("test wires");
     MemUsage mu("test wires");
 
-    PluginManager& pm = PluginManager::instance();
+    PluginManager &pm = PluginManager::instance();
     pm.add("WireCellGen");
-
 
     // fixme: this C++ dance to wire up the interfaces may eventually
     // be done inside a workflow engine.
@@ -54,17 +52,16 @@ int main(int argc, char* argv[])
     auto wp = WireCell::Factory::lookup<IWireParameters>("WireParams");
     AssertMsg(wp, "Failed to get IWireParameters from default WireParams");
     cout << "Got WireParams IWireParameters interface @ " << wp << endl;
-    
+
     cout << tk("Configured WireParams") << endl;
     cout << mu("Configured WireParams") << endl;
 
     cout << "Wire Parameters:\n"
-	 << "Bounds: " << wp->bounds() << "\n"
-	 << "Upitch: " << wp->pitchU() << "\n"
-	 << "Vpitch: " << wp->pitchV() << "\n"
-	 << "Wpitch: " << wp->pitchW() << "\n"
-	 << endl;
-
+         << "Bounds: " << wp->bounds() << "\n"
+         << "Upitch: " << wp->pitchU() << "\n"
+         << "Vpitch: " << wp->pitchV() << "\n"
+         << "Wpitch: " << wp->pitchW() << "\n"
+         << endl;
 
     auto wg = WireCell::Factory::lookup<IWireGenerator>("WireGenerator");
     AssertMsg(wg, "Failed to get IWireGenerator from default WireGenerator");
@@ -80,7 +77,7 @@ int main(int argc, char* argv[])
 
     int nwires = wires->size();
     cout << "Got " << nwires << " wires" << endl;
-    //Assert(1103 == nwires);
+    // Assert(1103 == nwires);
 
     cout << tk("Made local wire collection") << endl;
     cout << mu("Made local wire collection") << endl;
@@ -95,10 +92,11 @@ int main(int argc, char* argv[])
     cout << mu("Made wire summary") << endl;
 
     WireCell::BoundingBox boundingbox;
-    for (size_t ind = 0; ind < wires->size(); ++ind) {
-	boundingbox(wires->at(ind)->ray());
+    for (size_t ind = 0; ind < wires->size(); ++ind)
+    {
+        boundingbox(wires->at(ind)->ray());
     }
-    const Ray& bbox = boundingbox.bounds();
+    const Ray &bbox = boundingbox.bounds();
 
     cout << tk("Made bounding box") << endl;
     cout << mu("Made bounding box") << endl;
@@ -108,11 +106,7 @@ int main(int argc, char* argv[])
     copy_if(wires->begin(), wires->end(), back_inserter(v_wires), select_v_wires);
     copy_if(wires->begin(), wires->end(), back_inserter(w_wires), select_w_wires);
 
-    size_t n_wires[3] = {
-	u_wires.size(),
-	v_wires.size(),
-	w_wires.size()
-    };
+    size_t n_wires[3] = {u_wires.size(), v_wires.size(), w_wires.size()};
 
     MultiPdf pdf(argv[0]);
 
@@ -120,41 +114,44 @@ int main(int argc, char* argv[])
     TMarker m;
     m.SetMarkerSize(1);
     m.SetMarkerStyle(20);
-    int colors[] = {2,4,1};
+    int colors[] = {2, 4, 1};
     double max_width = 5.0;
 
     cout << tk("Made TCanvas") << endl;
     cout << mu("Made TCanvas") << endl;
 
-    TH1F* frame = pdf.canvas.DrawFrame(bbox.first.z(), bbox.first.y(),
-			      bbox.second.z(), bbox.second.y());
+    TH1F *frame = pdf.canvas.DrawFrame(bbox.first.z(), bbox.first.y(),
+                                       bbox.second.z(), bbox.second.y());
     frame->SetTitle("Wires, red=U, blue=V, thicker=increasing index");
     frame->SetXTitle("Z transverse direction");
     frame->SetYTitle("Y transverse direction");
-    for (auto wit = wires->begin(); wit != wires->end(); ++wit) {
-	IWire::pointer wire = *wit;
+    for (auto wit = wires->begin(); wit != wires->end(); ++wit)
+    {
+        IWire::pointer wire = *wit;
 
-	Ray wray = wire->ray();
+        Ray wray = wire->ray();
 
-	int iplane = wire->planeid().index();
-	int index = wire->index();
-	double width = ((index+1)*max_width)/n_wires[iplane];
+        int iplane = wire->planeid().index();
+        int index = wire->index();
+        double width = ((index + 1) * max_width) / n_wires[iplane];
 
-	l.SetLineColor(colors[iplane]);
-	l.SetLineWidth(width);
-	l.DrawLine(wray.first.z(), wray.first.y(), wray.second.z(), wray.second.y());
-	Point cent = wire->center();
-	m.SetMarkerColor(colors[iplane]);
-	m.DrawMarker(cent.z(), cent.y());
+        l.SetLineColor(colors[iplane]);
+        l.SetLineWidth(width);
+        l.DrawLine(wray.first.z(), wray.first.y(), wray.second.z(),
+                   wray.second.y());
+        Point cent = wire->center();
+        m.SetMarkerColor(colors[iplane]);
+        m.DrawMarker(cent.z(), cent.y());
     }
     cout << tk("Canvas drawn") << endl;
     cout << mu("Canvas drawn") << endl;
 
     pdf();
 
-    cout << "Timing summary:\n" << tk.summary() << endl;
-    cout << "Memory summary:\n" << mu.summary() << endl;
+    cout << "Timing summary:\n"
+         << tk.summary() << endl;
+    cout << "Memory summary:\n"
+         << mu.summary() << endl;
 
     return 0;
 }
-

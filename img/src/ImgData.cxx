@@ -2,22 +2,9 @@
 
 using namespace WireCell::Img::Data;
 
-Stripe::~Stripe()
-{
-}
-StripeSet::~StripeSet()
-{
-}
+Stripe::~Stripe() {}
+StripeSet::~StripeSet() {}
 
+Slice::~Slice() {}
 
-
-
-
-Slice::~Slice()
-{
-}
-
-SliceFrame::~SliceFrame()
-{
-}
-
+SliceFrame::~SliceFrame() {}

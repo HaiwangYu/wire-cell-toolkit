@@ -8,32 +8,35 @@
 #include "WireCellIface/ITensorSetFilter.h"
 #include "WireCellUtil/Logging.h"
 
-#include <torch/script.h> // One-stop header.
+#include <torch/script.h>  // One-stop header.
 
-namespace WireCell {
-namespace Pytorch {
-class TorchScript : public ITensorSetFilter, public IConfigurable {
-public:
-  TorchScript();
-  virtual ~TorchScript() {}
+namespace WireCell
+{
+    namespace Pytorch
+    {
+        class TorchScript : public ITensorSetFilter, public IConfigurable
+        {
+           public:
+            TorchScript();
+            virtual ~TorchScript() {}
 
-  // IConfigurable interface
-  virtual void configure(const WireCell::Configuration &config);
-  virtual WireCell::Configuration default_configuration() const;
+            // IConfigurable interface
+            virtual void configure(const WireCell::Configuration &config);
+            virtual WireCell::Configuration default_configuration() const;
 
-  // ITensorSetFilter interface
-  virtual bool operator()(const ITensorSet::pointer& in, ITensorSet::pointer& out);
+            // ITensorSetFilter interface
+            virtual bool operator()(const ITensorSet::pointer &in,
+                                    ITensorSet::pointer &out);
 
-private:
-  Log::logptr_t l;
-  Configuration m_cfg; /// copy of configuration
+           private:
+            Log::logptr_t l;
+            Configuration m_cfg;  /// copy of configuration
 
-  torch::jit::script::Module m_module;
+            torch::jit::script::Module m_module;
 
-  std::unordered_map<std::string, float> m_timers;
+            std::unordered_map<std::string, float> m_timers;
+        };
+    }  // namespace Pytorch
+}  // namespace WireCell
 
-};
-} // namespace Pytorch
-} // namespace WireCell
-
-#endif // WIRECELLPYTORCH_TORCHSCRIPT
+#endif  // WIRECELLPYTORCH_TORCHSCRIPT

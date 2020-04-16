@@ -1,12 +1,13 @@
 #ifndef WIRECELLGEN_UTIL
 #define WIRECELLGEN_UTIL
 
-#include "WireCellIface/IFrame.h"
 #include <vector>
+#include "WireCellIface/IFrame.h"
 
-namespace WireCell {
-    namespace Gen {
-
+namespace WireCell
+{
+    namespace Gen
+    {
         /// Sum a vector of frames, returning a new one with the given
         /// ident.  The start time of the new one will be the minimum
         /// time of all frames.  The sample period (tick) of all
@@ -17,7 +18,6 @@ namespace WireCell {
         /// outside of any individual trace.
         IFrame::pointer sum(std::vector<IFrame::pointer> frames, int ident);
 
-
-    }
-}
+    }  // namespace Gen
+}  // namespace WireCell
 #endif

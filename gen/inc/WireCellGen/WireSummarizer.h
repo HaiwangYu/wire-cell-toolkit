@@ -6,18 +6,17 @@
 
 #include <deque>
 
-namespace WireCell {
+namespace WireCell
+{
+    class WireSummarizer : public IWireSummarizer
+    {
+       public:
+        WireSummarizer();
+        virtual ~WireSummarizer();
 
-    class WireSummarizer : public IWireSummarizer {
-    public:
-	WireSummarizer();
-	virtual ~WireSummarizer();
-
-	virtual bool operator()(const input_pointer& in, output_pointer& out);
-
+        virtual bool operator()(const input_pointer &in, output_pointer &out);
     };
 
-}
+}  // namespace WireCell
 
 #endif
-

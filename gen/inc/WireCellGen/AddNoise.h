@@ -7,43 +7,45 @@
 #ifndef WIRECELL_GEN_ADDNOISE
 #define WIRECELL_GEN_ADDNOISE
 
-#include "WireCellIface/IFrameFilter.h"
-#include "WireCellIface/IConfigurable.h"
-#include "WireCellIface/IRandom.h"
 #include "WireCellIface/IChannelSpectrum.h"
-#include "WireCellUtil/Waveform.h"
+#include "WireCellIface/IConfigurable.h"
+#include "WireCellIface/IFrameFilter.h"
+#include "WireCellIface/IRandom.h"
 #include "WireCellUtil/Logging.h"
+#include "WireCellUtil/Waveform.h"
 
 #include <string>
 
-namespace WireCell {
-    namespace Gen {
+namespace WireCell
+{
+    namespace Gen
+    {
+        class AddNoise : public IFrameFilter, public IConfigurable
+        {
+           public:
+            AddNoise(const std::string &model = "", const std::string &rng = "Random");
 
-        class AddNoise : public IFrameFilter, public IConfigurable {
-        public:
-            AddNoise(const std::string& model = "",
-                     const std::string& rng="Random");
-            
             virtual ~AddNoise();
 
             /// IFrameFilter
-            virtual bool operator()(const input_pointer& inframe, output_pointer& outframe);
+            virtual bool operator()(const input_pointer &inframe,
+                                    output_pointer &outframe);
 
             /// IConfigurable
-            virtual void configure(const WireCell::Configuration& config);
+            virtual void configure(const WireCell::Configuration &config);
             virtual WireCell::Configuration default_configuration() const;
 
-        private:
+           private:
             IRandom::pointer m_rng;
             IChannelSpectrum::pointer m_model;
 
-            std::string m_model_tn,  m_rng_tn;
-	    int m_nsamples;
-	    double m_rep_percent;
-	    
+            std::string m_model_tn, m_rng_tn;
+            int m_nsamples;
+            double m_rep_percent;
+
             Log::logptr_t log;
-	};
-    }
-}
+        };
+    }  // namespace Gen
+}  // namespace WireCell
 
 #endif

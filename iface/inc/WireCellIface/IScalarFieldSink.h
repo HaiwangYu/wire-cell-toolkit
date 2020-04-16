@@ -4,25 +4,19 @@
 #include "WireCellIface/ISinkNode.h"
 #include "WireCellUtil/Point.h"
 
-
-namespace WireCell {
-
+namespace WireCell
+{
     /** Base class for a sink of cells. */
-    class IScalarFieldSink : public ISinkNode< ScalarField >
+    class IScalarFieldSink : public ISinkNode<ScalarField>
     {
-    public:
-	virtual ~IScalarFieldSink() ;
+       public:
+        virtual ~IScalarFieldSink();
 
-	virtual std::string signature() {
-	   return typeid(IScalarFieldSink).name();
-	}
-	/// supply:
-	/// virtual bool operator()(const std::shared_ptr<ScalarField>& field);
-
+        virtual std::string signature() { return typeid(IScalarFieldSink).name(); }
+        /// supply:
+        /// virtual bool operator()(const std::shared_ptr<ScalarField>& field);
     };
 
-}
-
+}  // namespace WireCell
 
 #endif
-

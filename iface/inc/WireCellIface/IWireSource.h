@@ -4,22 +4,20 @@
 #include "WireCellIface/ISourceNode.h"
 #include "WireCellIface/IWire.h"
 
-namespace WireCell {
-
+namespace WireCell
+{
     /** Return a vector of wires.
-     */
+ */
     class IWireSource : public ISourceNode<IWire::vector>
     {
-    public:
-	virtual ~IWireSource() ;
+       public:
+        virtual ~IWireSource();
 
-	virtual std::string signature() {
-	   return typeid(IWireSource).name();
-	}
-	// supply:
-	// virtual bool operator()(output_pointer& wires);
+        virtual std::string signature() { return typeid(IWireSource).name(); }
+        // supply:
+        // virtual bool operator()(output_pointer& wires);
     };
 
-}
+}  // namespace WireCell
 
 #endif

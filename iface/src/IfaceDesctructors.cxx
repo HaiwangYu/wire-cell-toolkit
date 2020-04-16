@@ -1,6 +1,5 @@
 // https://github.com/WireCell/wire-cell-iface/issues/5
 
-#include "WireCellIface/IWireParameters.h"
 #include "WireCellIface/IAnodeFace.h"
 #include "WireCellIface/IAnodePlane.h"
 #include "WireCellIface/IApplication.h"
@@ -18,8 +17,8 @@
 #include "WireCellIface/IClusterFanin.h"
 #include "WireCellIface/IClusterFilter.h"
 #include "WireCellIface/IClusterFramer.h"
-#include "WireCellIface/IClustering.h"
 #include "WireCellIface/IClusterSink.h"
+#include "WireCellIface/IClustering.h"
 #include "WireCellIface/IConfigurable.h"
 #include "WireCellIface/IDataFlowGraph.h"
 #include "WireCellIface/IDeconvolution.h"
@@ -33,8 +32,8 @@
 #include "WireCellIface/IDepoSetFanout.h"
 #include "WireCellIface/IDepoSink.h"
 #include "WireCellIface/IDepoSource.h"
-#include "WireCellIface/IDiffusion.h"
 #include "WireCellIface/IDiffuser.h"
+#include "WireCellIface/IDiffusion.h"
 #include "WireCellIface/IDrifter.h"
 #include "WireCellIface/IDuctor.h"
 #include "WireCellIface/IFaninNode.h"
@@ -59,39 +58,38 @@
 #include "WireCellIface/IPointFieldSink.h"
 #include "WireCellIface/IProcessor.h"
 #include "WireCellIface/IQueuedoutNode.h"
-#include "WireCellIface/IQueuedoutNode.h"
 #include "WireCellIface/IRandom.h"
 #include "WireCellIface/IRecombinationModel.h"
 #include "WireCellIface/IScalarFieldSink.h"
 #include "WireCellIface/ISequence.h"
 #include "WireCellIface/ISinkNode.h"
-#include "WireCellIface/ISourceNode.h"
 #include "WireCellIface/ISlice.h"
 #include "WireCellIface/ISliceFanout.h"
 #include "WireCellIface/ISliceFrame.h"
 #include "WireCellIface/ISliceFrameSink.h"
 #include "WireCellIface/ISliceStriper.h"
+#include "WireCellIface/ISourceNode.h"
 #include "WireCellIface/ISplitNode.h"
 #include "WireCellIface/IStripe.h"
 #include "WireCellIface/IStripeSet.h"
-#include "WireCellIface/ITerminal.h"
 #include "WireCellIface/ITensorSetFilter.h"
+#include "WireCellIface/ITerminal.h"
 #include "WireCellIface/ITiling.h"
 #include "WireCellIface/ITrace.h"
 #include "WireCellIface/IWaveform.h"
 #include "WireCellIface/IWireGenerator.h"
+#include "WireCellIface/IWireParameters.h"
 #include "WireCellIface/IWireSchema.h"
 #include "WireCellIface/IWireSource.h"
 #include "WireCellIface/IWireSummarizer.h"
 #include "WireCellIface/IWireSummary.h"
+#include "WireCellIface/SimpleBlob.h"
 #include "WireCellIface/SimpleDepoSet.h"
 #include "WireCellIface/SimpleWire.h"
-#include "WireCellIface/SimpleBlob.h"
-
 
 using namespace WireCell;
 
-IWireParameters::~IWireParameters() { }
+IWireParameters::~IWireParameters() {}
 IAnodeFace::~IAnodeFace() {}
 IAnodePlane::~IAnodePlane() {}
 IApplication::~IApplication() {}
@@ -145,11 +143,11 @@ IFrameSplitter::~IFrameSplitter() {}
 IFunctionNodeBase::~IFunctionNodeBase() {}
 IHydraNodeBase::~IHydraNodeBase() {}
 IJoinNodeBase::~IJoinNodeBase() {}
-INode::~INode(){}
+INode::~INode() {}
 IImpactResponse::~IImpactResponse() {}
 IPlaneImpactResponse::~IPlaneImpactResponse() {}
 IPointFieldSink::~IPointFieldSink() {}
-IProcessor::~IProcessor() { }
+IProcessor::~IProcessor() {}
 IQueuedoutNodeBase::~IQueuedoutNodeBase() {}
 IRandom::~IRandom() {}
 IRecombinationModel::~IRecombinationModel() {}

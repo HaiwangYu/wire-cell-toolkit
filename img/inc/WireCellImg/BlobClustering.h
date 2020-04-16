@@ -7,7 +7,7 @@
     slice (including none) and that blob sets are delivered in time
     order.  Blobs in the set may span both faces of an anode plane.
     Gaps in time between blob sets will be determined by the set's
-    slice.  
+    slice.
 
     Clusters will not span a gap.  Likewise, when an EOS is
     encountered, all clusters are flushed to the output queue.  If the
@@ -23,31 +23,33 @@
 #ifndef WIRECELLIMG_BLOBCLUSTERING
 #define WIRECELLIMG_BLOBCLUSTERING
 
+#include "WireCellIface/IBlob.h"
+#include "WireCellIface/IBlobSet.h"
+#include "WireCellIface/IChannel.h"
 #include "WireCellIface/IClustering.h"
 #include "WireCellIface/IConfigurable.h"
-#include "WireCellIface/IWire.h"
-#include "WireCellIface/IChannel.h"
-#include "WireCellIface/IBlob.h"
 #include "WireCellIface/ISlice.h"
-#include "WireCellIface/IBlobSet.h"
+#include "WireCellIface/IWire.h"
 
 #include "WireCellUtil/IndexedGraph.h"
 #include "WireCellUtil/Logging.h"
 
-namespace WireCell {
-    namespace Img {
-
-        class BlobClustering : public IClustering, public IConfigurable {
-        public:
+namespace WireCell
+{
+    namespace Img
+    {
+        class BlobClustering : public IClustering, public IConfigurable
+        {
+           public:
             BlobClustering();
             virtual ~BlobClustering();
 
-            virtual void configure(const WireCell::Configuration& cfg);
+            virtual void configure(const WireCell::Configuration &cfg);
             virtual WireCell::Configuration default_configuration() const;
 
-            virtual bool operator()(const input_pointer& blobset, output_queue& clusters) ;
+            virtual bool operator()(const input_pointer &blobset, output_queue &clusters);
 
-        private:
+           private:
             // User may configure how many slices can go missing
             // before breaking the clusters.  Default is 1.0, slices
             // must be adjacent in time or clusters will flush.
@@ -59,24 +61,25 @@ namespace WireCell {
             cluster_indexed_graph_t m_grind;
 
             // internal methods
-            void add_slice(const ISlice::pointer& islice);
-            void add_blobs(const input_pointer& newbs);
+            void add_slice(const ISlice::pointer &islice);
+            void add_blobs(const input_pointer &newbs);
 
             // flush graph to output queue
-            void flush(output_queue& clusters);
+            void flush(output_queue &clusters);
 
-            // Add the newbs to the graph.  Return true if a flush is needed (eg, because of a gap)
-            bool graph_bs(const input_pointer& newbs);
+            // Add the newbs to the graph.  Return true if a flush is needed (eg, because
+            // of a gap)
+            bool graph_bs(const input_pointer &newbs);
 
             // return true if a gap exists between the slice of newbs and the last bs.
-            bool judge_gap(const input_pointer& newbs);
+            bool judge_gap(const input_pointer &newbs);
 
             // Blob set must be kept, this saves them.
-            void intern(const input_pointer& newbs);
+            void intern(const input_pointer &newbs);
 
             Log::logptr_t l;
         };
-    }
-}
+    }  // namespace Img
+}  // namespace WireCell
 
 #endif

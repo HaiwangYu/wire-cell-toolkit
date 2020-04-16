@@ -4,39 +4,39 @@
 #ifndef WIRECELLGEN_DEPOTRANSFORM
 #define WIRECELLGEN_DEPOTRANSFORM
 
-#include "WireCellIface/IDepoFramer.h"
-#include "WireCellIface/IConfigurable.h"
-#include "WireCellIface/IRandom.h"
-#include "WireCellIface/IPlaneImpactResponse.h"
 #include "WireCellIface/IAnodePlane.h"
-#include "WireCellIface/WirePlaneId.h"
+#include "WireCellIface/IConfigurable.h"
 #include "WireCellIface/IDepo.h"
+#include "WireCellIface/IDepoFramer.h"
+#include "WireCellIface/IPlaneImpactResponse.h"
+#include "WireCellIface/IRandom.h"
+#include "WireCellIface/WirePlaneId.h"
 #include "WireCellUtil/Logging.h"
 
-namespace WireCell {
-    namespace Gen {
-
-        class DepoTransform : public IDepoFramer, public IConfigurable {
-        public:
+namespace WireCell
+{
+    namespace Gen
+    {
+        class DepoTransform : public IDepoFramer, public IConfigurable
+        {
+           public:
             DepoTransform();
             virtual ~DepoTransform();
-            
-            virtual bool operator()(const input_pointer& in, output_pointer& out);
-            
 
-            virtual void configure(const WireCell::Configuration& cfg);
+            virtual bool operator()(const input_pointer &in, output_pointer &out);
+
+            virtual void configure(const WireCell::Configuration &cfg);
             virtual WireCell::Configuration default_configuration() const;
 
-
-            /// dummy depo modifier 
+            /// dummy depo modifier
             /// used for the application of the charge scaling bases on dQdx calibration
-            /// see the detailed implementation in larwirecell or uboonecode 
-            virtual IDepo::pointer modify_depo(WirePlaneId wpid, IDepo::pointer depo){
+            /// see the detailed implementation in larwirecell or uboonecode
+            virtual IDepo::pointer modify_depo(WirePlaneId wpid, IDepo::pointer depo)
+            {
                 return depo;
             }
 
-        private:
-
+           private:
             IAnodePlane::pointer m_anode;
             IRandom::pointer m_rng;
             std::vector<IPlaneImpactResponse::pointer> m_pirs;
@@ -48,9 +48,8 @@ namespace WireCell {
             double m_nsigma;
             int m_frame_count;
             Log::logptr_t l;
-
         };
-    }
-}
+    }  // namespace Gen
+}  // namespace WireCell
 
 #endif

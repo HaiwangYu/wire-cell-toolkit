@@ -8,28 +8,31 @@
 #include "WireCellIface/ITensorSetFilter.h"
 #include "WireCellUtil/Logging.h"
 
-namespace WireCell {
-namespace Pytorch {
-class ZioTorchScript : public ITensorSetFilter, public IConfigurable {
-public:
-  ZioTorchScript();
-  virtual ~ZioTorchScript() {}
+namespace WireCell
+{
+    namespace Pytorch
+    {
+        class ZioTorchScript : public ITensorSetFilter, public IConfigurable
+        {
+           public:
+            ZioTorchScript();
+            virtual ~ZioTorchScript() {}
 
-  // IConfigurable interface
-  virtual void configure(const WireCell::Configuration &config);
-  virtual WireCell::Configuration default_configuration() const;
+            // IConfigurable interface
+            virtual void configure(const WireCell::Configuration &config);
+            virtual WireCell::Configuration default_configuration() const;
 
-  // ITensorSetFilter interface
-  virtual bool operator()(const ITensorSet::pointer& in, ITensorSet::pointer& out);
+            // ITensorSetFilter interface
+            virtual bool operator()(const ITensorSet::pointer &in,
+                                    ITensorSet::pointer &out);
 
-private:
-  Log::logptr_t l;
-  Configuration m_cfg; /// copy of configuration
+           private:
+            Log::logptr_t l;
+            Configuration m_cfg;  /// copy of configuration
 
-  std::unordered_map<std::string, float> m_timers;
+            std::unordered_map<std::string, float> m_timers;
+        };
+    }  // namespace Pytorch
+}  // namespace WireCell
 
-};
-} // namespace Pytorch
-} // namespace WireCell
-
-#endif // WIRECELLPYTORCH_ZIOTORCHSCRIPT
+#endif  // WIRECELLPYTORCH_ZIOTORCHSCRIPT

@@ -1,23 +1,24 @@
 #ifndef WIRECELL_SINGLETON
 #define WIRECELL_SINGLETON
 
-namespace WireCell {
-
+namespace WireCell
+{
     template <class T>
     class Singleton
     {
-    public:
-	static T& Instance() {
-	    static T instance;
-	    return instance;
-	}
+       public:
+        static T &Instance()
+        {
+            static T instance;
+            return instance;
+        }
 
-    private:
-	Singleton(){}
-	~Singleton(){}
-	Singleton(Singleton const&){}
-	Singleton& operator=(Singleton const&){}
+       private:
+        Singleton() {}
+        ~Singleton() {}
+        Singleton(Singleton const &) {}
+        Singleton &operator=(Singleton const &) {}
     };
-}
+}  // namespace WireCell
 
 #endif

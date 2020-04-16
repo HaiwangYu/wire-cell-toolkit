@@ -7,15 +7,16 @@
 #include "WireCellUtil/IComponent.h"
 #include "WireCellUtil/Waveform.h"
 
-namespace WireCell {
-
-    class IFilterWaveform : public IComponent<IFilterWaveform> {
-    public:
-        virtual ~IFilterWaveform() ;
+namespace WireCell
+{
+    class IFilterWaveform : public IComponent<IFilterWaveform>
+    {
+       public:
+        virtual ~IFilterWaveform();
 
         /// Provide the filter waveform with a given number of frequency bins.
         virtual const Waveform::realseq_t filter_waveform(int nfbins) const = 0;
     };
-}
+}  // namespace WireCell
 
 #endif

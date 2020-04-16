@@ -2,53 +2,53 @@
   Test out the IRandom implementation Gen::Random.
  */
 
-
-#include "WireCellUtil/PluginManager.h"
-#include "WireCellUtil/NamedFactory.h"
-#include "WireCellIface/IRandom.h"
 #include "WireCellIface/IConfigurable.h"
+#include "WireCellIface/IRandom.h"
 #include "WireCellUtil/ExecMon.h"
+#include "WireCellUtil/NamedFactory.h"
+#include "WireCellUtil/PluginManager.h"
 #include "WireCellUtil/Testing.h"
 
-#include <iostream>
 #include <complex>
+#include <iostream>
 #include <vector>
 
 using namespace std;
 using namespace WireCell;
 
-double normalize(std::complex<double> val) {
-    return std::abs(val);
-}
-double normalize(double val) {
-    return val;
-}
-double normalize(int val) {
-    return (double)val;
-}
+double normalize(std::complex<double> val) { return std::abs(val); }
+double normalize(double val) { return val; }
+double normalize(int val) { return (double) val; }
 
-template<typename NumType, int nbins=10, int nstars = 100, int ntries=100000>
-void histify(std::function<NumType()> gen) {
-    int hist[nbins+2]={};
-    for (int count=0; count<ntries; ++count) {
+template <typename NumType, int nbins = 10, int nstars = 100,
+          int ntries = 100000>
+void histify(std::function<NumType()> gen)
+{
+    int hist[nbins + 2] = {};
+    for (int count = 0; count < ntries; ++count)
+    {
         double num = normalize(gen());
-        ++num;                  // shift to accommodate under/overflow
-        if (num<=0) num=0;
-        if (num>nbins) num = nbins+1;
-        ++hist[(int)(0.5+num)];
+        ++num;  // shift to accommodate under/overflow
+        if (num <= 0)
+            num = 0;
+        if (num > nbins)
+            num = nbins + 1;
+        ++hist[(int) (0.5 + num)];
     }
-    for (int bin=0; bin<nbins+2; ++bin) {
-        int bar = (hist[bin]*nstars)/ntries;
-        
+    for (int bin = 0; bin < nbins + 2; ++bin)
+    {
+        int bar = (hist[bin] * nstars) / ntries;
 
-        char sbin = '0'+(bin-1);
-        if (bin == 0) {
+        char sbin = '0' + (bin - 1);
+        if (bin == 0)
+        {
             sbin = '-';
         }
-        if (bin == nbins+1) {
+        if (bin == nbins + 1)
+        {
             sbin = '+';
         }
-        cout << sbin << ": " << std::string(bar,'*') << std::endl;
+        cout << sbin << ": " << std::string(bar, '*') << std::endl;
     }
 }
 
@@ -64,28 +64,27 @@ void test_named(std::string generator_name)
         rndcfg->configure(cfg);
     }
 
-
     // Beware, this is evil.  Busting out the shared pointer and using
     // histify<> here is just to save some typing in this test.  It's
     // okay in this test because histify<> goes not live longer than
     // we hold the shared pointer.
-    IRandom* ptr = &(*rnd);
+    IRandom *ptr = &(*rnd);
 
     cout << "binomial(9,0.5)\n";
     histify<int>(std::bind(&IRandom::binomial, ptr, 9, 0.5));
-        
+
     cout << "normal(5.0,3.0)\n";
-    histify<double>(std::bind(&IRandom::normal, ptr, 5.0,3.0));
+    histify<double>(std::bind(&IRandom::normal, ptr, 5.0, 3.0));
 
     cout << "uniform(0.0,10.0)\n";
     histify<double>(std::bind(&IRandom::uniform, ptr, 0.0, 10.0));
     cout << "uniform(2.0,5.0)\n";
-    histify<double>(std::bind(&IRandom::uniform, ptr, 2.0,5.0));
+    histify<double>(std::bind(&IRandom::uniform, ptr, 2.0, 5.0));
 
     cout << "range(0,10)\n";
-    histify<int>(std::bind(&IRandom::range, rnd, 0,10));
+    histify<int>(std::bind(&IRandom::range, rnd, 0, 10));
     cout << "range(2,4)\n";
-    histify<int>(std::bind(&IRandom::range, rnd, 2,4));
+    histify<int>(std::bind(&IRandom::range, rnd, 2, 4));
 }
 
 void test_repeat()
@@ -94,23 +93,25 @@ void test_repeat()
 
     const int ntries = 5;
     std::vector<double> v1(ntries), v2(ntries);
-    for (int ind=0; ind<ntries; ++ind) {
-        v1[ind] = rnd->normal(0,1);
+    for (int ind = 0; ind < ntries; ++ind)
+    {
+        v1[ind] = rnd->normal(0, 1);
     }
-    for (int ind=0; ind<ntries; ++ind) {
-        v2[ind] = rnd->normal(0,1);
+    for (int ind = 0; ind < ntries; ++ind)
+    {
+        v2[ind] = rnd->normal(0, 1);
     }
-    for (size_t ind=0; ind<v1.size(); ++ind) {
+    for (size_t ind = 0; ind < v1.size(); ++ind)
+    {
         cerr << v1[ind] << "\t" << v2[ind] << endl;
         Assert(std::abs(v1[ind] - v2[ind]) > 1.0e-8);
     }
-
 }
 
 int main()
 {
     ExecMon em("starting");
-    PluginManager& pm = PluginManager::instance();
+    PluginManager &pm = PluginManager::instance();
     pm.add("WireCellGen");
     em("plugged in");
 
@@ -133,4 +134,3 @@ int main()
 
     return 0;
 }
-

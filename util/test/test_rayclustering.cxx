@@ -1,14 +1,13 @@
+#include "WireCellUtil/Logging.h"
 #include "WireCellUtil/RayClustering.h"
 #include "WireCellUtil/RayTiling.h"
-#include "WireCellUtil/Waveform.h"
 #include "WireCellUtil/Testing.h"
-#include "WireCellUtil/Logging.h"
+#include "WireCellUtil/Waveform.h"
 
+#include <math.h>
 
-#include <math.h> 
-
-#include <random>
 #include <fstream>
+#include <random>
 #include <string>
 
 using namespace WireCell;
@@ -32,65 +31,77 @@ const double height = 100;
 
 #include "raygrid_dump.h"
 
-static
-std::vector<Point> make_points(std::default_random_engine& generator, double x)
+static std::vector<Point> make_points(std::default_random_engine &generator,
+                                      double x)
 {
     std::vector<Point> points;
-    std::uniform_real_distribution<double> position(0,std::max(width,height));
+    std::uniform_real_distribution<double> position(0, std::max(width, height));
     std::normal_distribution<double> spread(0.0, gaussian);
-    for (int idepo=0;idepo<ndepos;++idepo) {
+    for (int idepo = 0; idepo < ndepos; ++idepo)
+    {
         Point cp(0, position(generator), position(generator));
-        for (int iele=0; iele<neles; ++iele) {
+        for (int iele = 0; iele < neles; ++iele)
+        {
             const Point delta(x, spread(generator), spread(generator));
             const Point pt = cp + delta;
-            if (pt.y() < -border or pt.y() > height+border or
-                pt.z() < -border or pt.z() > width+border) {
-                warn("Rejecting far away point: {} + {}" , cp, delta);
+            if (pt.y() < -border or pt.y() > height + border or pt.z() < -border or
+                pt.z() > width + border)
+            {
+                warn("Rejecting far away point: {} + {}", cp, delta);
                 continue;
             }
-            points.push_back(cp+delta);
+            points.push_back(cp + delta);
         }
     }
     return points;
 }
 
-
 typedef std::vector<Activity::value_t> measure_t;
 
-static
-std::vector<measure_t> make_measures(Coordinates& coords, const std::vector<Point>& points)
+static std::vector<measure_t> make_measures(Coordinates &coords,
+                                            const std::vector<Point> &points)
 {
     int nlayers = coords.nlayers();
     std::vector<measure_t> measures(nlayers);
-    const auto& pitches = coords.pitch_dirs();
-    const auto& centers = coords.centers();
-    const auto& pitch_mags = coords.pitch_mags();
+    const auto &pitches = coords.pitch_dirs();
+    const auto &centers = coords.centers();
+    const auto &pitch_mags = coords.pitch_mags();
 
-    for (size_t ipt=0; ipt<points.size(); ++ipt ) {
-        const auto& p = points[ipt];
-        for (int ilayer = 0; ilayer<nlayers; ++ilayer) {
-            const auto& pit = pitches[ilayer];
-            const auto& cen = centers[ilayer];
-            const auto rel = p-cen;
-            const int pit_ind = pit.dot(rel)/pitch_mags[ilayer]; 
-            if (pit_ind < 0) {
-                warn("Negative pitch indices not allowed, got {} from ilayer {} ipt {} for point {}",
-                     pit_ind, ilayer, ipt, p);
+    for (size_t ipt = 0; ipt < points.size(); ++ipt)
+    {
+        const auto &p = points[ipt];
+        for (int ilayer = 0; ilayer < nlayers; ++ilayer)
+        {
+            const auto &pit = pitches[ilayer];
+            const auto &cen = centers[ilayer];
+            const auto rel = p - cen;
+            const int pit_ind = pit.dot(rel) / pitch_mags[ilayer];
+            if (pit_ind < 0)
+            {
+                warn(
+                    "Negative pitch indices not allowed, got {} from ilayer {} ipt {} "
+                    "for point {}",
+                    pit_ind, ilayer, ipt, p);
                 continue;
             }
-            if (ilayer <= 1) {
-                if (pit_ind >= 1 or pit_ind < 0) {
+            if (ilayer <= 1)
+            {
+                if (pit_ind >= 1 or pit_ind < 0)
+                {
                     debug("mm: pit_ind={} with ipt={}", pit_ind, ipt);
-                    if (pit_ind == 1) {
+                    if (pit_ind == 1)
+                    {
                         debug("\tpit={} cen={} rel={}", pit, cen, rel);
                     }
                     continue;
                 }
             }
-            measure_t& m = measures[ilayer];
-            if ((int)m.size() <= pit_ind) {
-                debug("resize for ipt {} ilayer {} from {} to {}", ipt, ilayer, m.size(), pit_ind+1);
-                m.resize(pit_ind+1, 0.0);
+            measure_t &m = measures[ilayer];
+            if ((int) m.size() <= pit_ind)
+            {
+                debug("resize for ipt {} ilayer {} from {} to {}", ipt, ilayer,
+                      m.size(), pit_ind + 1);
+                m.resize(pit_ind + 1, 0.0);
                 debug("done");
             }
 
@@ -103,13 +114,14 @@ std::vector<measure_t> make_measures(Coordinates& coords, const std::vector<Poin
     return measures;
 }
 
-static
-activities_t make_activities(Coordinates& coords, std::vector<measure_t>& measures)
+static activities_t make_activities(Coordinates &coords,
+                                    std::vector<measure_t> &measures)
 {
     int nlayers = coords.nlayers();
     activities_t activities;
-    for (int ilayer = 0; ilayer<nlayers; ++ilayer) {
-        auto& m = measures[ilayer];
+    for (int ilayer = 0; ilayer < nlayers; ++ilayer)
+    {
+        auto &m = measures[ilayer];
         info("Make activity for layer: {}: {}", ilayer, m.size());
         Activity activity(ilayer, {m.begin(), m.end()});
         Assert(!activity.empty());
@@ -118,41 +130,49 @@ activities_t make_activities(Coordinates& coords, std::vector<measure_t>& measur
     return activities;
 }
 
-struct Chirp {
-    const blobs_t& one;
-    const blobs_t& two;
-    Coordinates& coords;
+struct Chirp
+{
+    const blobs_t &one;
+    const blobs_t &two;
+    Coordinates &coords;
 
     typedef typename std::unordered_set<std::size_t> indices_t;
     indices_t *sel1;
     indices_t *sel2;
 
-    Chirp(const blobs_t& one, const blobs_t& two,
-          Coordinates& coords, JsonEvent& dumper)
-        : one(one)
-        , two(two)
-        , coords(coords)
-        , sel1(new indices_t)
-        , sel2(new indices_t)
-        {}
+    Chirp(const blobs_t &one, const blobs_t &two, Coordinates &coords,
+          JsonEvent &dumper)
+      : one(one)
+      , two(two)
+      , coords(coords)
+      , sel1(new indices_t)
+      , sel2(new indices_t)
+    {
+    }
 
-    bool in(const blobref_t& a, const blobref_t& b) {
-        if (surrounding(a, b)) {
+    bool in(const blobref_t &a, const blobref_t &b)
+    {
+        if (surrounding(a, b))
+        {
             return true;
         }
 
-        const auto& astrips = a->strips();
+        const auto &astrips = a->strips();
         const int nlayers = astrips.size();
 
         // if at least one corner of b is in side a, return true
-        for (const auto& c : b->corners()) {
+        for (const auto &c : b->corners())
+        {
             int found = 0;
             // go through each layer of blob a
-            for (layer_index_t layer = 0; layer < nlayers; ++layer) {
-                const auto& astrip = astrips[layer];
-                if (layer == c.first.layer) {
+            for (layer_index_t layer = 0; layer < nlayers; ++layer)
+            {
+                const auto &astrip = astrips[layer];
+                if (layer == c.first.layer)
+                {
                     info("L{} A: {} {}", layer, astrip, c);
-                    if (astrip.on(c.first.grid)) {
+                    if (astrip.on(c.first.grid))
+                    {
                         info("\ton with found={} nlayers={}", found, nlayers);
                         ++found;
                         continue;
@@ -160,14 +180,16 @@ struct Chirp {
                     info("\toff with found={} nlayers={}", found, nlayers);
                     break;
                 }
-                if (layer == c.second.layer) {
+                if (layer == c.second.layer)
+                {
                     info("L{} A: {} {}", layer, astrip, c);
-                    if (astrip.on(c.second.grid)) {
+                    if (astrip.on(c.second.grid))
+                    {
                         info("\ton with found={} nlayers={}", found, nlayers);
                         ++found;
                         continue;
                     }
-                    info("\toff with found={} nlayers={}",found, nlayers);
+                    info("\toff with found={} nlayers={}", found, nlayers);
                     break;
                 }
                 const double ploc = coords.pitch_location(c.first, c.second, layer);
@@ -175,51 +197,57 @@ struct Chirp {
 
                 info("L{} A: {} pind={} ploc={} {}", layer, astrip, pind, ploc, c);
 
-                if (astrip.in(pind)) {
+                if (astrip.in(pind))
+                {
                     info("\tin with found={} nlayers={}", found, nlayers);
                     ++found;
                 }
-                else {
+                else
+                {
                     info("\tout with found={} nlayers={}", found, nlayers);
                     break;
                 }
             }
-            if (found == nlayers) {
+            if (found == nlayers)
+            {
                 return true;
             }
         }
         return false;
     }
 
-    void operator()(const blobref_t& a, const blobref_t& b) {
-
-
-        const std::size_t d1 = a-one.begin();
-        const std::size_t d2 = b-two.begin();
+    void operator()(const blobref_t &a, const blobref_t &b)
+    {
+        const std::size_t d1 = a - one.begin();
+        const std::size_t d2 = b - two.begin();
 
         info("overlap: a{} and b{}", d1, d2);
         info("\tblob a #{}: {}", d1, a->as_string());
         info("\tblob b #{}: {}", d2, b->as_string());
 
-        if (!this->in(a,b)) {
+        if (!this->in(a, b))
+        {
             warn("NO CONTAINED CORNERS");
-            //Assert(this->in(a,b));
+            // Assert(this->in(a,b));
         }
 
         sel1->insert(d1);
         sel2->insert(d2);
     }
 
-    void dump(JsonEvent& dumper) {
+    void dump(JsonEvent &dumper)
+    {
         int number = 0;
-        for (const auto ind : *sel1) {
-            const auto& br = one[ind];
+        for (const auto ind : *sel1)
+        {
+            const auto &br = one[ind];
             dumper(br, 10.0, 1.0, 1, ind);
             ++number;
         }
         number = 0;
-        for (const auto ind : *sel2) {
-            const auto& br = two[ind];
+        for (const auto ind : *sel2)
+        {
+            const auto &br = two[ind];
             dumper(br, 20.0, 1.0, 2, ind);
             ++number;
         }
@@ -227,12 +255,12 @@ struct Chirp {
         return;
     }
 };
-    
-static
-void test_blobs(const blobs_t& blobs)
+
+static void test_blobs(const blobs_t &blobs)
 {
-    for (const auto& blob : blobs) {
-        const auto& strips = blob.strips();
+    for (const auto &blob : blobs)
+    {
+        const auto &strips = blob.strips();
         Assert(strips[0].bounds.first == 0);
         Assert(strips[0].bounds.second == 1);
         Assert(strips[1].bounds.first == 0);
@@ -240,8 +268,7 @@ void test_blobs(const blobs_t& blobs)
     }
 }
 
-
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
     auto raypairs = make_raypairs(width, height, pitch_magnitude);
 
@@ -263,7 +290,7 @@ int main(int argc, char* argv[])
     auto blobs2 = make_blobs(coords, act2);
 
     test_blobs(blobs1);
-    test_blobs(blobs2);       
+    test_blobs(blobs2);
 
     // fixme: blobs are missing these features:
     // - sort corners
@@ -272,8 +299,14 @@ int main(int argc, char* argv[])
     // this is maybe best done converting from Blob to another rep
 
     JsonEvent dumper(coords);
-    for (const auto& pt : pts1) { dumper(pt); }
-    for (const auto& pt : pts2) { dumper(pt); }
+    for (const auto &pt : pts1)
+    {
+        dumper(pt);
+    }
+    for (const auto &pt : pts2)
+    {
+        dumper(pt);
+    }
     Chirp chirp(blobs1, blobs2, coords, dumper);
     associator_t chirpf = chirp;
     associate(blobs1, blobs2, chirpf);
@@ -286,4 +319,3 @@ int main(int argc, char* argv[])
 
     return 0;
 }
-

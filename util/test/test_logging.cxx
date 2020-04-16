@@ -1,11 +1,11 @@
-#include "WireCellUtil/Testing.h"
 #include "WireCellUtil/Logging.h"
+#include "WireCellUtil/Testing.h"
 
 #include <string>
 
 using namespace WireCell;
 
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
     std::string fname = argv[0];
     fname += ".log";
@@ -48,9 +48,9 @@ int main(int argc, char* argv[])
     s->debug("debug other logger");
     spdlog::debug("debug default logger");
 
-
-    //SPDLOG_LOGGER_DEBUG(l, "log from debug CPP macro");
-    //SPDLOG_LOGGER_TRACE(l, "log from trace CPP macro, should not see by default");
+    // SPDLOG_LOGGER_DEBUG(l, "log from debug CPP macro");
+    // SPDLOG_LOGGER_TRACE(l, "log from trace CPP macro, should not see by
+    // default");
 
     return 0;
 }

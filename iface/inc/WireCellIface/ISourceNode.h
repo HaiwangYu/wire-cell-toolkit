@@ -6,67 +6,61 @@
 #include <boost/any.hpp>
 #include <vector>
 
-namespace WireCell {
-
+namespace WireCell
+{
     /** A node which acts as a source.
-     */
+ */
     class ISourceNodeBase : public INode
     {
-    public:
-	typedef std::shared_ptr<ISourceNodeBase> pointer;
-	
+       public:
+        typedef std::shared_ptr<ISourceNodeBase> pointer;
 
-	virtual ~ISourceNodeBase() ;
+        virtual ~ISourceNodeBase();
 
-	virtual NodeCategory category() {
-	    return sourceNode;
-	}
+        virtual NodeCategory category() { return sourceNode; }
 
-	virtual bool operator()(boost::any& anyout)=0;
+        virtual bool operator()(boost::any &anyout) = 0;
     };
-    
 
     template <typename OutputType>
     class ISourceNode : public ISourceNodeBase
     {
-    public:
-	typedef OutputType output_type;
+       public:
+        typedef OutputType output_type;
 
-	typedef ISourceNode<OutputType> signature_type;
-	typedef std::shared_ptr<signature_type> pointer;
+        typedef ISourceNode<OutputType> signature_type;
+        typedef std::shared_ptr<signature_type> pointer;
 
-	typedef std::shared_ptr<const OutputType> output_pointer;
+        typedef std::shared_ptr<const OutputType> output_pointer;
 
-	virtual ~ISourceNode() {}
+        virtual ~ISourceNode() {}
 
-	virtual NodeCategory category() {
-	    return sourceNode;
-	}
+        virtual NodeCategory category() { return sourceNode; }
 
-	/// Set the signature for all subclasses.
-	virtual std::string signature() {
-	   return typeid(signature_type).name();
-	}
+        /// Set the signature for all subclasses.
+        virtual std::string signature() { return typeid(signature_type).name(); }
 
-	virtual bool operator()(boost::any& anyout) {
-	    output_pointer out;
-	    bool ok = (*this)(out);
-	    if (!ok) return false;
+        virtual bool operator()(boost::any &anyout)
+        {
+            output_pointer out;
+            bool ok = (*this)(out);
+            if (!ok)
+                return false;
             anyout = out;
 
-	    return true;
-	}
+            return true;
+        }
 
-	/// The calling signature:
-	virtual bool operator()(output_pointer& out) = 0;
+        /// The calling signature:
+        virtual bool operator()(output_pointer &out) = 0;
 
-	// Return the names of the types this node takes as output.
-	virtual std::vector<std::string>  output_types() {
-	    return std::vector<std::string>{typeid(output_type).name()};
-	}
-
+        // Return the names of the types this node takes as output.
+        virtual std::vector<std::string> output_types()
+        {
+            return std::vector<std::string>{typeid(output_type).name()};
+        }
     };
 
-}
+}  // namespace WireCell
 
 #endif

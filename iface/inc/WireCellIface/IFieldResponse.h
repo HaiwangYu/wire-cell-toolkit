@@ -10,18 +10,17 @@
 #include "WireCellUtil/IComponent.h"
 #include "WireCellUtil/Response.h"
 
-namespace WireCell {
-
+namespace WireCell
+{
     class IFieldResponse : public IComponent<IFieldResponse>
     {
-    public:
-
-        virtual ~IFieldResponse() ;
+       public:
+        virtual ~IFieldResponse();
 
         /// Return the field response data
-        virtual const Response::Schema::FieldResponse& field_response() const = 0;
+        virtual const Response::Schema::FieldResponse &field_response() const = 0;
     };
 
-}
+}  // namespace WireCell
 
 #endif

@@ -1,22 +1,18 @@
 #include "WireCellIface/IWire.h"
 
-
-WireCell::IWire::~IWire()
-{
-}
-
+WireCell::IWire::~IWire() {}
 
 WireCell::Point WireCell::IWire::center() const
 {
     Ray seg = ray();
-    return 0.5*(seg.first + seg.second);
+    return 0.5 * (seg.first + seg.second);
 }
-
 
 bool WireCell::ascending_index(IWire::pointer lhs, IWire::pointer rhs)
 {
-    if (lhs->planeid() == rhs->planeid()) {
-	return lhs->index() < rhs->index();
+    if (lhs->planeid() == rhs->planeid())
+    {
+        return lhs->index() < rhs->index();
     }
     return lhs->planeid() < lhs->planeid();
 }
@@ -26,8 +22,7 @@ bool WireCell::ascending_index(IWire::pointer lhs, IWire::pointer rhs)
 //     return lhs < rhs;
 // }
 
-
-// bool operator==(WireCell::Wire lhs, WireCell::Wire rhs) 
+// bool operator==(WireCell::Wire lhs, WireCell::Wire rhs)
 // {
 //     return lhs->ident() == rhs->ident();
 // }
@@ -40,9 +35,7 @@ bool WireCell::ascending_index(IWire::pointer lhs, IWire::pointer rhs)
 //     return lhs->plane() < rhs->plane();
 // }
 
-
 // std::ostream & operator<<(std::ostream &os, WireCell::Wire wire)
 // {
 //     os << "<WIRE " << wire->ident() << ">";
 // }
-

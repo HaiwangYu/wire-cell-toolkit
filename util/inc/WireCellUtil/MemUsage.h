@@ -5,49 +5,44 @@
 #define WIRECELL_MEMUSAGE
 
 #include <fstream>
-#include <vector>
 #include <string>
+#include <vector>
 
-
-namespace WireCell {
-
+namespace WireCell
+{
     double memusage_resident();
     double memusage_shared();
     double memusage_size();
 
-    
-    class MemUsage {
-    public:	
-	typedef std::pair<double, double> memusage;
-	typedef std::pair<memusage, std::string> event;
-	MemUsage(const std::string& msg = "start");
-	~MemUsage();
+    class MemUsage
+    {
+       public:
+        typedef std::pair<double, double> memusage;
+        typedef std::pair<memusage, std::string> event;
+        MemUsage(const std::string &msg = "start");
+        ~MemUsage();
 
-	void push(const std::string& msg, MemUsage::memusage mu = memusage(-1,-1));
+        void push(const std::string &msg, MemUsage::memusage mu = memusage(-1, -1));
 
-	/// Record an event.
-	std::string operator()(
-	    std::string msg = "<tick>",
-	    MemUsage::memusage mu = memusage(-1,-1));
-	
-	/// Return summary up to now.
-	std::string summary() const;
+        /// Record an event.
+        std::string operator()(std::string msg = "<tick>",
+                               MemUsage::memusage mu = memusage(-1, -1));
 
-	/// Return event by index.
-	event operator[](int ind) const;
-	
-	memusage current() const;
+        /// Return summary up to now.
+        std::string summary() const;
 
-    private:
-	/// Emit a formatted message for the given event index.
-	std::string emit(int ind) const;
+        /// Return event by index.
+        event operator[](int ind) const;
 
+        memusage current() const;
 
-	std::vector< event > m_events;
+       private:
+        /// Emit a formatted message for the given event index.
+        std::string emit(int ind) const;
 
+        std::vector<event> m_events;
     };
 
-}
-
+}  // namespace WireCell
 
 #endif

@@ -1,4 +1,4 @@
-/*! 
+/*!
  * FlowConfigurable provides common configuration for any component
  * that is a sink/extractor or source/injector of WCT / ZIO flow data.
  *
@@ -15,30 +15,29 @@
 #include "WireCellIface/IConfigurable.h"
 #include "WireCellIface/ITerminal.h"
 #include "WireCellUtil/Logging.h"
-#include "zio/node.hpp"
 #include "zio/flow.hpp"
-
+#include "zio/node.hpp"
 
 #include "WireCellIface/ITensorSet.h"
 
-
-namespace WireCell {
-    namespace Zio {
-
+namespace WireCell
+{
+    namespace Zio
+    {
         class FlowConfigurable : public WireCell::IConfigurable,
-                                 public WireCell::ITerminal {
-        public:
-
-            FlowConfigurable(const std::string& direction,
-                             const std::string& nodename = "");
+                                 public WireCell::ITerminal
+        {
+           public:
+            FlowConfigurable(const std::string &direction,
+                             const std::string &nodename = "");
             virtual ~FlowConfigurable();
 
             virtual WireCell::Configuration default_configuration() const;
-            virtual void configure(const WireCell::Configuration& config);
-            
+            virtual void configure(const WireCell::Configuration &config);
+
             virtual void finalize();
 
-        protected:
+           protected:
             int m_timeout{1000}, m_credit{10};
             std::string m_portname{"flow"}, m_direction{"extract"}, m_bot_label{""};
             zio::Node m_node;
@@ -62,31 +61,31 @@ namespace WireCell {
             bool pre_flow();
 
             /// Give subclass a chance to add to a configuration
-            virtual void user_default_configuration(WireCell::Configuration& cfg) const {};
+            virtual void
+            user_default_configuration(WireCell::Configuration &cfg) const {};
 
             /// Give subclass a chance to read a configuration.  Ports
             /// are not yet online.
-            virtual bool user_configure(const WireCell::Configuration& cfg)
-                {return true;};
+            virtual bool user_configure(const WireCell::Configuration &cfg)
+            {
+                return true;
+            };
 
             /// Called after going online and before configuration phase is over
             virtual bool user_online() { return true; }
-        
-        public:
+
+           public:
             /// Pack the ITensorSet into a ZIO Message
-            static zio::Message pack(const ITensorSet::pointer & itens);
+            static zio::Message pack(const ITensorSet::pointer &itens);
 
             /// Unpack ZIO Message to ITensorSet
-            static ITensorSet::pointer unpack(const zio::Message& zmsg);
+            static ITensorSet::pointer unpack(const zio::Message &zmsg);
 
-        private:
+           private:
             // assure pre_flow() body called just once.
             bool m_did_bot{false};
-       };
-    }
-}
-
+        };
+    }  // namespace Zio
+}  // namespace WireCell
 
 #endif
-
-

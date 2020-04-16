@@ -1,26 +1,25 @@
+#include "WireCellIface/IChannelSpectrum.h"
+#include "WireCellIface/IChannelStatus.h"
+#include "WireCellUtil/NamedFactory.h"
 #include "WireCellUtil/Persist.h"
+#include "WireCellUtil/PluginManager.h"
 #include "WireCellUtil/String.h"
 #include "WireCellUtil/Units.h"
-#include "WireCellUtil/PluginManager.h"
-#include "WireCellUtil/NamedFactory.h"
-#include "WireCellIface/IChannelStatus.h"
-#include "WireCellIface/IChannelSpectrum.h"
 
 #include <cstdlib>
 #include <string>
 
-#include "anode_loader.h" // ignore everything in this file
+#include "anode_loader.h"  // ignore everything in this file
 
 using namespace std;
 using namespace WireCell;
 
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
     std::string detector = "uboone";
 
-
     // In the real WCT this is done by wire-cell and driven by user
-    // configuration.  
+    // configuration.
     auto anode_tns = anode_loader(detector);
 
     cerr << "Using AnodePlane: \"" << anode_tns[0] << "\"\n";
@@ -59,17 +58,16 @@ int main(int argc, char* argv[])
 
     auto chids = anode->channels();
     cerr << "Got " << chids.size() << " channels\n";
-    for (auto chid : chids) {
-        const auto& amp = (*empnomo)(chid);
+    for (auto chid : chids)
+    {
+        const auto &amp = (*empnomo)(chid);
         double tot = 0;
-        for (auto v : amp) {
+        for (auto v : amp)
+        {
             tot += v;
         }
-        cerr << "ch:" << chid << " " << amp.size()
-             << " tot=" << tot
-             << endl;
+        cerr << "ch:" << chid << " " << amp.size() << " tot=" << tot << endl;
     }
-
 
     return 0;
 }

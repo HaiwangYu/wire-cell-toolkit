@@ -1,14 +1,19 @@
 #ifndef WIRECELL_IFACE_TEST_MYCELL
-#define  WIRECELL_IFACE_TEST_MYCELL
+#define WIRECELL_IFACE_TEST_MYCELL
 
 #include "WireCellIface/ICell.h"
 
-class MyCell : public WireCell::ICell {
+class MyCell : public WireCell::ICell
+{
     int m_ident;
     double m_area;
-    
-public:
-    MyCell(int i, double a) : m_ident(i), m_area(a) {}
+
+   public:
+    MyCell(int i, double a)
+      : m_ident(i)
+      , m_area(a)
+    {
+    }
     virtual ~MyCell() {}
     int ident() const { return m_ident; }
 

@@ -1,4 +1,4 @@
-/** Some tools that operate on frame-related interfaces.  
+/** Some tools that operate on frame-related interfaces.
 
     fixme: this should probably go into some WireCellItools package.
  */
@@ -9,9 +9,10 @@
 #include "WireCellIface/IFrame.h"
 #include "WireCellUtil/Array.h"
 
-namespace WireCell {
-    namespace FrameTools {
-
+namespace WireCell
+{
+    namespace FrameTools
+    {
         /// Return a vector of traces which have no trace tags.  Here,
         /// any frame tags are ignored.  Returned vector of traces has
         /// undefined order.
@@ -26,7 +27,6 @@ namespace WireCell {
         /// of traces has undefined order.
         ITrace::vector tagged_traces(IFrame::pointer frame, IFrame::tag_t tag);
 
-
         /// Return a one-to-one vector of channels from a vector of
         /// traces.
         ///
@@ -37,15 +37,15 @@ namespace WireCell {
         ///   std::sort(ch.begin(), ch.end());
         ///   auto end = std::unique(ch.begin(), ch.end());
         ///   ch.resize(std::distance(ch.begin(), end));
-        /// 
+        ///
         typedef std::vector<int> channel_list;
-        channel_list channels(const ITrace::vector& traces);
+        channel_list channels(const ITrace::vector &traces);
 
         /// Return the tbin range of the traces.  The first value is
         /// minimum of all tbins and the second is maximum of all
         /// tbin+size where size is number of elements in the charge
-        /// array.  
-        std::pair<int,int> tbin_range(const ITrace::vector& traces);
+        /// array.
+        std::pair<int, int> tbin_range(const ITrace::vector &traces);
 
         /// Fill a 2D [nchannels/nrows X nticks/ncolumns] array by
         /// adding the charge information in the given traces.  The
@@ -58,12 +58,9 @@ namespace WireCell {
         /// refered to in the channel list or which are outside the
         /// array are ignored and not all channels need to have
         /// associated traces.
-        void fill(Array::array_xxf& array, 
-                  const ITrace::vector& traces,
-                  channel_list::iterator ch_begin, 
-                  channel_list::iterator ch_end, 
+        void fill(Array::array_xxf &array, const ITrace::vector &traces,
+                  channel_list::iterator ch_begin, channel_list::iterator ch_end,
                   int tbin = 0);
-
 
         /// Compare the time span of a frame to a time.
         ///
@@ -78,7 +75,7 @@ namespace WireCell {
         /// of the maximum tick is exactly at the target time then the
         /// frame span is not considered to cover the target time.
         int frmtcmp(IFrame::pointer frame, double time);
-            
+
         /// Split one frame into two.  A new .first frame will contain
         /// traces with all samples taken before the given time and a
         /// new .second frame with traces containing samples all taken
@@ -89,9 +86,10 @@ namespace WireCell {
         ///
         /// Note, the frame pointer must be valid and the frame must
         /// have traces.
-        std::pair<IFrame::pointer, IFrame::pointer> split(IFrame::pointer frame, double time);
+        std::pair<IFrame::pointer, IFrame::pointer> split(IFrame::pointer frame,
+                                                          double time);
 
-    }
-}
+    }  // namespace FrameTools
+}  // namespace WireCell
 
 #endif

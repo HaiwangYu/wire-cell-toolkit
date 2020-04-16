@@ -9,25 +9,27 @@
 #include "WireCellIface/IFrameJoiner.h"
 #include "WireCellUtil/Configuration.h"
 
-namespace WireCell {
-    namespace SigProc {
-        class FrameMerger : public IFrameJoiner, public IConfigurable {
-        public:
+namespace WireCell
+{
+    namespace SigProc
+    {
+        class FrameMerger : public IFrameJoiner, public IConfigurable
+        {
+           public:
             FrameMerger();
             virtual ~FrameMerger();
-            
-            // IJoinNode
-            virtual bool operator()(const input_tuple_type& intup,
-                                    output_pointer& out);
-            
-            // IConfigurable
-            virtual void configure(const WireCell::Configuration& config);
-            virtual WireCell::Configuration default_configuration() const;
-        private:
-            Configuration m_cfg;
 
+            // IJoinNode
+            virtual bool operator()(const input_tuple_type &intup, output_pointer &out);
+
+            // IConfigurable
+            virtual void configure(const WireCell::Configuration &config);
+            virtual WireCell::Configuration default_configuration() const;
+
+           private:
+            Configuration m_cfg;
         };
-    }
-}
+    }  // namespace SigProc
+}  // namespace WireCell
 
 #endif

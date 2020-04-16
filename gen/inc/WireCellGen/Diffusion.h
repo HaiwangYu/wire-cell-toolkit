@@ -1,43 +1,41 @@
 #ifndef WIRECELL_DIFFUSION
 #define WIRECELL_DIFFUSION
 
-
-#include "WireCellIface/IDiffusion.h"
 #include "WireCellIface/IDepo.h"
+#include "WireCellIface/IDiffusion.h"
 
 #include <boost/multi_array.hpp>
 
-namespace WireCell {
-
+namespace WireCell
+{
     class Diffusion : public IDiffusion
     {
-	IDepo::pointer m_depo;
-	boost::multi_array<double, 2> array;
-	double lmin, tmin, lmax, tmax, lbin, tbin;
-    public:
+        IDepo::pointer m_depo;
+        boost::multi_array<double, 2> array;
+        double lmin, tmin, lmax, tmax, lbin, tbin;
 
-	Diffusion(IDepo::pointer depo,
-		  int nlong, int ntrans, double lmin, double tmin, double lmax, double tmax);
-	
-	Diffusion(const Diffusion& other);
-	Diffusion& operator=(const Diffusion& other);
+       public:
+        Diffusion(IDepo::pointer depo, int nlong, int ntrans, double lmin,
+                  double tmin, double lmax, double tmax);
 
-	virtual ~Diffusion();
+        Diffusion(const Diffusion &other);
+        Diffusion &operator=(const Diffusion &other);
 
-	virtual IDepo::pointer depo() const;
+        virtual ~Diffusion();
 
-	// Size of diffusion patch in both directions.
-	virtual int lsize() const;
-	virtual int tsize() const;
+        virtual IDepo::pointer depo() const;
 
-	virtual double get(int lind, int tind) const;
-	virtual double set(int lind, int tind, double value);
+        // Size of diffusion patch in both directions.
+        virtual int lsize() const;
+        virtual int tsize() const;
 
-	// Longitudinal position at index with extra offset 0.5 is bin center.
-	virtual double lpos(int ind, double offset=0.0) const;
-	// Transverse position at index with extra offset 0.5 is bin center.
-	virtual double tpos(int ind, double offset=0.0) const;
+        virtual double get(int lind, int tind) const;
+        virtual double set(int lind, int tind, double value);
 
+        // Longitudinal position at index with extra offset 0.5 is bin center.
+        virtual double lpos(int ind, double offset = 0.0) const;
+        // Transverse position at index with extra offset 0.5 is bin center.
+        virtual double tpos(int ind, double offset = 0.0) const;
     };
-}
+}  // namespace WireCell
 #endif

@@ -5,47 +5,57 @@
 
 using namespace WireCell;
 
-char foo(size_t ind)
-{
-    return "if"[ind];
-}
+char foo(size_t ind) { return "if"[ind]; }
 
 typedef std::shared_ptr<int> iptr_t;
 typedef std::shared_ptr<float> fptr_t;
 typedef std::variant<iptr_t, fptr_t> if_t;
 
-struct if_node_t {
+struct if_node_t
+{
     if_t ptr;
-    if_node_t() : ptr() { }
-    if_node_t(const if_t& ift) : ptr(ift) { }
-    if_node_t(const iptr_t& i) : ptr(i) { }
-    if_node_t(const fptr_t& f) : ptr(f) { }
-        
-    bool operator==(const if_node_t &other) const {
-        return ptr == other.ptr;
+    if_node_t()
+      : ptr()
+    {
     }
+    if_node_t(const if_t &ift)
+      : ptr(ift)
+    {
+    }
+    if_node_t(const iptr_t &i)
+      : ptr(i)
+    {
+    }
+    if_node_t(const fptr_t &f)
+      : ptr(f)
+    {
+    }
+
+    bool operator==(const if_node_t &other) const { return ptr == other.ptr; }
 };
 
-
-namespace std {
-    template<>
-    struct hash<if_node_t> {
-        std::size_t operator()(const if_node_t& n) const {
-            if (std::holds_alternative<iptr_t>(n.ptr)) {
+namespace std
+{
+    template <>
+    struct hash<if_node_t>
+    {
+        std::size_t operator()(const if_node_t &n) const
+        {
+            if (std::holds_alternative<iptr_t>(n.ptr))
+            {
                 return (size_t)(std::get<iptr_t>(n.ptr).get());
             }
-            if (std::holds_alternative<fptr_t>(n.ptr)) {
+            if (std::holds_alternative<fptr_t>(n.ptr))
+            {
                 return (size_t)(std::get<fptr_t>(n.ptr).get());
             }
             return 0;
         }
     };
-}
+}  // namespace std
 
 int main()
 {
-
-
     std::unordered_map<if_t, int> p2i;
 
     typedef IndexedGraph<if_node_t> indexed_graph_t;
@@ -61,7 +71,7 @@ int main()
     // test variant
     Assert(1 == tre.index());
     Assert(*std::get<1>(two) < *std::get<1>(tre));
-    Assert(one < two);      // caution: compares against indices first!
+    Assert(one < two);  // caution: compares against indices first!
     Assert(*std::get<0>(one) == 42);
     Assert(nullptr == std::get_if<1>(&one));
     Assert('i' == foo(0));
@@ -78,29 +88,26 @@ int main()
     g.edge(two, one);
     g.edge(one, tre);
     auto verts = boost::vertices(g.graph());
-    Assert(verts.second-verts.first == 3);
+    Assert(verts.second - verts.first == 3);
 
     Assert(g.has(oneprime));
 
     indexed_graph_t g2(g.graph());
 
-    for (auto n : g2.neighbors(two)) {
+    for (auto n : g2.neighbors(two))
+    {
         Assert(g2.has(n));
     }
 
-
-
-    std::vector<std::string> names{"one","two","tre"};
+    std::vector<std::string> names{"one", "two", "tre"};
     std::unordered_map<indexed_graph_t::vdesc_t, std::string> ids;
-    for (auto u : boost::make_iterator_range(vertices(g2.graph()))) {
+    for (auto u : boost::make_iterator_range(vertices(g2.graph())))
+    {
         ids[u] = names[ids.size()];
     }
     boost::default_writer w;
-    boost::write_graphviz(std::cout,
-                          g2.graph(),
-                          w,w,w,
+    boost::write_graphviz(std::cout, g2.graph(), w, w, w,
                           boost::make_assoc_property_map(ids));
 
     return 0;
-
 }

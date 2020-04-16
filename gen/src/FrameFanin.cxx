@@ -1,36 +1,33 @@
 #include "WireCellGen/FrameFanin.h"
 
-#include "WireCellUtil/NamedFactory.h"
-#include "WireCellUtil/Exceptions.h"
 #include "WireCellIface/SimpleFrame.h"
+#include "WireCellUtil/Exceptions.h"
+#include "WireCellUtil/NamedFactory.h"
 
 #include <iostream>
 
-WIRECELL_FACTORY(FrameFanin, WireCell::Gen::FrameFanin,
-                 WireCell::IFrameFanin, WireCell::IConfigurable)
-
+WIRECELL_FACTORY(FrameFanin, WireCell::Gen::FrameFanin, WireCell::IFrameFanin,
+                 WireCell::IConfigurable)
 
 using namespace WireCell;
 
 Gen::FrameFanin::FrameFanin(size_t multiplicity)
-    : m_multiplicity(multiplicity)
+  : m_multiplicity(multiplicity)
 {
 }
-Gen::FrameFanin::~FrameFanin()
-{
-}
+Gen::FrameFanin::~FrameFanin() {}
 
 WireCell::Configuration Gen::FrameFanin::default_configuration() const
 {
     Configuration cfg;
-    cfg["multiplicity"] = (int)m_multiplicity;
+    cfg["multiplicity"] = (int) m_multiplicity;
 
     // A non-null entry in this array is taken as a string and used to
     // tag traces which arrive on the corresponding input port when
     // they are placed to the output frame.  This creates a tagged
-    // subset of output traces corresponding to the entire set of 
+    // subset of output traces corresponding to the entire set of
     // traces in the input frame from the associated port.
-    cfg["tags"] = Json::arrayValue; 
+    cfg["tags"] = Json::arrayValue;
 
     // Tag rules are an array, one element per input port.  Each
     // element is an object keyed with "frame" or "trace".  Each of
@@ -41,18 +38,20 @@ WireCell::Configuration Gen::FrameFanin::default_configuration() const
 
     return cfg;
 }
-void Gen::FrameFanin::configure(const WireCell::Configuration& cfg)
+void Gen::FrameFanin::configure(const WireCell::Configuration &cfg)
 {
-    int m = get<int>(cfg, "multiplicity", (int)m_multiplicity);
-    if (m<=0) {
+    int m = get<int>(cfg, "multiplicity", (int) m_multiplicity);
+    if (m <= 0)
+    {
         THROW(ValueError() << errmsg{"FrameFanin multiplicity must be positive"});
     }
     m_multiplicity = m;
     m_tags.resize(m);
 
     // Tag entire input frame worth of traces in the output frame.
-    auto jtags = cfg["tags"];   
-    for (int ind=0; ind<m; ++ind) {
+    auto jtags = cfg["tags"];
+    for (int ind = 0; ind < m; ++ind)
+    {
         m_tags[ind] = convert<std::string>(jtags[ind], "");
     }
 
@@ -60,55 +59,64 @@ void Gen::FrameFanin::configure(const WireCell::Configuration& cfg)
     m_ft.configure(cfg["tag_rules"]);
 }
 
-
 std::vector<std::string> Gen::FrameFanin::input_types()
 {
     const std::string tname = std::string(typeid(input_type).name());
     std::vector<std::string> ret(m_multiplicity, tname);
     return ret;
-
 }
 
-bool Gen::FrameFanin::operator()(const input_vector& invec, output_pointer& out)
+bool Gen::FrameFanin::operator()(const input_vector &invec,
+                                 output_pointer &out)
 {
     out = nullptr;
     size_t neos = 0;
-    for (const auto& fr : invec) {
-        if (!fr) {
+    for (const auto &fr : invec)
+    {
+        if (!fr)
+        {
             ++neos;
         }
     }
-    if (neos == invec.size()) {
+    if (neos == invec.size())
+    {
         return true;
     }
-    if (neos) {
+    if (neos)
+    {
         std::cerr << "Gen::FrameFanin: " << neos << " input frames missing\n";
     }
 
-    if (invec.size() != m_multiplicity) {
+    if (invec.size() != m_multiplicity)
+    {
         std::cerr << "Gen::FrameFanin: got unexpected multiplicity, got:"
                   << invec.size() << " want:" << m_multiplicity << std::endl;
         THROW(ValueError() << errmsg{"unexpected multiplicity"});
     }
 
-
     std::vector<IFrame::trace_list_t> by_port(m_multiplicity);
 
     // ...
-    std::vector< std::tuple<tagrules::tag_t, IFrame::trace_list_t, IFrame::trace_summary_t> > stash;
+    std::vector<std::tuple<tagrules::tag_t, IFrame::trace_list_t,
+                           IFrame::trace_summary_t>>
+        stash;
 
     tagrules::tagset_t fouttags;
     ITrace::vector out_traces;
     IFrame::pointer one = nullptr;
-    for (size_t iport=0; iport < m_multiplicity; ++iport) {
+    for (size_t iport = 0; iport < m_multiplicity; ++iport)
+    {
         const size_t trace_offset = out_traces.size();
 
-        const auto& fr = invec[iport];
-        if (!one) { one = fr; }
+        const auto &fr = invec[iport];
+        if (!one)
+        {
+            one = fr;
+        }
         auto traces = fr->traces();
 
-        { // collect output frame tags by tranforming each input frame
-          // tag based on user rules.
+        {  // collect output frame tags by tranforming each input frame
+            // tag based on user rules.
             auto fintags = fr->frame_tags();
             fintags.push_back("");
             auto fo = m_ft.transform(iport, "frame", fintags);
@@ -117,9 +125,11 @@ bool Gen::FrameFanin::operator()(const input_vector& invec, output_pointer& out)
 
         // collect transformed trace tags, any trace summary and their
         // offset trace indeices. annoying_factor *= 10;
-        for (auto inttag : fr->trace_tags()) {
+        for (auto inttag : fr->trace_tags())
+        {
             tagrules::tagset_t touttags = m_ft.transform(iport, "trace", inttag);
-            if (touttags.empty()) {
+            if (touttags.empty())
+            {
                 // std::cerr << "FrameFanin: no port trace tag for " << inttag << "\n";
                 continue;
             }
@@ -128,19 +138,21 @@ bool Gen::FrameFanin::operator()(const input_vector& invec, output_pointer& out)
             //     std::cerr << "\t" << t << "\n";
             // }
 
-            const auto& summary = fr->trace_summary(inttag);
+            const auto &summary = fr->trace_summary(inttag);
             IFrame::trace_list_t outtrinds;
-            for (size_t trind : fr->tagged_traces(inttag)) {
+            for (size_t trind : fr->tagged_traces(inttag))
+            {
                 outtrinds.push_back(trind + trace_offset);
             }
-            for (auto ot : touttags) {
+            for (auto ot : touttags)
+            {
                 // need to stash them until after creating the output frame.
-	      stash.push_back(std::make_tuple(ot, outtrinds, summary));
+                stash.push_back(std::make_tuple(ot, outtrinds, summary));
             }
         };
 
-
-        if (! m_tags[iport].empty() ) {
+        if (!m_tags[iport].empty())
+        {
             IFrame::trace_list_t tl(traces->size());
             std::iota(tl.begin(), tl.end(), trace_offset);
             by_port[iport] = tl;
@@ -149,20 +161,25 @@ bool Gen::FrameFanin::operator()(const input_vector& invec, output_pointer& out)
         // Insert one intput frames traces.
         out_traces.insert(out_traces.end(), traces->begin(), traces->end());
     }
-    
+
     auto sf = new SimpleFrame(one->ident(), one->time(), out_traces, one->tick());
-    for (size_t iport=0; iport < m_multiplicity; ++iport) {
-        if (m_tags[iport].size()) {
-            // std::cerr << "FrameFanin: tagging trace set: " << by_port[iport].size() << " traces from port "
+    for (size_t iport = 0; iport < m_multiplicity; ++iport)
+    {
+        if (m_tags[iport].size())
+        {
+            // std::cerr << "FrameFanin: tagging trace set: " << by_port[iport].size()
+            // << " traces from port "
             //          << iport << " with " << m_tags[iport] << std::endl;
             sf->tag_traces(m_tags[iport], by_port[iport]);
         }
     }
-    for (auto ftag : fouttags) {
+    for (auto ftag : fouttags)
+    {
         // std::cerr << "FrameFanin: tagging frame: " << ftag << std::endl;
         sf->tag_frame(ftag);
     }
-    for (auto ttt : stash) {
+    for (auto ttt : stash)
+    {
         // std::cerr << "FrameFanin: tagging traces: "
         //           << get<0>(ttt) << std::endl;
         sf->tag_traces(get<0>(ttt), get<1>(ttt), get<2>(ttt));
@@ -171,5 +188,3 @@ bool Gen::FrameFanin::operator()(const input_vector& invec, output_pointer& out)
     out = IFrame::pointer(sf);
     return true;
 }
-
-

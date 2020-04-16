@@ -5,14 +5,15 @@
 
 using namespace std;
 
-struct IName {
-    virtual std::string name() const = 0 ;
+struct IName
+{
+    virtual std::string name() const = 0;
     virtual ~IName() {}
-    
 };
 
-template<typename T>
-struct INameT : public IName {
+template <typename T>
+struct INameT : public IName
+{
     virtual std::string name() const { return typeid(T).name(); }
     virtual ~INameT() {}
 };
@@ -30,19 +31,19 @@ int main()
     cerr << a.INameT<float>::name() << endl;
 
     // ambiguous, fails to compile.
-    //cerr << a.name() << endl;
+    // cerr << a.name() << endl;
 
-    INameT<int>* ai = &a;
+    INameT<int> *ai = &a;
     cerr << ai->name() << endl;
 
-    INameT<float>* af = &a;
+    INameT<float> *af = &a;
     cerr << af->name() << endl;
 
-
     cerr << "Via bases" << endl;
-    vector<IName*> named{ai,af};
-    for (auto n : named) {
-	cerr << n->name() << endl;
+    vector<IName *> named{ai, af};
+    for (auto n : named)
+    {
+        cerr << n->name() << endl;
     }
 
     return 0;

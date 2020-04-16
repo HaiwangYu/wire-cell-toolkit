@@ -5,22 +5,23 @@
 #include "WireCellIface/IConfigurable.h"
 #include "WireCellUtil/Configuration.h"
 
-namespace WireCellApps {
+namespace WireCellApps
+{
+    class ConfigDumper : public WireCell::IApplication,
+                         public WireCell::IConfigurable
+    {
+        WireCell::Configuration m_cfg;
 
-    class ConfigDumper : public WireCell::IApplication, public WireCell::IConfigurable {
-	WireCell::Configuration m_cfg;
-    public:
-	ConfigDumper();
-	virtual ~ConfigDumper();
+       public:
+        ConfigDumper();
+        virtual ~ConfigDumper();
 
-	virtual void execute();
+        virtual void execute();
 
-	virtual void configure(const WireCell::Configuration& config);
-	virtual WireCell::Configuration default_configuration() const;
-
-
+        virtual void configure(const WireCell::Configuration &config);
+        virtual WireCell::Configuration default_configuration() const;
     };
 
-}
+}  // namespace WireCellApps
 
 #endif

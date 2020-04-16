@@ -7,37 +7,36 @@
 
 #include "WireCellIface/IApplication.h"
 #include "WireCellIface/IConfigurable.h"
-#include "WireCellIface/IFrameSource.h"
 #include "WireCellIface/IFrameFilter.h"
 #include "WireCellIface/IFrameSink.h"
+#include "WireCellIface/IFrameSource.h"
 
-#include <vector>
 #include <string>
+#include <vector>
 
-namespace WireCell {
-    namespace SigProc {
-        
-        class Omnibus : public WireCell::IApplication, public WireCell::IConfigurable {
-        public:
-
+namespace WireCell
+{
+    namespace SigProc
+    {
+        class Omnibus : public WireCell::IApplication, public WireCell::IConfigurable
+        {
+           public:
             Omnibus();
             virtual ~Omnibus();
 
             virtual void execute();
 
-            virtual void configure(const WireCell::Configuration& config);
+            virtual void configure(const WireCell::Configuration &config);
             virtual WireCell::Configuration default_configuration() const;
 
-
-        private:
-
-	    std::string m_input_tn, m_output_tn;
-	    std::vector<std::string> m_filters_tn;
+           private:
+            std::string m_input_tn, m_output_tn;
+            std::vector<std::string> m_filters_tn;
             IFrameSource::pointer m_input;
-            std::vector<IFrameFilter::pointer> m_filters;            
+            std::vector<IFrameFilter::pointer> m_filters;
             IFrameSink::pointer m_output;
         };
-    }
-}
+    }  // namespace SigProc
+}  // namespace WireCell
 
 #endif

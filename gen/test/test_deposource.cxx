@@ -1,7 +1,7 @@
-#include "WireCellUtil/PluginManager.h"
-#include "WireCellUtil/NamedFactory.h"
-#include "WireCellIface/IDepoSource.h"
 #include "WireCellIface/IConfigurable.h"
+#include "WireCellIface/IDepoSource.h"
+#include "WireCellUtil/NamedFactory.h"
+#include "WireCellUtil/PluginManager.h"
 #include "WireCellUtil/Testing.h"
 #include "WireCellUtil/Type.h"
 
@@ -10,7 +10,7 @@ using namespace WireCell;
 
 int main()
 {
-    PluginManager& pm = PluginManager::instance();
+    PluginManager &pm = PluginManager::instance();
     pm.add("WireCellGen");
 
     {

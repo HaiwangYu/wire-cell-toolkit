@@ -1,71 +1,77 @@
 // A minimally complete example of a tbb dfp
 
-#include  "tbb_mock.h"
+#include "tbb_mock.h"
 
 #include "WireCellTbb/NodeWrapper.h"
+#include "WireCellTbb/QueuedoutCat.h"
 #include "WireCellTbb/SinkCat.h"
 #include "WireCellTbb/SourceCat.h"
-#include "WireCellTbb/QueuedoutCat.h"
 
 #include "WireCellUtil/Testing.h"
 
 #include <tbb/flow_graph.h>
 
-#include <string>
 #include <deque>
 #include <iostream>
+#include <string>
 
 using namespace std;
 
 // fixme: this fakes the factory until we clean up nodes to allow
 // empty c'tor and use configuration.
-WireCell::INode::pointer get_node(const std::string& node_desc)
+WireCell::INode::pointer get_node(const std::string &node_desc)
 {
     using namespace WireCell;
 
-    if (node_desc == "source") { // note actual desc should be class or class:inst
-	return INode::pointer(new WireCellTbb::MockDepoSource);
+    if (node_desc == "source")
+    {  // note actual desc should be class or class:inst
+        return INode::pointer(new WireCellTbb::MockDepoSource);
     }
-    if (node_desc == "drift") { // note actual desc should be class or class:inst
-	return INode::pointer(new WireCellTbb::MockDrifter);
+    if (node_desc == "drift")
+    {  // note actual desc should be class or class:inst
+        return INode::pointer(new WireCellTbb::MockDrifter);
     }
-    if (node_desc == "sink") { // note actual desc should be class or class:inst
-	return INode::pointer(new WireCellTbb::MockDepoSink);
+    if (node_desc == "sink")
+    {  // note actual desc should be class or class:inst
+        return INode::pointer(new WireCellTbb::MockDepoSink);
     }
     return nullptr;
 }
 
-
-
-WireCellTbb::Node make_node(tbb::flow::graph& graph, const std::string& node_desc)
+WireCellTbb::Node make_node(tbb::flow::graph &graph,
+                            const std::string &node_desc)
 {
     using namespace WireCell;
     using namespace WireCellTbb;
 
     INode::pointer wcnode = get_node(node_desc);
-    if (! wcnode) {
-	cerr << "Failed to get node for " << node_desc << endl; 
-	return nullptr;
+    if (!wcnode)
+    {
+        cerr << "Failed to get node for " << node_desc << endl;
+        return nullptr;
     }
 
     cerr << "Getting node from category: " << wcnode->category() << endl;
-    switch (wcnode->category()) {
-    case INode::sourceNode: 
-	return Node(new SourceNodeWrapper(graph, wcnode));
+    switch (wcnode->category())
+    {
+    case INode::sourceNode:
+        return Node(new SourceNodeWrapper(graph, wcnode));
     case INode::sinkNode:
-    	return Node(new SinkNodeWrapper(graph, wcnode));
+        return Node(new SinkNodeWrapper(graph, wcnode));
     // case INode::functionNode:
     // 	return Node(new FunctionWrapper(graph, wcnode));
     case INode::queuedoutNode:
-    	return Node(new QueuedoutWrapper(graph, wcnode));
+        return Node(new QueuedoutWrapper(graph, wcnode));
     default:
-	return nullptr;
+        return nullptr;
     }
     return nullptr;
 }
 
-bool connect(WireCellTbb::Node sender, WireCellTbb::Node receiver, size_t sport=0, size_t rport=0);
-bool connect(WireCellTbb::Node sender, WireCellTbb::Node receiver, size_t sport, size_t rport)
+bool connect(WireCellTbb::Node sender, WireCellTbb::Node receiver,
+             size_t sport = 0, size_t rport = 0);
+bool connect(WireCellTbb::Node sender, WireCellTbb::Node receiver, size_t sport,
+             size_t rport)
 {
     using namespace WireCellTbb;
 
@@ -76,9 +82,9 @@ bool connect(WireCellTbb::Node sender, WireCellTbb::Node receiver, size_t sport,
 
     Assert(sports.size() > sport);
     Assert(rports.size() > rport);
-    
-    sender_type* s = sports[sport];
-    receiver_type* r = rports[rport];
+
+    sender_type *s = sports[sport];
+    receiver_type *r = rports[rport];
     Assert(s);
     Assert(r);
 
@@ -99,10 +105,11 @@ int main()
     Node sink = make_node(graph, "sink");
     Assert(sink);
 
-    Assert (connect(source, drift));
-    Assert (connect(drift, sink));
+    Assert(connect(source, drift));
+    Assert(connect(drift, sink));
 
-    // fixme: in general all nodes should be initialize()'d but so far only source nodes need it.
+    // fixme: in general all nodes should be initialize()'d but so far only source
+    // nodes need it.
     source->initialize();
 
     graph.wait_for_all();

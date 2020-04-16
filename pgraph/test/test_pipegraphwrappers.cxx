@@ -1,10 +1,10 @@
 #include "WireCellPgraph/Factory.h"
 #include "WireCellPgraph/Graph.h"
 
-#include "WireCellUtil/PluginManager.h"
-#include "WireCellUtil/NamedFactory.h"
 #include "WireCellIface/IConfigurable.h"
 #include "WireCellIface/IDepoSink.h"
+#include "WireCellUtil/NamedFactory.h"
+#include "WireCellUtil/PluginManager.h"
 #include "WireCellUtil/Testing.h"
 #include "WireCellUtil/Type.h"
 
@@ -13,10 +13,9 @@
 using namespace std;
 using namespace WireCell;
 
-
 int main()
 {
-    PluginManager& pm = PluginManager::instance();
+    PluginManager &pm = PluginManager::instance();
     pm.add("WireCellPgraph");
     pm.add("WireCellGen");
 
@@ -25,15 +24,16 @@ int main()
     {
         auto obj = Factory::lookup<IConfigurable>("TrackDepos");
         auto cfg = obj->default_configuration();
-        cfg["tracks"][0]["time"] = 100.0*units::ms;
+        cfg["tracks"][0]["time"] = 100.0 * units::ms;
         cfg["tracks"][0]["charge"] = 10000;
         cfg["tracks"][0]["ray"]["tail"]["x"] = 0.0;
         cfg["tracks"][0]["ray"]["tail"]["y"] = 0.0;
         cfg["tracks"][0]["ray"]["tail"]["z"] = 0.0;
-        cfg["tracks"][0]["ray"]["head"]["x"] = 1*units::cm;
-        cfg["tracks"][0]["ray"]["head"]["y"] = 1*units::cm;
-        cfg["tracks"][0]["ray"]["head"]["z"] = 1*units::cm;
-        cerr << "TrackDepos cfg:\n" << cfg << endl;
+        cfg["tracks"][0]["ray"]["head"]["x"] = 1 * units::cm;
+        cfg["tracks"][0]["ray"]["head"]["y"] = 1 * units::cm;
+        cfg["tracks"][0]["ray"]["head"]["z"] = 1 * units::cm;
+        cerr << "TrackDepos cfg:\n"
+             << cfg << endl;
         obj->configure(cfg);
     }
     // DumpDepos needs no config.
@@ -41,7 +41,6 @@ int main()
     // Pretend like we are some app with a hard-coded graph structure
     INode::pointer ds = Factory::lookup<INode>("TrackDepos");
     INode::pointer dd = Factory::lookup<INode>("DumpDepos");
-
 
     Pgraph::Factory pgwfac;
 

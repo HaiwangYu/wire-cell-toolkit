@@ -1,5 +1,5 @@
-#include "WireCellUtil/DfpGraph.h"
 #include "WireCellUtil/Configuration.h"
+#include "WireCellUtil/DfpGraph.h"
 #include "WireCellUtil/Persist.h"
 
 #include <iostream>
@@ -45,11 +45,12 @@ int main()
     DfpGraph dfp;
     dfp.configure(cfg["edges"]);
 
-    for (auto thc: dfp.connections()) {
-	auto tail = get<0>(thc);
-	auto head = get<1>(thc);
-	auto conn = get<2>(thc);
-	cerr << tail << " " << conn << " " << head << endl;
+    for (auto thc : dfp.connections())
+    {
+        auto tail = get<0>(thc);
+        auto head = get<1>(thc);
+        auto conn = get<2>(thc);
+        cerr << tail << " " << conn << " " << head << endl;
     }
 
     return 0;

@@ -6,7 +6,7 @@
     type: "Retagger",
     data: {
         tag_rules: [{
-            merge: {            
+            merge: {
                 "gauss\d": "gauss",
                 "wiener\d": "wiener",
             }
@@ -15,7 +15,7 @@
   }
 
  * This would put all trace sets tagged like gauss0, gauss1, etc into
- * an output trace set tagged "gauss".  
+ * an output trace set tagged "gauss".
  *
  * Note that although Retagger is a 1-1 frame filter, the tag_rules is
  * a list in order to match the data structure pattern with
@@ -29,28 +29,30 @@
 #ifndef WIRECELL_GEN_RETAGGER
 #define WIRECELL_GEN_RETAGGER
 
-#include "WireCellIface/IFrameFilter.h"
 #include "WireCellIface/IConfigurable.h"
+#include "WireCellIface/IFrameFilter.h"
 #include "WireCellUtil/TagRules.h"
 
-namespace WireCell {
-
-    namespace Gen {
-
-        class Retagger : public IFrameFilter, public IConfigurable {
-        public:
+namespace WireCell
+{
+    namespace Gen
+    {
+        class Retagger : public IFrameFilter, public IConfigurable
+        {
+           public:
             Retagger();
             virtual ~Retagger();
-        
-            virtual void configure(const WireCell::Configuration& config);
-            virtual WireCell::Configuration default_configuration() const;
-        
-            virtual bool operator()(const input_pointer& inframe, output_pointer& outframe);
 
-        private:
+            virtual void configure(const WireCell::Configuration &config);
+            virtual WireCell::Configuration default_configuration() const;
+
+            virtual bool operator()(const input_pointer &inframe,
+                                    output_pointer &outframe);
+
+           private:
             tagrules::Context m_trctx;
         };
-    }
-}
+    }  // namespace Gen
+}  // namespace WireCell
 
 #endif

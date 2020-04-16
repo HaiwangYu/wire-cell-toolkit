@@ -15,27 +15,27 @@
 
 #include <vector>
 
-namespace WireCell {
-    namespace Gen {
-
+namespace WireCell
+{
+    namespace Gen
+    {
         /** This IDuctor needs a Garfield2D field calculation data
-         * file in compressed JSON format as produced by Python module
-         * wirecell.sigproc.garfield.
-         */
-        class Ductor : public IDuctor, public IConfigurable {
-        public:
-            
+ * file in compressed JSON format as produced by Python module
+ * wirecell.sigproc.garfield.
+ */
+        class Ductor : public IDuctor, public IConfigurable
+        {
+           public:
             Ductor();
-            virtual ~Ductor() {};
+            virtual ~Ductor(){};
 
-            //virtual void reset();
-            virtual bool operator()(const input_pointer& depo, output_queue& frames);
+            // virtual void reset();
+            virtual bool operator()(const input_pointer &depo, output_queue &frames);
 
-            virtual void configure(const WireCell::Configuration& config);
+            virtual void configure(const WireCell::Configuration &config);
             virtual WireCell::Configuration default_configuration() const;
 
-        protected:
-
+           protected:
             // The "Type:Name" of the IAnodePlane (default is "AnodePlane")
             std::string m_anode_tn;
             std::string m_rng_tn;
@@ -57,14 +57,13 @@ namespace WireCell {
 
             int m_frame_count;
 
-            virtual void process(output_queue& frames);
+            virtual void process(output_queue &frames);
             virtual ITrace::vector process_face(IAnodeFace::pointer face,
-                                                const IDepo::vector& face_depos);
-            bool start_processing(const input_pointer& depo);
+                                                const IDepo::vector &face_depos);
+            bool start_processing(const input_pointer &depo);
             Log::logptr_t l;
-
         };
-    }
-}
+    }  // namespace Gen
+}  // namespace WireCell
 
 #endif
