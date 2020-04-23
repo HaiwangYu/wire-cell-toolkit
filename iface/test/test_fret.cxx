@@ -4,8 +4,7 @@
 
 typedef std::function<int()> intsrc_t;
 
-struct MyIntFunc
-{
+struct MyIntFunc {
     int number = 0;
     MyIntFunc(int n = 0)
       : number(n)
@@ -29,8 +28,7 @@ std::default_random_engine make_a_generator()
     std::cerr << "Made generator with " << distribution(generator) << std::endl;
     return generator;
 }
-std::default_random_engine
-take_a_generator(std::default_random_engine generator)
+std::default_random_engine take_a_generator(std::default_random_engine generator)
 {
     std::uniform_real_distribution<double> distribution(0.0, 1.0);
     std::cerr << "Take generator with " << distribution(generator) << std::endl;

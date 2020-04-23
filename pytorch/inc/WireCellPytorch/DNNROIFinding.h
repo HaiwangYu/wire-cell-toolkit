@@ -11,20 +11,16 @@
 #include "WireCellIface/ITensorSetFilter.h"
 #include "WireCellUtil/Logging.h"
 
-namespace WireCell
-{
-    namespace Pytorch
-    {
-        class DNNROIFinding : public IFrameFilter, public IConfigurable
-        {
+namespace WireCell {
+    namespace Pytorch {
+        class DNNROIFinding : public IFrameFilter, public IConfigurable {
            public:
             DNNROIFinding();
             virtual ~DNNROIFinding();
 
             /// working operation - interface from IFrameFilter
             /// executed when called by pgrapher
-            virtual bool operator()(const IFrame::pointer &inframe,
-                                    IFrame::pointer &outframe);
+            virtual bool operator()(const IFrame::pointer &inframe, IFrame::pointer &outframe);
 
             /// interfaces from IConfigurable
 
@@ -35,9 +31,8 @@ namespace WireCell
             virtual void configure(const WireCell::Configuration &config);
 
            private:
-            Configuration m_cfg;  /// copy of configuration
-            IAnodePlane::pointer
-                m_anode;  /// pointer to some APA, needed to associate chnnel ID to planes
+            Configuration m_cfg;           /// copy of configuration
+            IAnodePlane::pointer m_anode;  /// pointer to some APA, needed to associate chnnel ID to planes
 
             ITensorSetFilter::pointer m_torch;  /// pointer to a TorchScript wrapper
 

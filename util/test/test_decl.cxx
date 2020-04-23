@@ -2,21 +2,18 @@
 #include <typeinfo>
 using namespace std;
 
-struct Base
-{
+struct Base {
     virtual ~Base() {}
     virtual void any() = 0;
 };
-struct A : public Base
-{
+struct A : public Base {
     virtual ~A() {}
 
     void a() { cerr << "Hi (a)\n"; }
 
     virtual void any() { cerr << "Hi from any (a)\n"; }
 };
-struct B : public Base
-{
+struct B : public Base {
     virtual ~B() {}
     void b() { cerr << "Hi (b)\n"; }
 

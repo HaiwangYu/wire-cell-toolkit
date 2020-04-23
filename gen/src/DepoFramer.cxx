@@ -3,13 +3,11 @@
 
 #include "WireCellUtil/NamedFactory.h"
 
-WIRECELL_FACTORY(DepoFramer, WireCell::Gen::DepoFramer, WireCell::IDepoFramer,
-                 WireCell::IConfigurable)
+WIRECELL_FACTORY(DepoFramer, WireCell::Gen::DepoFramer, WireCell::IDepoFramer, WireCell::IConfigurable)
 
 using namespace WireCell;
 
-Gen::DepoFramer::DepoFramer(const std::string &drifter,
-                            const std::string &ductor)
+Gen::DepoFramer::DepoFramer(const std::string &drifter, const std::string &ductor)
   : m_drifter_tn(drifter)
   , m_ductor_tn(ductor)
 {
@@ -42,17 +40,14 @@ bool Gen::DepoFramer::operator()(const input_pointer &in, output_pointer &out)
     depos.push_back(nullptr);
 
     m_drifter->reset();
-    for (auto depo : depos)
-    {
+    for (auto depo : depos) {
         IDrifter::output_queue dq;
         (*m_drifter)(depo, dq);
-        for (auto d : dq)
-        {
+        for (auto d : dq) {
             drifted.push_back(d);
         }
     }
-    if (drifted.back())
-    {
+    if (drifted.back()) {
         // check if drifter is following protocol
         std::cerr << "Gen::DepoFramer: warning: failed to get null on last drifted "
                      "depo\n";
@@ -63,12 +58,10 @@ bool Gen::DepoFramer::operator()(const input_pointer &in, output_pointer &out)
 
     std::vector<IFrame::pointer> partial_frames;
 
-    for (auto drifted_depo : drifted)
-    {
+    for (auto drifted_depo : drifted) {
         IDuctor::output_queue frames;
         (*m_ductor)(drifted_depo, frames);
-        for (auto f : frames)
-        {
+        for (auto f : frames) {
             partial_frames.push_back(f);
         }
     }

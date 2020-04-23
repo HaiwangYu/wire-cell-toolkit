@@ -5,8 +5,7 @@
 #include "WireCellUtil/Response.h"
 #include "WireCellUtil/Waveform.h"
 
-WIRECELL_FACTORY(Misconfigure, WireCell::Gen::Misconfigure,
-                 WireCell::IFrameFilter, WireCell::IConfigurable)
+WIRECELL_FACTORY(Misconfigure, WireCell::Gen::Misconfigure, WireCell::IFrameFilter, WireCell::IConfigurable)
 
 using namespace WireCell;
 
@@ -51,45 +50,34 @@ void Gen::Misconfigure::configure(const WireCell::Configuration &cfg)
     double tick = cfg["tick"].asDouble();
     Binning bins(n, 0, n * tick);
 
-    m_from = Response::ColdElec(cfg["from"]["gain"].asDouble(),
-                                cfg["from"]["shaping"].asDouble())
-                 .generate(bins);
-    m_to = Response::ColdElec(cfg["to"]["gain"].asDouble(),
-                              cfg["to"]["shaping"].asDouble())
-               .generate(bins);
+    m_from = Response::ColdElec(cfg["from"]["gain"].asDouble(), cfg["from"]["shaping"].asDouble()).generate(bins);
+    m_to = Response::ColdElec(cfg["to"]["gain"].asDouble(), cfg["to"]["shaping"].asDouble()).generate(bins);
 
     m_truncate = cfg["truncate"].asBool();
 }
 
-bool Gen::Misconfigure::operator()(const input_pointer &in,
-                                   output_pointer &out)
+bool Gen::Misconfigure::operator()(const input_pointer &in, output_pointer &out)
 {
     out = nullptr;
-    if (!in)
-    {
+    if (!in) {
         return true;  // eos, but we don't care here.
     }
 
     auto traces = in->traces();
-    if (!traces)
-    {
+    if (!traces) {
         std::cerr << "Gen::Misconfigure: warning no traces in frame for me\n";
         return true;
     }
 
     size_t ntraces = traces->size();
     ITrace::vector out_traces(ntraces);
-    for (size_t ind = 0; ind < ntraces; ++ind)
-    {
+    for (size_t ind = 0; ind < ntraces; ++ind) {
         auto trace = traces->at(ind);
 
-        auto wave =
-            Waveform::replace_convolve(trace->charge(), m_to, m_from, m_truncate);
-        out_traces[ind] =
-            std::make_shared<SimpleTrace>(trace->channel(), trace->tbin(), wave);
+        auto wave = Waveform::replace_convolve(trace->charge(), m_to, m_from, m_truncate);
+        out_traces[ind] = std::make_shared<SimpleTrace>(trace->channel(), trace->tbin(), wave);
     }
 
-    out = std::make_shared<SimpleFrame>(in->ident(), in->time(), out_traces,
-                                        in->tick());
+    out = std::make_shared<SimpleFrame>(in->ident(), in->time(), out_traces, in->tick());
     return true;
 }

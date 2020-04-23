@@ -6,10 +6,8 @@
 #include <map>
 #include <string>
 
-namespace WireCell
-{
-    class Plugin
-    {
+namespace WireCell {
+    class Plugin {
        public:
         Plugin(void *lib);
         ~Plugin();
@@ -22,8 +20,7 @@ namespace WireCell
         bool symbol(const std::string &symbol_name, T &ret)
         {
             void *thing = raw(symbol_name);
-            if (!thing)
-            {
+            if (!thing) {
                 return false;
             }
             ret = reinterpret_cast<T>(thing);
@@ -35,8 +32,7 @@ namespace WireCell
     };
 
     /** This is meant to be used from a WireCell::Singleton. */
-    class PluginManager
-    {
+    class PluginManager {
         Log::logptr_t l;
         PluginManager();
         ~PluginManager();

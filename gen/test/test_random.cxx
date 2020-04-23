@@ -20,32 +20,25 @@ double normalize(std::complex<double> val) { return std::abs(val); }
 double normalize(double val) { return val; }
 double normalize(int val) { return (double) val; }
 
-template <typename NumType, int nbins = 10, int nstars = 100,
-          int ntries = 100000>
+template <typename NumType, int nbins = 10, int nstars = 100, int ntries = 100000>
 void histify(std::function<NumType()> gen)
 {
     int hist[nbins + 2] = {};
-    for (int count = 0; count < ntries; ++count)
-    {
+    for (int count = 0; count < ntries; ++count) {
         double num = normalize(gen());
         ++num;  // shift to accommodate under/overflow
-        if (num <= 0)
-            num = 0;
-        if (num > nbins)
-            num = nbins + 1;
+        if (num <= 0) num = 0;
+        if (num > nbins) num = nbins + 1;
         ++hist[(int) (0.5 + num)];
     }
-    for (int bin = 0; bin < nbins + 2; ++bin)
-    {
+    for (int bin = 0; bin < nbins + 2; ++bin) {
         int bar = (hist[bin] * nstars) / ntries;
 
         char sbin = '0' + (bin - 1);
-        if (bin == 0)
-        {
+        if (bin == 0) {
             sbin = '-';
         }
-        if (bin == nbins + 1)
-        {
+        if (bin == nbins + 1) {
             sbin = '+';
         }
         cout << sbin << ": " << std::string(bar, '*') << std::endl;
@@ -93,16 +86,13 @@ void test_repeat()
 
     const int ntries = 5;
     std::vector<double> v1(ntries), v2(ntries);
-    for (int ind = 0; ind < ntries; ++ind)
-    {
+    for (int ind = 0; ind < ntries; ++ind) {
         v1[ind] = rnd->normal(0, 1);
     }
-    for (int ind = 0; ind < ntries; ++ind)
-    {
+    for (int ind = 0; ind < ntries; ++ind) {
         v2[ind] = rnd->normal(0, 1);
     }
-    for (size_t ind = 0; ind < v1.size(); ++ind)
-    {
+    for (size_t ind = 0; ind < v1.size(); ++ind) {
         cerr << v1[ind] << "\t" << v2[ind] << endl;
         Assert(std::abs(v1[ind] - v2[ind]) > 1.0e-8);
     }

@@ -34,12 +34,9 @@
 #include "WireCellUtil/IndexedGraph.h"
 #include "WireCellUtil/Logging.h"
 
-namespace WireCell
-{
-    namespace Img
-    {
-        class BlobClustering : public IClustering, public IConfigurable
-        {
+namespace WireCell {
+    namespace Img {
+        class BlobClustering : public IClustering, public IConfigurable {
            public:
             BlobClustering();
             virtual ~BlobClustering();

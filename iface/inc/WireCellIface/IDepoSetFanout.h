@@ -4,13 +4,11 @@
 #include "WireCellIface/IDepoSet.h"
 #include "WireCellIface/IFanoutNode.h"
 
-namespace WireCell
-{
+namespace WireCell {
     // This fixes the type for input and output slots.  The
     // multiplicity MUST be set by the subclass and the method
     // output_types() must be reimplemented
-    class IDepoSetFanout : public IFanoutNode<IDepoSet, IDepoSet, 0>
-    {
+    class IDepoSetFanout : public IFanoutNode<IDepoSet, IDepoSet, 0> {
        public:
         virtual ~IDepoSetFanout();
 

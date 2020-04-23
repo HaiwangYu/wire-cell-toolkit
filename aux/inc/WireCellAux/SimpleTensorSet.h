@@ -3,12 +3,9 @@
 
 #include "WireCellIface/ITensorSet.h"
 
-namespace WireCell
-{
-    namespace Aux
-    {
-        class SimpleTensorSet : public WireCell::ITensorSet
-        {
+namespace WireCell {
+    namespace Aux {
+        class SimpleTensorSet : public WireCell::ITensorSet {
            public:
             SimpleTensorSet(int ident, Configuration md, ITensor::shared_vector tv)
               : m_ident(ident)

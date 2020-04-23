@@ -2,13 +2,11 @@
 
 #include "WireCellUtil/NamedFactory.h"
 
-WIRECELL_FACTORY(HfFilter, WireCell::SigProc::HfFilter,
-                 WireCell::IFilterWaveform, WireCell::IConfigurable)
+WIRECELL_FACTORY(HfFilter, WireCell::SigProc::HfFilter, WireCell::IFilterWaveform, WireCell::IConfigurable)
 
 using namespace WireCell;
 
-SigProc::HfFilter::HfFilter(double max_freq, double sigma, double power,
-                            bool flag)
+SigProc::HfFilter::HfFilter(double max_freq, double sigma, double power, bool flag)
   : m_max_freq(max_freq)
   , m_sigma(sigma)
   , m_power(power)
@@ -43,11 +41,9 @@ const Waveform::realseq_t SigProc::HfFilter::filter_waveform(int nbins) const
 
     Response::HfFilter hf_filter(m_sigma, m_power, m_flag);
 
-    for (size_t i = 0; i != m_wfs.size(); i++)
-    {
+    for (size_t i = 0; i != m_wfs.size(); i++) {
         double freq = i * 1.0 / int(m_wfs.size()) * 2 * m_max_freq;
-        if (freq > m_max_freq)
-            freq = freq - 2 * m_max_freq;
+        if (freq > m_max_freq) freq = freq - 2 * m_max_freq;
         m_wfs.at(i) = hf_filter(fabs(freq));
     }
     // std::cout << m_wfs.size() << std::endl;

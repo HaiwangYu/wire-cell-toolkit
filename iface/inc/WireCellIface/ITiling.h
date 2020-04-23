@@ -9,10 +9,8 @@
 #include "WireCellIface/IFunctionNode.h"
 #include "WireCellIface/ISlice.h"
 
-namespace WireCell
-{
-    class ITiling : public IFunctionNode<ISlice, IBlobSet>
-    {
+namespace WireCell {
+    class ITiling : public IFunctionNode<ISlice, IBlobSet> {
        public:
         typedef std::shared_ptr<ITiling> pointer;
 

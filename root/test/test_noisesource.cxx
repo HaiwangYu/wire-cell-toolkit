@@ -26,8 +26,7 @@ using namespace WireCell;
 int main(int argc, char *argv[])
 {
     std::string detector = "uboone";
-    if (argc > 1)
-    {
+    if (argc > 1) {
         detector = argv[1];
     }
     auto anode_tns = anode_loader(detector);
@@ -102,14 +101,11 @@ int main(int argc, char *argv[])
     TFile *rootfile = TFile::Open(tfilename.c_str(), "recreate");
     // TCanvas* canvas = new TCanvas("c","canvas",1000,1000);
     // gStyle->SetOptStat(0);
-    TH2F *hist =
-        new TH2F("noise", "Noise Frame", nticks, 0, nticks, ntraces, 0, ntraces);
-    for (auto trace : *traces)
-    {
+    TH2F *hist = new TH2F("noise", "Noise Frame", nticks, 0, nticks, ntraces, 0, ntraces);
+    for (auto trace : *traces) {
         int chid = trace->channel();
         const auto &qvec = trace->charge();
-        for (int ind = 0; ind < nticks; ++ind)
-        {
+        for (int ind = 0; ind < nticks; ++ind) {
             // convert to ADC ...
             hist->Fill(ind + 0.5, chid + 0.5, qvec[ind] / units::mV * 4096 / 2000.);
         }

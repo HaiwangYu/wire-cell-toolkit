@@ -6,15 +6,11 @@
 #include "WireCellIface/IFilterWaveform.h"
 #include "WireCellUtil/Response.h"
 
-namespace WireCell
-{
-    namespace SigProc
-    {
-        class HfFilter : public IFilterWaveform, public IConfigurable
-        {
+namespace WireCell {
+    namespace SigProc {
+        class HfFilter : public IFilterWaveform, public IConfigurable {
            public:
-            HfFilter(double max_freq = 1 * units::megahertz,
-                     double sigma = 3.0 * units::megahertz, double power = 2,
+            HfFilter(double max_freq = 1 * units::megahertz, double sigma = 3.0 * units::megahertz, double power = 2,
                      bool flag = true);
             virtual ~HfFilter();
 

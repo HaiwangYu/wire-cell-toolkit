@@ -9,17 +9,12 @@
 #include "WireCellIface/IWaveform.h"
 #include "WireCellUtil/Units.h"
 
-namespace WireCell
-{
-    namespace Gen
-    {
-        class ElecResponse : public IWaveform, public IConfigurable
-        {
+namespace WireCell {
+    namespace Gen {
+        class ElecResponse : public IWaveform, public IConfigurable {
            public:
-            ElecResponse(int nticks = 10000, double t0 = 0,
-                         double gain = 14.0 * units::mV / units::fC,
-                         double shaping = 2 * units::us, double postgain = 1.0,
-                         double tick = 0.5 * units::us);
+            ElecResponse(int nticks = 10000, double t0 = 0, double gain = 14.0 * units::mV / units::fC,
+                         double shaping = 2 * units::us, double postgain = 1.0, double tick = 0.5 * units::us);
             // IConfigurable interface
             virtual void configure(const WireCell::Configuration &cfg);
             virtual WireCell::Configuration default_configuration() const;

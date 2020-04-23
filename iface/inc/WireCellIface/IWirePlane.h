@@ -14,10 +14,8 @@
 #include "WireCellIface/IChannel.h"
 #include "WireCellIface/IWire.h"
 
-namespace WireCell
-{
-    class IWirePlane : public IComponent<IWirePlane>
-    {
+namespace WireCell {
+    class IWirePlane : public IComponent<IWirePlane> {
        public:
         virtual ~IWirePlane();
 

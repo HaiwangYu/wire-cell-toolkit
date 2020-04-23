@@ -9,8 +9,7 @@
 #include "TH1F.h"
 #include "TTree.h"
 
-WIRECELL_FACTORY(CelltreeSource, WireCell::Root::CelltreeSource,
-                 WireCell::IFrameSource, WireCell::IConfigurable)
+WIRECELL_FACTORY(CelltreeSource, WireCell::Root::CelltreeSource, WireCell::IFrameSource, WireCell::IConfigurable)
 
 using namespace WireCell;
 
@@ -23,8 +22,7 @@ Root::CelltreeSource::~CelltreeSource() {}
 
 void Root::CelltreeSource::configure(const WireCell::Configuration &cfg)
 {
-    if (cfg["filename"].empty())
-    {
+    if (cfg["filename"].empty()) {
         THROW(ValueError() << errmsg{"CelltreeSource: must supply input "
                                      "\"filename\" configuration item."});
     }
@@ -54,13 +52,11 @@ bool Root::CelltreeSource::operator()(IFrame::pointer &out)
     out = nullptr;
     ++m_calls;
     std::cerr << "CelltreeSource: called " << m_calls << " times\n";
-    if (m_calls > 2)
-    {
+    if (m_calls > 2) {
         std::cerr << "CelltreeSource: past EOS\n";
         return false;
     }
-    if (m_calls > 1)
-    {
+    if (m_calls > 1) {
         std::cerr << "CelltreeSource: EOS\n";
         return true;  // this is to send out EOS
     }
@@ -70,8 +66,7 @@ bool Root::CelltreeSource::operator()(IFrame::pointer &out)
     TFile *tfile = TFile::Open(url.c_str());
 
     TTree *tree = (TTree *) tfile->Get("/Event/Sim");
-    if (!tree)
-    {
+    if (!tree) {
         THROW(IOError() << errmsg{"No tree: /Event/Sim in input file"});
     }
 
@@ -98,11 +93,9 @@ bool Root::CelltreeSource::operator()(IFrame::pointer &out)
     // loop entry
     int siz = 0;
     unsigned int entries = tree->GetEntries();
-    for (unsigned int ent = 0; ent < entries; ent++)
-    {
+    for (unsigned int ent = 0; ent < entries; ent++) {
         siz = tree->GetEntry(ent);
-        if (event_no == frame_number)
-        {
+        if (event_no == frame_number) {
             break;
         }
     }
@@ -113,8 +106,7 @@ bool Root::CelltreeSource::operator()(IFrame::pointer &out)
 
     // some output using eventNo, runNo, subRunNO, ...
     std::cerr << "CelltreeSource: frame " << frame_number << "\n";
-    std::cerr << "CelltreeSource: runNo " << run_no << ", subrunNo " << subrun_no
-              << ", eventNo " << event_no << "\n";
+    std::cerr << "CelltreeSource: runNo " << run_no << ", subrunNo " << subrun_no << ", eventNo " << event_no << "\n";
 
     ITrace::vector all_traces;
     std::unordered_map<IFrame::tag_t, IFrame::trace_list_t> tagged_traces;
@@ -122,31 +114,26 @@ bool Root::CelltreeSource::operator()(IFrame::pointer &out)
     // channels leave cmm empty.
     WireCell::Waveform::ChannelMaskMap cmm;
 
-    if (siz > 0 && frame_number == frame_ident)
-    {
+    if (siz > 0 && frame_number == frame_ident) {
         int nchannels = channelid->size();
 
         auto frametag = m_cfg["frames"][0].asString();
         int channel_number = 0;
 
-        std::cerr << "CelltreeSource: loading " << frametag << " " << nchannels
-                  << " channels \n";
+        std::cerr << "CelltreeSource: loading " << frametag << " " << nchannels << " channels \n";
 
         // fill waveform ...
         TH1S *signal_s;
         TH1F *signal_f;
 
-        for (int ind = 0; ind < nchannels; ++ind)
-        {
+        for (int ind = 0; ind < nchannels; ++ind) {
             signal_s = dynamic_cast<TH1S *>(esignal->At(ind));
             signal_f = dynamic_cast<TH1F *>(esignal->At(ind));
 
             bool flag_float = 1;
-            if (signal_f == 0 && signal_s != 0)
-                flag_float = 0;
+            if (signal_f == 0 && signal_s != 0) flag_float = 0;
 
-            if (!signal_f && !signal_s)
-                continue;
+            if (!signal_f && !signal_s) continue;
             channel_number = channelid->at(ind);
 
             ITrace::ChargeSequence charges;
@@ -158,19 +145,14 @@ bool Root::CelltreeSource::operator()(IFrame::pointer &out)
             // std::cerr<<"CelltreeSource: tick "<<nticks<<"\n";
             // nticks = 9600,  this could be an issue cause just 9594 have non-ZERO
             // value around baseline
-            for (int itickbin = 0; itickbin != nticks; itickbin++)
-            {
-                if (flag_float == 1)
-                {
-                    if (signal_f->GetBinContent(itickbin + 1) != 0)
-                    {
+            for (int itickbin = 0; itickbin != nticks; itickbin++) {
+                if (flag_float == 1) {
+                    if (signal_f->GetBinContent(itickbin + 1) != 0) {
                         charges.push_back(signal_f->GetBinContent(itickbin + 1));
                     }
                 }
-                else
-                {
-                    if (signal_s->GetBinContent(itickbin + 1) != 0)
-                    {
+                else {
+                    if (signal_s->GetBinContent(itickbin + 1) != 0) {
                         charges.push_back(signal_s->GetBinContent(itickbin + 1));
                     }
                 }
@@ -179,26 +161,20 @@ bool Root::CelltreeSource::operator()(IFrame::pointer &out)
             const size_t index = all_traces.size();
             tagged_traces[frametag].push_back(index);
 
-            all_traces.push_back(
-                std::make_shared<SimpleTrace>(channel_number, 0, charges));
+            all_traces.push_back(std::make_shared<SimpleTrace>(channel_number, 0, charges));
         }
-        auto sframe = new SimpleFrame(frame_ident, frame_time, all_traces,
-                                      0.5 * units::microsecond, cmm);
-        for (auto const &it : tagged_traces)
-        {
+        auto sframe = new SimpleFrame(frame_ident, frame_time, all_traces, 0.5 * units::microsecond, cmm);
+        for (auto const &it : tagged_traces) {
             sframe->tag_traces(it.first, it.second);
-            std::cerr << "CelltreeSource: tag " << it.second.size()
-                      << " traces as: \"" << it.first << "\"\n";
+            std::cerr << "CelltreeSource: tag " << it.second.size() << " traces as: \"" << it.first << "\"\n";
         }
 
         out = IFrame::pointer(sframe);
 
         return true;
     }
-    else
-    {
-        std::cerr << "CelltreeSource: Event Number is out of boundary! "
-                  << std::endl;
+    else {
+        std::cerr << "CelltreeSource: Event Number is out of boundary! " << std::endl;
         return false;
     }
 

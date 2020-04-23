@@ -10,12 +10,9 @@
 #include "WireCellIface/IAnodePlane.h"
 #include "WireCellIface/IRandom.h"
 
-namespace WireCell
-{
-    namespace Gen
-    {
-        class TruthSmearer : public IDuctor, public IConfigurable
-        {
+namespace WireCell {
+    namespace Gen {
+        class TruthSmearer : public IDuctor, public IConfigurable {
            public:
             TruthSmearer();
 

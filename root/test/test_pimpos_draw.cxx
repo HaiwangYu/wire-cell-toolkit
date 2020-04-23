@@ -27,21 +27,17 @@ int main(int argc, char *argv[])
     const double angle = 35.707 * units::degree;
     const double wire_extent = pitch * 0.5 * (nwiresperplane - 1);
 
-    std::vector<Vector> uvw_wire{
-        Vector(0, cos(angle), sin(angle)),   // points Y>0, Z>0
-        Vector(0, cos(angle), -sin(angle)),  // points Y>0, Z<0
-        Vector(0, 1, 0)};
+    std::vector<Vector> uvw_wire{Vector(0, cos(angle), sin(angle)),   // points Y>0, Z>0
+                                 Vector(0, cos(angle), -sin(angle)),  // points Y>0, Z<0
+                                 Vector(0, 1, 0)};
 
     // Pitch direction points generally in +Z direction (for "front" faces)
-    std::vector<Vector> uvw_pitch{Vector(0, -sin(angle), cos(angle)),
-                                  Vector(0, sin(angle), cos(angle)),
+    std::vector<Vector> uvw_pitch{Vector(0, -sin(angle), cos(angle)), Vector(0, sin(angle), cos(angle)),
                                   Vector(0, 0, 1)};
 
     std::vector<Pimpos> pimpos;
-    for (int iplane = 0; iplane < 3; ++iplane)
-    {
-        Pimpos p(nwiresperplane, -wire_extent, wire_extent, uvw_wire[iplane],
-                 uvw_pitch[iplane]);
+    for (int iplane = 0; iplane < 3; ++iplane) {
+        Pimpos p(nwiresperplane, -wire_extent, wire_extent, uvw_wire[iplane], uvw_pitch[iplane]);
         pimpos.push_back(p);
 
         const double wpdot = uvw_wire[iplane].dot(uvw_pitch[iplane]);
@@ -63,15 +59,13 @@ int main(int argc, char *argv[])
     frame->SetYTitle("Transverse Y [mm]");
     int colors[3] = {2, 4, 1};
 
-    for (int iplane = 0; iplane < 3; ++iplane)
-    {
+    for (int iplane = 0; iplane < 3; ++iplane) {
         const Vector wiredir = pimpos[iplane].axis(1);
         const Vector pitchdir = pimpos[iplane].axis(2);
         const Point origin = pimpos[iplane].origin();
         const Binning &binning = pimpos[iplane].region_binning();
 
-        for (int ipitch = 0; ipitch <= binning.nbins(); ++ipitch)
-        {
+        for (int ipitch = 0; ipitch <= binning.nbins(); ++ipitch) {
             const double pitch1 = binning.edge(ipitch);
             const double pitch2 = binning.edge(ipitch + 1);
 
@@ -81,19 +75,16 @@ int main(int argc, char *argv[])
             const Vector vwire = 1.2 * wiredir * wire_extent;
             const Ray r_wire(origin + vpitch1 - vwire, origin + vpitch1 + vwire);
 
-            if (ipitch < binning.nbins())
-            {  // pitch is bin, wire is edge
-                TArrow *a_pitch = new TArrow(
-                    r_pitch.first.z() / units::mm, r_pitch.first.y() / units::mm,
-                    r_pitch.second.z() / units::mm, r_pitch.second.y() / units::mm,
-                    0.01, "|>");
+            if (ipitch < binning.nbins()) {  // pitch is bin, wire is edge
+                TArrow *a_pitch =
+                    new TArrow(r_pitch.first.z() / units::mm, r_pitch.first.y() / units::mm,
+                               r_pitch.second.z() / units::mm, r_pitch.second.y() / units::mm, 0.01, "|>");
                 a_pitch->SetLineColor(colors[iplane]);
                 a_pitch->SetLineWidth(2);
                 a_pitch->Draw();
             }
-            TArrow *a_wire = new TArrow(
-                r_wire.first.z() / units::mm, r_wire.first.y() / units::mm,
-                r_wire.second.z() / units::mm, r_wire.second.y() / units::mm, 0.01);
+            TArrow *a_wire = new TArrow(r_wire.first.z() / units::mm, r_wire.first.y() / units::mm,
+                                        r_wire.second.z() / units::mm, r_wire.second.y() / units::mm, 0.01);
             a_wire->SetLineColor(colors[iplane]);
 
             a_wire->Draw();

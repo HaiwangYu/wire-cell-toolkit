@@ -1,8 +1,7 @@
 
 #include <json/json.h>
 
-class JsonEvent
-{
+class JsonEvent {
     const WireCell::RayGrid::Coordinates &coords;
     Json::Value blobs, points;
 
@@ -37,15 +36,13 @@ class JsonEvent
     Json::Value convert(const WireCell::RayGrid::crossings_t &corners, double x)
     {
         Json::Value jcorners = Json::arrayValue;
-        for (const auto &corner : corners)
-        {
+        for (const auto &corner : corners) {
             jcorners.append(convert(corner, x));
         }
         return jcorners;
     }
 
-    void operator()(const WireCell::RayGrid::Blob &blob, double x,
-                    double charge = 1.0, int slice = 1, int number = 0)
+    void operator()(const WireCell::RayGrid::Blob &blob, double x, double charge = 1.0, int slice = 1, int number = 0)
     {
         Json::Value jblob;
         jblob["points"] = convert(blob.corners(), x);

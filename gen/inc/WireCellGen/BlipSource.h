@@ -9,12 +9,9 @@
 #include "WireCellIface/IDepoSource.h"
 #include "WireCellIface/IRandom.h"
 
-namespace WireCell
-{
-    namespace Gen
-    {
-        class BlipSource : public IDepoSource, public IConfigurable
-        {
+namespace WireCell {
+    namespace Gen {
+        class BlipSource : public IDepoSource, public IConfigurable {
            public:
             BlipSource();
             virtual ~BlipSource();
@@ -27,14 +24,12 @@ namespace WireCell
             virtual WireCell::Configuration default_configuration() const;
 
             // Internal base class for something that makes a scalar
-            struct ScalarMaker
-            {
+            struct ScalarMaker {
                 virtual double operator()() = 0;
                 virtual ~ScalarMaker(){};
             };
             // Internal base class for something that makes a scalar
-            struct PointMaker
-            {
+            struct PointMaker {
                 virtual Point operator()() = 0;
                 virtual ~PointMaker(){};
             };

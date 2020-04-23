@@ -5,8 +5,7 @@
 
 #include <boost/graph/graphviz.hpp>
 
-WIRECELL_FACTORY(BlobClustering, WireCell::Img::BlobClustering,
-                 WireCell::IClustering, WireCell::IConfigurable)
+WIRECELL_FACTORY(BlobClustering, WireCell::Img::BlobClustering, WireCell::IClustering, WireCell::IConfigurable)
 
 using namespace WireCell;
 
@@ -18,10 +17,7 @@ Img::BlobClustering::BlobClustering()
 }
 Img::BlobClustering::~BlobClustering() {}
 
-void Img::BlobClustering::configure(const WireCell::Configuration &cfg)
-{
-    m_spans = get(cfg, "spans", m_spans);
-}
+void Img::BlobClustering::configure(const WireCell::Configuration &cfg) { m_spans = get(cfg, "spans", m_spans); }
 
 WireCell::Configuration Img::BlobClustering::default_configuration() const
 {
@@ -42,17 +38,13 @@ void Img::BlobClustering::flush(output_queue &clusters)
     m_last_bs = nullptr;
 }
 
-void Img::BlobClustering::intern(const input_pointer &newbs)
-{
-    m_last_bs = newbs;
-}
+void Img::BlobClustering::intern(const input_pointer &newbs) { m_last_bs = newbs; }
 
 bool Img::BlobClustering::judge_gap(const input_pointer &newbs)
 {
     const double epsilon = 1 * units::ns;
 
-    if (m_spans <= epsilon)
-    {
+    if (m_spans <= epsilon) {
         return false;  // never break on gap.
     }
 
@@ -65,20 +57,16 @@ bool Img::BlobClustering::judge_gap(const input_pointer &newbs)
 
 void Img::BlobClustering::add_slice(const ISlice::pointer &islice)
 {
-    if (m_grind.has(islice))
-    {
+    if (m_grind.has(islice)) {
         return;
     }
 
-    for (const auto &ichv : islice->activity())
-    {
+    for (const auto &ichv : islice->activity()) {
         const IChannel::pointer ich = ichv.first;
-        if (m_grind.has(ich))
-        {
+        if (m_grind.has(ich)) {
             continue;
         }
-        for (const auto &iwire : ich->wires())
-        {
+        for (const auto &iwire : ich->wires()) {
             m_grind.edge(ich, iwire);
         }
     }
@@ -86,8 +74,7 @@ void Img::BlobClustering::add_slice(const ISlice::pointer &islice)
 
 void Img::BlobClustering::add_blobs(const input_pointer &newbs)
 {
-    for (const auto &iblob : newbs->blobs())
-    {
+    for (const auto &iblob : newbs->blobs()) {
         auto islice = iblob->slice();
         add_slice(islice);
         m_grind.edge(islice, iblob);
@@ -96,20 +83,16 @@ void Img::BlobClustering::add_blobs(const input_pointer &newbs)
         auto wire_planes = iface->planes();
 
         const auto &shape = iblob->shape();
-        for (const auto &strip : shape.strips())
-        {
+        for (const auto &strip : shape.strips()) {
             // FIXME: need a way to encode this convention!
             // For now, it requires collusion.  Don't impeach me.
             const int num_nonplane_layers = 2;
             int iplane = strip.layer - num_nonplane_layers;
-            if (iplane < 0)
-            {
+            if (iplane < 0) {
                 continue;
             }
             const auto &wires = wire_planes[iplane]->wires();
-            for (int wip = strip.bounds.first;
-                 wip < strip.bounds.second and wip < int(wires.size()); ++wip)
-            {
+            for (int wip = strip.bounds.first; wip < strip.bounds.second and wip < int(wires.size()); ++wip) {
                 auto iwire = wires[wip];
                 m_grind.edge(iblob, iwire);
             }
@@ -121,14 +104,12 @@ bool Img::BlobClustering::graph_bs(const input_pointer &newbs)
 {
     add_blobs(newbs);
 
-    if (!m_last_bs)
-    {
+    if (!m_last_bs) {
         // need to wait for next one to do anything.
         // note, caller interns.
         return false;
     }
-    if (judge_gap(newbs))
-    {
+    if (judge_gap(newbs)) {
         // nothing to do, but pass on that we hit a gap
         return true;
     }
@@ -153,23 +134,19 @@ bool Img::BlobClustering::graph_bs(const input_pointer &newbs)
     return false;
 }
 
-bool Img::BlobClustering::operator()(const input_pointer &blobset,
-                                     output_queue &clusters)
+bool Img::BlobClustering::operator()(const input_pointer &blobset, output_queue &clusters)
 {
-    if (!blobset)
-    {  // eos
+    if (!blobset) {  // eos
         l->debug("BlobClustering: EOS");
         flush(clusters);
         clusters.push_back(nullptr);  // forward eos
         return true;
     }
 
-    SPDLOG_LOGGER_TRACE(l, "BlobClustering: got {} blobs",
-                        blobset->blobs().size());
+    SPDLOG_LOGGER_TRACE(l, "BlobClustering: got {} blobs", blobset->blobs().size());
 
     bool gap = graph_bs(blobset);
-    if (gap)
-    {
+    if (gap) {
         flush(clusters);
         l->debug("BlobClustering: sending {} clusters", clusters.size());
         // note: flush fast to keep memory usage in this component
@@ -182,8 +159,7 @@ bool Img::BlobClustering::operator()(const input_pointer &blobset,
 
     intern(blobset);
 
-    SPDLOG_LOGGER_TRACE(l, "BlobClustering: holding {}",
-                        boost::num_vertices(m_grind.graph()));
+    SPDLOG_LOGGER_TRACE(l, "BlobClustering: holding {}", boost::num_vertices(m_grind.graph()));
 
     return true;
 }

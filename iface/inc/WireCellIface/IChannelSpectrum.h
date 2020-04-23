@@ -12,10 +12,8 @@
 
 #include "WireCellUtil/IComponent.h"
 
-namespace WireCell
-{
-    class IChannelSpectrum : virtual public IComponent<IChannelSpectrum>
-    {
+namespace WireCell {
+    class IChannelSpectrum : virtual public IComponent<IChannelSpectrum> {
        public:
         virtual ~IChannelSpectrum();
 

@@ -9,10 +9,8 @@
 #include "WireCellIface/IFunctionNode.h"
 #include "WireCellUtil/IComponent.h"
 
-namespace WireCell
-{
-    class IClusterFilter : public IFunctionNode<ICluster, ICluster>
-    {
+namespace WireCell {
+    class IClusterFilter : public IFunctionNode<ICluster, ICluster> {
        public:
         typedef std::shared_ptr<IClusterFilter> pointer;
 

@@ -19,12 +19,9 @@ ITensorSet::pointer make_tensorset()
     const double signal_start_time = 6 * units::ms;
     vector<float> signal{0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 0.0};
 
-    ITrace::vector signal_traces{make_shared<SimpleTrace>(1, 10, signal),
-                                 make_shared<SimpleTrace>(1, 20, signal),
-                                 make_shared<SimpleTrace>(2, 30, signal),
-                                 make_shared<SimpleTrace>(2, 33, signal)};
-    auto iframe1 = make_shared<SimpleFrame>(signal_frame_ident, signal_start_time,
-                                            signal_traces, tick);
+    ITrace::vector signal_traces{make_shared<SimpleTrace>(1, 10, signal), make_shared<SimpleTrace>(1, 20, signal),
+                                 make_shared<SimpleTrace>(2, 30, signal), make_shared<SimpleTrace>(2, 33, signal)};
+    auto iframe1 = make_shared<SimpleFrame>(signal_frame_ident, signal_start_time, signal_traces, tick);
 
     ITensorSet::pointer itensorset = nullptr;
     Aux::TaggedFrameTensorSet tfts;
@@ -40,10 +37,8 @@ ITensorSet::pointer make_tensorset()
 void print(const ITensor::pointer tens)
 {
     float *data = (float *) tens->data();
-    for (size_t x1 = 0; x1 < tens->shape()[0]; ++x1)
-    {
-        for (size_t x2 = 0; x2 < tens->shape()[1]; ++x2)
-        {
+    for (size_t x1 = 0; x1 < tens->shape()[0]; ++x1) {
+        for (size_t x2 = 0; x2 < tens->shape()[1]; ++x2) {
             std::cout << data[x2 * tens->shape()[0] + x1] << " ";
         }
         std::cout << std::endl;

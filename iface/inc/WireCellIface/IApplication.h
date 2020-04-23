@@ -3,13 +3,11 @@
 
 #include "WireCellUtil/IComponent.h"
 
-namespace WireCell
-{
+namespace WireCell {
     /**
- * An application executes something post-configuration.
- */
-    class IApplication : public IComponent<IApplication>
-    {
+     * An application executes something post-configuration.
+     */
+    class IApplication : public IComponent<IApplication> {
        public:
         virtual ~IApplication();
 

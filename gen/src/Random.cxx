@@ -16,14 +16,12 @@
 
 #include <random>
 
-WIRECELL_FACTORY(Random, WireCell::Gen::Random, WireCell::IRandom,
-                 WireCell::IConfigurable)
+WIRECELL_FACTORY(Random, WireCell::Gen::Random, WireCell::IRandom, WireCell::IConfigurable)
 
 using namespace WireCell;
 using spdlog::warn;
 
-Gen::Random::Random(const std::string &generator,
-                    const std::vector<unsigned int> seeds)
+Gen::Random::Random(const std::string &generator, const std::vector<unsigned int> seeds)
   : m_generator(generator)
   , m_seeds(seeds.begin(), seeds.end())
   , m_pimpl(nullptr)
@@ -32,8 +30,7 @@ Gen::Random::Random(const std::string &generator,
 
 // This pimpl may turn out to be a bottle neck.
 template <typename URNG>
-class RandomT : public IRandom
-{
+class RandomT : public IRandom {
     URNG m_rng;
 
    public:
@@ -78,30 +75,24 @@ class RandomT : public IRandom
 void Gen::Random::configure(const WireCell::Configuration &cfg)
 {
     auto jseeds = cfg["seeds"];
-    if (not jseeds.isNull())
-    {
+    if (not jseeds.isNull()) {
         std::vector<unsigned int> seeds;
-        for (auto jseed : jseeds)
-        {
+        for (auto jseed : jseeds) {
             seeds.push_back(jseed.asInt());
         }
         m_seeds = seeds;
     }
     auto gen = get(cfg, "generator", m_generator);
-    if (m_pimpl)
-    {
+    if (m_pimpl) {
         delete m_pimpl;
     }
-    if (gen == "default")
-    {
+    if (gen == "default") {
         m_pimpl = new RandomT<std::default_random_engine>(m_seeds);
     }
-    else if (gen == "twister")
-    {
+    else if (gen == "twister") {
         m_pimpl = new RandomT<std::mt19937>(m_seeds);
     }
-    else
-    {
+    else {
         warn(
             "Gen::Random::configure: warning: unknown random engine: \"{}\" using "
             "default",
@@ -115,36 +106,20 @@ WireCell::Configuration Gen::Random::default_configuration() const
     Configuration cfg;
     cfg["generator"] = m_generator;
     Json::Value jseeds(Json::arrayValue);
-    for (auto seed : m_seeds)
-    {
+    for (auto seed : m_seeds) {
         jseeds.append(seed);
     }
     cfg["seeds"] = jseeds;
     return cfg;
 }
 
-int Gen::Random::binomial(int max, double prob)
-{
-    return m_pimpl->binomial(max, prob);
-}
+int Gen::Random::binomial(int max, double prob) { return m_pimpl->binomial(max, prob); }
 int Gen::Random::poisson(double mean) { return m_pimpl->poisson(mean); }
 
-double Gen::Random::normal(double mean, double sigma)
-{
-    return m_pimpl->normal(mean, sigma);
-}
+double Gen::Random::normal(double mean, double sigma) { return m_pimpl->normal(mean, sigma); }
 
-double Gen::Random::uniform(double begin, double end)
-{
-    return m_pimpl->uniform(begin, end);
-}
+double Gen::Random::uniform(double begin, double end) { return m_pimpl->uniform(begin, end); }
 
-double Gen::Random::exponential(double mean)
-{
-    return m_pimpl->exponential(mean);
-}
+double Gen::Random::exponential(double mean) { return m_pimpl->exponential(mean); }
 
-int Gen::Random::range(int first, int last)
-{
-    return m_pimpl->range(first, last);
-}
+int Gen::Random::range(int first, int last) { return m_pimpl->range(first, last); }

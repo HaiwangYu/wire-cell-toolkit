@@ -25,23 +25,18 @@
 #include <unordered_map>
 #include <vector>
 
-namespace WireCell
-{
-    namespace Gen
-    {
-        class EmpiricalNoiseModel : public IChannelSpectrum, public IConfigurable
-        {
+namespace WireCell {
+    namespace Gen {
+        class EmpiricalNoiseModel : public IChannelSpectrum, public IConfigurable {
            public:
-            EmpiricalNoiseModel(
-                const std::string &spectra_file = "",
-                const int nsamples = 10000,  // assuming 10k samples
-                const double period = 0.5 * units::us,
-                const double wire_length_scale = 1.0 * units::cm,
-                /* const double time_scale = 1.0*units::ns, */
-                /* const double gain_scale = 1.0*units::volt/units::eplus, */
-                /* const double freq_scale = 1.0*units::megahertz, */
-                const std::string anode_tn = "AnodePlane",
-                const std::string chanstat_tn = "StaticChannelStatus");
+            EmpiricalNoiseModel(const std::string &spectra_file = "",
+                                const int nsamples = 10000,  // assuming 10k samples
+                                const double period = 0.5 * units::us, const double wire_length_scale = 1.0 * units::cm,
+                                /* const double time_scale = 1.0*units::ns, */
+                                /* const double gain_scale = 1.0*units::volt/units::eplus, */
+                                /* const double freq_scale = 1.0*units::megahertz, */
+                                const std::string anode_tn = "AnodePlane",
+                                const std::string chanstat_tn = "StaticChannelStatus");
 
             virtual ~EmpiricalNoiseModel();
 
@@ -62,20 +57,17 @@ namespace WireCell
             // Local methods
 
             // fixme: this should be factored out into wire-cell-util.
-            struct NoiseSpectrum
-            {
-                int plane;        // plane identifier number
-                int nsamples;     // number of samples used in preparing spectrum
-                double period;    // sample period [time] used in preparing spectrum
-                double gain;      // amplifier gain [voltage/charge]
-                double shaping;   // amplifier shaping time [time]
-                double wirelen;   // total length of wire conductor [length]
-                double constant;  // amplifier independent constant noise component
-                                  // [voltage/frequency]
-                std::vector<float>
-                    freqs;  // the frequencies at which the spectrum is sampled
-                std::vector<float>
-                    amps;  // the amplitude [voltage/frequency] of the spectrum.
+            struct NoiseSpectrum {
+                int plane;                 // plane identifier number
+                int nsamples;              // number of samples used in preparing spectrum
+                double period;             // sample period [time] used in preparing spectrum
+                double gain;               // amplifier gain [voltage/charge]
+                double shaping;            // amplifier shaping time [time]
+                double wirelen;            // total length of wire conductor [length]
+                double constant;           // amplifier independent constant noise component
+                                           // [voltage/frequency]
+                std::vector<float> freqs;  // the frequencies at which the spectrum is sampled
+                std::vector<float> amps;   // the amplitude [voltage/frequency] of the spectrum.
             };
 
             // Resample a NoiseSpectrum to match what the model was

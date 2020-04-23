@@ -29,32 +29,25 @@ void test_read(const char *filename)
     cerr << "Got anode 0 with " << store1.faces(a0).size() << " faces\n";
 
     const int bogusid = 0xdeadbeaf;
-    try
-    {
+    try {
         store1.anode(bogusid);
         cerr << "Unexpectedly got bogus anode ID  " << bogusid << "\n";
         Assert(false);
     }
-    catch (WireCell::Exception &e)
-    {
-        cerr << "Correctly caught exception with unlikely anode id " << bogusid
-             << ":\n"
+    catch (WireCell::Exception &e) {
+        cerr << "Correctly caught exception with unlikely anode id " << bogusid << ":\n"
              << "----\n"
              << e.what() << "----\n";
     }
 
-    for (const auto &anode : store1.anodes())
-    {
-        for (const auto &face : store1.faces(anode))
-        {
-            for (const auto &plane : store1.planes(face))
-            {
+    for (const auto &anode : store1.anodes()) {
+        for (const auto &face : store1.faces(anode)) {
+            for (const auto &plane : store1.planes(face)) {
                 auto bb = store1.bounding_box(plane);
                 auto wp = store1.wire_pitch(plane);
                 auto ex = wp.first.cross(wp.second);
 
-                cerr << "anode:" << anode.ident << " face:" << face.ident
-                     << " plane:" << plane.ident << ":\n"
+                cerr << "anode:" << anode.ident << " face:" << face.ident << " plane:" << plane.ident << ":\n"
                      << "\tdrift: " << ex << "\n"
                      << "\twire:  " << wp.first << "\n"
                      << "\tpitch: " << wp.second << "\n"
@@ -68,8 +61,7 @@ void test_read(const char *filename)
             const int n = wires.size();
             cerr << "\tW plane: " << n << " wires, "
                  << "[" << zmin / units::m << "," << zmax / units::m << "]m, "
-                 << "extent=" << dd / units::cm
-                 << "cm, pitch=" << dd / (n - 1) / units::mm << "mm\n";
+                 << "extent=" << dd / units::cm << "cm, pitch=" << dd / (n - 1) / units::mm << "mm\n";
         }
     }
 }
@@ -77,8 +69,7 @@ void test_read(const char *filename)
 int main(int argc, char *argv[])
 {
     const char *filename = "microboone-celltree-wires-v2.1.json.bz2";
-    if (argc > 1)
-    {
+    if (argc > 1) {
         filename = argv[1];
     }
     test_read(filename);

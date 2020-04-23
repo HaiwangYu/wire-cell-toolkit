@@ -13,12 +13,9 @@
 #include "WireCellIface/WirePlaneId.h"
 #include "WireCellUtil/Logging.h"
 
-namespace WireCell
-{
-    namespace Gen
-    {
-        class DepoTransform : public IDepoFramer, public IConfigurable
-        {
+namespace WireCell {
+    namespace Gen {
+        class DepoTransform : public IDepoFramer, public IConfigurable {
            public:
             DepoTransform();
             virtual ~DepoTransform();
@@ -31,10 +28,7 @@ namespace WireCell
             /// dummy depo modifier
             /// used for the application of the charge scaling bases on dQdx calibration
             /// see the detailed implementation in larwirecell or uboonecode
-            virtual IDepo::pointer modify_depo(WirePlaneId wpid, IDepo::pointer depo)
-            {
-                return depo;
-            }
+            virtual IDepo::pointer modify_depo(WirePlaneId wpid, IDepo::pointer depo) { return depo; }
 
            private:
             IAnodePlane::pointer m_anode;

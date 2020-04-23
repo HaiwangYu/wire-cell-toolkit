@@ -10,10 +10,8 @@
 #include "WireCellUtil/IComponent.h"
 #include "WireCellUtil/Response.h"
 
-namespace WireCell
-{
-    class IFieldResponse : public IComponent<IFieldResponse>
-    {
+namespace WireCell {
+    class IFieldResponse : public IComponent<IFieldResponse> {
        public:
         virtual ~IFieldResponse();
 

@@ -22,13 +22,11 @@ int ZSEndedTrace::tbin() const { return m_chqmap.begin()->first; }
 
 const ZSEndedTrace::ChargeSequence &ZSEndedTrace::charge() const
 {
-    if (!m_charge.size())
-    {
+    if (!m_charge.size()) {
         int first_bin = m_chqmap.begin()->first;
         int last_bin = m_chqmap.rbegin()->first;
         m_charge.resize(last_bin - first_bin + 1, 0);
-        for (auto mit : m_chqmap)
-        {
+        for (auto mit : m_chqmap) {
             m_charge[mit.first - first_bin] = mit.second;
         }
     }

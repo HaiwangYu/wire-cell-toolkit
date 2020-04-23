@@ -12,16 +12,13 @@ Diagnostics::Partial::Partial(int nfreqs, double maxpower)
 {
 }
 
-bool Diagnostics::Partial::
-operator()(const WireCell::Waveform::compseq_t &spec) const
+bool Diagnostics::Partial::operator()(const WireCell::Waveform::compseq_t &spec) const
 {
     const double mag0 = std::abs(spec[0 + 1]);
     double sum = mag0;
-    for (int ind = 1; ind <= nfreqs && ind < (int) spec.size(); ++ind)
-    {
+    for (int ind = 1; ind <= nfreqs && ind < (int) spec.size(); ++ind) {
         const double magi = std::abs(spec[ind + 1]);
-        if (mag0 <= magi)
-        {
+        if (mag0 <= magi) {
             return false;
         }
         sum += magi;
@@ -34,16 +31,14 @@ operator()(const WireCell::Waveform::compseq_t &spec) const
     return sum / (nfreqs + 1) > maxpower;
 }
 
-Diagnostics::Chirp::Chirp(int windowSize, double chirpMinRMS,
-                          double maxNormalNeighborFrac)
+Diagnostics::Chirp::Chirp(int windowSize, double chirpMinRMS, double maxNormalNeighborFrac)
   : windowSize(windowSize)
   , chirpMinRMS(chirpMinRMS)
   , maxNormalNeighborFrac(maxNormalNeighborFrac)
 {
 }
 
-bool Diagnostics::Chirp::operator()(const WireCell::Waveform::realseq_t &sig,
-                                    int &beg, int &end) const
+bool Diagnostics::Chirp::operator()(const WireCell::Waveform::realseq_t &sig, int &beg, int &end) const
 {
     beg = end = -1;
 
@@ -68,59 +63,46 @@ bool Diagnostics::Chirp::operator()(const WireCell::Waveform::realseq_t &sig,
 
     const int numBins = sig.size();
 
-    for (int ibin = 0; ibin < numBins; ibin++)
-    {
+    for (int ibin = 0; ibin < numBins; ibin++) {
         double ADCval = sig[ibin];
 
         runningAmpMean += ADCval;
         runningAmpRMS += ADCval * ADCval;
 
         counter++;
-        if (counter == windowSize)
-        {
+        if (counter == windowSize) {
             runningAmpMean /= (double) windowSize;
             runningAmpRMS /= (double) windowSize;
-            runningAmpRMS =
-                std::sqrt(runningAmpRMS - runningAmpMean * runningAmpMean);
+            runningAmpRMS = std::sqrt(runningAmpRMS - runningAmpMean * runningAmpMean);
 
             RMSfirst = RMSsecond;
             RMSsecond = RMSthird;
             RMSthird = runningAmpRMS;
 
-            if (runningAmpRMS < chirpMinRMS)
-            {
+            if (runningAmpRMS < chirpMinRMS) {
                 numLowRMS++;
             }
 
-            if (ibin >= 3 * windowSize - 1)
-            {
-                if ((RMSsecond < chirpMinRMS) &&
-                    ((RMSfirst > chirpMinRMS) || (RMSthird > chirpMinRMS)))
-                {
+            if (ibin >= 3 * windowSize - 1) {
+                if ((RMSsecond < chirpMinRMS) && ((RMSfirst > chirpMinRMS) || (RMSthird > chirpMinRMS))) {
                     numNormalNeighbors++;
                 }
 
-                if (lowRMSFlag == false)
-                {
-                    if ((RMSsecond < chirpMinRMS) && (RMSthird < chirpMinRMS))
-                    {
+                if (lowRMSFlag == false) {
+                    if ((RMSsecond < chirpMinRMS) && (RMSthird < chirpMinRMS)) {
                         lowRMSFlag = true;
                         firstLowRMSBin = ibin - 2 * windowSize + 1;
                         lastLowRMSBin = ibin - windowSize + 1;
                     }
 
-                    if ((ibin == 3 * windowSize - 1) && (RMSfirst < chirpMinRMS) &&
-                        (RMSsecond < chirpMinRMS))
-                    {
+                    if ((ibin == 3 * windowSize - 1) && (RMSfirst < chirpMinRMS) && (RMSsecond < chirpMinRMS)) {
                         lowRMSFlag = true;
                         firstLowRMSBin = ibin - 3 * windowSize + 1;
                         lastLowRMSBin = ibin - 2 * windowSize + 1;
                     }
                 }
-                else
-                {
-                    if ((RMSsecond < chirpMinRMS) && (RMSthird < chirpMinRMS))
-                    {
+                else {
+                    if ((RMSsecond < chirpMinRMS) && (RMSthird < chirpMinRMS)) {
                         lastLowRMSBin = ibin - windowSize + 1;
                     }
                 }
@@ -132,25 +114,19 @@ bool Diagnostics::Chirp::operator()(const WireCell::Waveform::realseq_t &sig,
         }
     }
 
-    double chirpFrac =
-        ((double) numLowRMS) / (((double) numBins) / ((double) windowSize));
-    double normalNeighborFrac =
-        ((double) numNormalNeighbors) / ((double) numLowRMS);
+    double chirpFrac = ((double) numLowRMS) / (((double) numBins) / ((double) windowSize));
+    double normalNeighborFrac = ((double) numNormalNeighbors) / ((double) numLowRMS);
     if ((numLowRMS > 4) &&
         ((normalNeighborFrac < maxNormalNeighborFrac) ||
-         ((numLowRMS < 2.0 / maxNormalNeighborFrac) &&
-          (lastLowRMSBin - firstLowRMSBin == numLowRMS * windowSize))))
-    {
+         ((numLowRMS < 2.0 / maxNormalNeighborFrac) && (lastLowRMSBin - firstLowRMSBin == numLowRMS * windowSize)))) {
         firstLowRMSBin = std::max(1, firstLowRMSBin - windowSize);
         lastLowRMSBin = std::min(numBins, lastLowRMSBin + 2 * windowSize);
 
-        if ((numBins - lastLowRMSBin) < windowSize)
-        {
+        if ((numBins - lastLowRMSBin) < windowSize) {
             lastLowRMSBin = numBins;
         }
 
-        if (chirpFrac > 0.99)
-        {
+        if (chirpFrac > 0.99) {
             firstLowRMSBin = 1;
             lastLowRMSBin = numBins;
         }

@@ -9,15 +9,11 @@
 #include <string>
 #include <vector>
 
-namespace WireCell
-{
-    namespace String
-    {
-        std::vector<std::string> split(const std::string &in,
-                                       const std::string &delim = ":");
+namespace WireCell {
+    namespace String {
+        std::vector<std::string> split(const std::string &in, const std::string &delim = ":");
 
-        std::pair<std::string, std::string> parse_pair(const std::string &in,
-                                                       const std::string &delim = ":");
+        std::pair<std::string, std::string> parse_pair(const std::string &in, const std::string &delim = ":");
 
         // format_flatten converts from "%"-list to variadic function call.
         template <typename TYPE>

@@ -3,12 +3,10 @@
 
 #include "WireCellIface/IDepo.h"
 
-namespace WireCell
-{
+namespace WireCell {
     /** An interface to information about a deposition of charge.
- */
-    class IDepoSet : public IData<IDepoSet>
-    {
+     */
+    class IDepoSet : public IData<IDepoSet> {
        public:
         virtual ~IDepoSet();
 

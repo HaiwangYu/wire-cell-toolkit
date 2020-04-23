@@ -13,8 +13,7 @@ array_xxf my_great_array(ExecMon &em, int nrows, int ncols)
     std::stringstream ss;
     ss << "array(" << nrows << "," << ncols << ")";
     em(ss.str() + ": constructing");
-    array_xxf arr =
-        Eigen::ArrayXXf::Random(nrows, ncols);  // 197 ms opt, 646 ms debug.
+    array_xxf arr = Eigen::ArrayXXf::Random(nrows, ncols);  // 197 ms opt, 646 ms debug.
     em(ss.str() + ": constructed");
 
     return arr;
@@ -31,8 +30,7 @@ void test_copy(ExecMon &em)
         em("array by value: returned");
 
         // This loop over 100 copies takes 19.513 s (debug), 1.715 s (opt)
-        for (int ind = 0; ind < 100; ++ind)
-        {
+        for (int ind = 0; ind < 100; ++ind) {
             array_xxf tmp = dup(arr);
         }
         em("array by value: 100 dups");
@@ -57,18 +55,15 @@ bool same(const arrtype &a1, const arrtype &a2, double eps = 1.0e-6)
 {
     double n1 = a1.matrix().squaredNorm();
     double n2 = a2.matrix().squaredNorm();
-    if (n1 == n2)
-    {
+    if (n1 == n2) {
         return true;
     }
-    if (n2 == 0.0)
-    {
+    if (n2 == 0.0) {
         cerr << "norm2=0, norm1=" << n2 << endl;
         return false;
     }
     double diff = std::abs(1 - n1 / n2);
-    if (diff > eps)
-    {
+    if (diff > eps) {
         cerr << "differ: " << diff << " n1=" << n1 << " n2=" << n2 << endl;
     }
     return (diff <= eps);
@@ -98,14 +93,12 @@ void test_partial(ExecMon &em)
 
     const int nrounds = 100;
 
-    for (int count = 0; count < nrounds; ++count)
-    {
+    for (int count = 0; count < nrounds; ++count) {
         auto spec = dft(arr);
         auto orig = idft(spec);
     }
     em("test_partial: direct round trip");
-    for (int count = 0; count < nrounds; ++count)
-    {
+    for (int count = 0; count < nrounds; ++count) {
         auto spec_rc = dft_rc(arr);
         auto spec_cc = dft_cc(spec_rc);
         auto arr2_cc = idft_cc(spec_cc);
@@ -123,15 +116,13 @@ void test_dft(ExecMon &em)
 
     auto arr = my_great_array(em, nrows, ncols);
     em("dft: make array");
-    for (int count = 0; count < nrounds; ++count)
-    {
+    for (int count = 0; count < nrounds; ++count) {
         auto spec = dft(arr);
         auto orig = idft(spec);
     }
     em("dft with floats");
 #ifdef WCT_HACK_FOR_FFTW_NO_SP
-    for (int count = 0; count < nrounds; ++count)
-    {
+    for (int count = 0; count < nrounds; ++count) {
         auto spec = dftd(arr);
         auto orig = idftd(spec);
     }
@@ -167,26 +158,20 @@ void test_division(ExecMon &em)
     arr1 << 0.0, 1.0, 2.0, 3.0, 4.0, 5.0;
     arr2 << 0.0, 0.5, 0.0, 2.0, 0.0, -5.0;
     arr3 = arr1 / arr2;
-    cerr << "arr3 before NaN zeroing\n"
-         << arr3 << endl;
+    cerr << "arr3 before NaN zeroing\n" << arr3 << endl;
 
-    for (int irow = 0; irow < arr3.rows(); ++irow)
-    {
-        for (int icol = 0; icol < arr3.cols(); ++icol)
-        {
+    for (int irow = 0; irow < arr3.rows(); ++irow) {
+        for (int icol = 0; icol < arr3.cols(); ++icol) {
             float val = arr3(irow, icol);
-            if (std::isnan(val))
-            {
+            if (std::isnan(val)) {
                 arr3(irow, icol) = -0.0;
             }
-            if (std::isinf(val))
-            {
+            if (std::isinf(val)) {
                 arr3(irow, icol) = 0.0;
             }
         }
     }
-    cerr << "arr3 after NaN zeroing\n"
-         << arr3 << endl;
+    cerr << "arr3 after NaN zeroing\n" << arr3 << endl;
 }
 
 void test_division_complex(ExecMon &em)
@@ -195,26 +180,20 @@ void test_division_complex(ExecMon &em)
     arr1 << 0.0, 1.0, 2.0, 3.0, 4.0, 5.0;
     arr2 << 0.0, 0.5, 0.0, 2.0, 0.0, -5.0;
     arr3 = arr1 / arr2;
-    cerr << "arr3 before NaN zeroing\n"
-         << arr3 << endl;
+    cerr << "arr3 before NaN zeroing\n" << arr3 << endl;
 
-    for (int irow = 0; irow < arr3.rows(); ++irow)
-    {
-        for (int icol = 0; icol < arr3.cols(); ++icol)
-        {
+    for (int irow = 0; irow < arr3.rows(); ++irow) {
+        for (int icol = 0; icol < arr3.cols(); ++icol) {
             float val = abs(arr3(irow, icol));
-            if (std::isnan(val))
-            {
+            if (std::isnan(val)) {
                 arr3(irow, icol) = -0.0;
             }
-            if (std::isinf(val))
-            {
+            if (std::isinf(val)) {
                 arr3(irow, icol) = 0.0;
             }
         }
     }
-    cerr << "arr3 after NaN zeroing\n"
-         << arr3 << endl;
+    cerr << "arr3 after NaN zeroing\n" << arr3 << endl;
 }
 
 int main()

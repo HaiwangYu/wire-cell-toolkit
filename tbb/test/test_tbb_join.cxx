@@ -10,8 +10,7 @@
 #include <iostream>
 using namespace std;
 
-struct CountDown
-{
+struct CountDown {
     const int index;
     int count;
     CountDown(int index, int n = 10)
@@ -22,8 +21,7 @@ struct CountDown
     }
     bool operator()(int &x)
     {
-        if (!count)
-        {
+        if (!count) {
             cerr << "CountDown(" << index << "): EOS\n";
             return false;
         }
@@ -33,21 +31,18 @@ struct CountDown
     }
 };
 
-struct MyJoin
-{
+struct MyJoin {
     bool operator()(const vector<int> &in, int &out)
     {
         out = 0;
-        for (auto x : in)
-        {
+        for (auto x : in) {
             out += x;
         }
         return true;
     }
 };
 
-struct Chirp
-{
+struct Chirp {
     void operator()(const int &x) { cerr << x << endl; }
 };
 
@@ -55,15 +50,13 @@ struct Chirp
 typedef tbb::flow::receiver<int> int_receiver;
 
 template <class TupleType, int N>
-struct TupleHelper
-{
+struct TupleHelper {
     TupleHelper<TupleType, N - 1> nm1helper;
 
     vector<int_receiver *> input_ports(tbb::flow::join_node<TupleType> &jn)
     {
         vector<int_receiver *> ret = nm1helper.input_ports(jn);
-        int_receiver *rec =
-            dynamic_cast<int_receiver *>(&tbb::flow::input_port<N - 1>(jn));
+        int_receiver *rec = dynamic_cast<int_receiver *>(&tbb::flow::input_port<N - 1>(jn));
         ret.insert(ret.begin(), rec);
         return ret;
     }
@@ -81,12 +74,8 @@ struct TupleHelper
 };
 
 template <class TupleType>
-struct TupleHelper<TupleType, 0>
-{
-    vector<int_receiver *> input_ports(tbb::flow::join_node<TupleType> &jn)
-    {
-        return vector<int_receiver *>();
-    }
+struct TupleHelper<TupleType, 0> {
+    vector<int_receiver *> input_ports(tbb::flow::join_node<TupleType> &jn) { return vector<int_receiver *>(); }
     vector<int> values(const TupleType &t) { return vector<int>(); }
 };
 
@@ -95,15 +84,13 @@ struct TupleHelper<TupleType, 0>
 // corresponding to a IJoinNode's output.  N is given by the
 // IJoinNode.
 
-struct Adder
-{
+struct Adder {
     int operator()(const vector<int> &in)
     {
         int tot = 0;
         std::string comma = "";
         cerr << "Adding: ";
-        for (auto x : in)
-        {
+        for (auto x : in) {
             tot += x;
             cerr << comma << x;
             comma = " + ";
@@ -121,8 +108,7 @@ int main()
     vector<int_source> countdowns;
 
     int n = 3;  // explicitly nonconst
-    for (int i = 0; i < n; ++i)
-    {
+    for (int i = 0; i < n; ++i) {
         countdowns.push_back(int_source(graph, CountDown(i), false));
     }
 
@@ -134,18 +120,15 @@ int main()
     JoinInt3 jn(graph);
     vector<int_receiver *> jrec = th.input_ports(jn);
 
-    tbb::flow::function_node<std::tuple<int, int, int>, vector<int>> bo(graph, 0,
-                                                                        th);
+    tbb::flow::function_node<std::tuple<int, int, int>, vector<int>> bo(graph, 0, th);
     tbb::flow::function_node<vector<int>, int> fn(graph, 0, Adder());
 
-    for (int i = 0; i < n; ++i)
-    {
+    for (int i = 0; i < n; ++i) {
         make_edge(countdowns[i], *jrec[i]);
     }
     make_edge(jn, bo);
     make_edge(bo, fn);
-    for (int i = 0; i < n; ++i)
-    {
+    for (int i = 0; i < n; ++i) {
         countdowns[i].activate();
     }
 

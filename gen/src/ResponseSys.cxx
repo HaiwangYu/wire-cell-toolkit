@@ -3,14 +3,11 @@
 #include "WireCellUtil/NamedFactory.h"
 #include "WireCellUtil/Response.h"
 
-WIRECELL_FACTORY(ResponseSys, WireCell::Gen::ResponseSys, WireCell::IWaveform,
-                 WireCell::IConfigurable)
+WIRECELL_FACTORY(ResponseSys, WireCell::Gen::ResponseSys, WireCell::IWaveform, WireCell::IConfigurable)
 
 using namespace WireCell;
 
-Gen::ResponseSys::ResponseSys(int nticks, double start, double tick,
-                              double magnitude, double time_smear,
-                              double offset)
+Gen::ResponseSys::ResponseSys(int nticks, double start, double tick, double magnitude, double time_smear, double offset)
 {
     m_cfg["nticks"] = tick;
     m_cfg["start"] = start;
@@ -19,10 +16,7 @@ Gen::ResponseSys::ResponseSys(int nticks, double start, double tick,
     m_cfg["time_smear"] = time_smear;
     m_cfg["offset"] = offset;
 }
-WireCell::Configuration Gen::ResponseSys::default_configuration() const
-{
-    return m_cfg;
-}
+WireCell::Configuration Gen::ResponseSys::default_configuration() const { return m_cfg; }
 void Gen::ResponseSys::configure(const WireCell::Configuration &cfg)
 {
     m_cfg = cfg;
@@ -39,17 +33,8 @@ void Gen::ResponseSys::configure(const WireCell::Configuration &cfg)
     m_wave = sysresp.generate(tbins);
 }
 
-double Gen::ResponseSys::waveform_start() const
-{
-    return m_cfg["start"].asDouble();
-}
+double Gen::ResponseSys::waveform_start() const { return m_cfg["start"].asDouble(); }
 
-double Gen::ResponseSys::waveform_period() const
-{
-    return m_cfg["tick"].asDouble();
-}
+double Gen::ResponseSys::waveform_period() const { return m_cfg["tick"].asDouble(); }
 
-const IWaveform::sequence_type &Gen::ResponseSys::waveform_samples() const
-{
-    return m_wave;
-}
+const IWaveform::sequence_type &Gen::ResponseSys::waveform_samples() const { return m_wave; }

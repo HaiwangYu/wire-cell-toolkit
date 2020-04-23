@@ -7,13 +7,10 @@
 #include "WireCellIface/IConfigurable.h"
 #include "WireCellUtil/Logging.h"
 
-namespace WireCell
-{
-    namespace Img
-    {  // fixme move to sio?
+namespace WireCell {
+    namespace Img {  // fixme move to sio?
 
-        class JsonBlobSetSink : public IBlobSetSink, public IConfigurable
-        {
+        class JsonBlobSetSink : public IBlobSetSink, public IConfigurable {
            public:
             JsonBlobSetSink();
             virtual ~JsonBlobSetSink();

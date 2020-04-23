@@ -15,8 +15,7 @@ Gen::DumpFrames::~DumpFrames() {}
 
 bool Gen::DumpFrames::operator()(const IFrame::pointer &frame)
 {
-    if (!frame)
-    {
+    if (!frame) {
         log->debug("frame sink sees EOS");
         return true;
     }
@@ -24,13 +23,11 @@ bool Gen::DumpFrames::operator()(const IFrame::pointer &frame)
     const int ntraces = traces->size();
 
     std::stringstream ss;
-    ss << "sink frame: #" << frame->ident() << " @" << frame->time() / units::ms
-       << " with " << ntraces << " traces";
+    ss << "sink frame: #" << frame->ident() << " @" << frame->time() / units::ms << " with " << ntraces << " traces";
     {
         std::string comma = "";
         ss << ", frame tags:[";
-        for (auto ftag : frame->frame_tags())
-        {
+        for (auto ftag : frame->frame_tags()) {
             ss << comma << ftag;
             comma = ", ";
         }
@@ -39,8 +36,7 @@ bool Gen::DumpFrames::operator()(const IFrame::pointer &frame)
     {
         std::string comma = "";
         ss << ", trace tags:[";
-        for (auto ftag : frame->trace_tags())
-        {
+        for (auto ftag : frame->trace_tags()) {
             ss << comma << ftag;
             comma = ", ";
         }

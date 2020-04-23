@@ -5,8 +5,7 @@
 
 #include <iostream>
 
-WIRECELL_FACTORY(DepoFanout, WireCell::Gen::DepoFanout, WireCell::IDepoFanout,
-                 WireCell::IConfigurable)
+WIRECELL_FACTORY(DepoFanout, WireCell::Gen::DepoFanout, WireCell::IDepoFanout, WireCell::IConfigurable)
 
 using namespace WireCell;
 using namespace std;
@@ -28,8 +27,7 @@ WireCell::Configuration Gen::DepoFanout::default_configuration() const
 void Gen::DepoFanout::configure(const WireCell::Configuration &cfg)
 {
     int m = get<int>(cfg, "multiplicity", (int) m_multiplicity);
-    if (m <= 0)
-    {
+    if (m <= 0) {
         THROW(ValueError() << errmsg{"DepoFanout multiplicity must be positive"});
     }
     m_multiplicity = m;
@@ -47,8 +45,7 @@ bool Gen::DepoFanout::operator()(const input_pointer &in, output_vector &outv)
     // Note: if "in" indicates EOS, just pass it on
 
     outv.resize(m_multiplicity);
-    for (size_t ind = 0; ind < m_multiplicity; ++ind)
-    {
+    for (size_t ind = 0; ind < m_multiplicity; ++ind) {
         outv[ind] = in;
     }
     return true;

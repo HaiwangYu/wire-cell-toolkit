@@ -17,15 +17,11 @@
 
 #include <string>
 
-namespace WireCell
-{
-    namespace Gen
-    {
-        class NoiseSource : public IFrameSource, public IConfigurable
-        {
+namespace WireCell {
+    namespace Gen {
+        class NoiseSource : public IFrameSource, public IConfigurable {
            public:
-            NoiseSource(const std::string &model = "",
-                        const std::string &anode = "AnodePlane",
+            NoiseSource(const std::string &model = "", const std::string &anode = "AnodePlane",
                         const std::string &rng = "Random");
             // fixme: add constructor that set parameter defaults from c++ for unit tests
             virtual ~NoiseSource();

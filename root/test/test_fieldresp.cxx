@@ -17,13 +17,11 @@ using namespace std;
 int main(int argc, char *argv[])
 {
     std::string frfname = "ub-10-wnormed.json.bz2";
-    if (argc > 1)
-    {
+    if (argc > 1) {
         frfname = argv[1];
         cerr << "Using command line field response file: " << frfname << endl;
     }
-    else
-    {
+    else {
         cerr << "Using default field response file: " << frfname << endl;
     }
 
@@ -49,8 +47,7 @@ int main(int argc, char *argv[])
     // Make a new data set which is the average FR
     Response::Schema::FieldResponse fravg = Response::wire_region_average(fr);
 
-    cerr << "FR with " << fravg.planes[0].paths.size()
-         << " responses per plane\n";
+    cerr << "FR with " << fravg.planes[0].paths.size() << " responses per plane\n";
     /// fixme: why is this is producing 22 responses per plane and not 21?
 
     double period = 0.5 * units::microsecond;
@@ -58,8 +55,7 @@ int main(int argc, char *argv[])
     // convolute with electronics response function
     WireCell::Waveform::compseq_t elec;
     WireCell::Binning tbins(Response::as_array(fravg.planes[0]).cols(), 0,
-                            Response::as_array(fravg.planes[0]).cols() *
-                                fravg.period);
+                            Response::as_array(fravg.planes[0]).cols() * fravg.period);
     Response::ColdElec ce(14.0 * units::mV / units::fC, 2.0 * units::microsecond);
     auto ewave = ce.generate(tbins);
     Waveform::scale(ewave, 1.2 * 4096 / 2000.);
@@ -75,19 +71,16 @@ int main(int argc, char *argv[])
 
     Waveform::realseq_t wfs(9594);
     Waveform::realseq_t ctbins(9594);
-    for (int i = 0; i != 9594; i++)
-    {
+    for (int i = 0; i != 9594; i++) {
         ctbins.at(i) = i * period;
     }
     Waveform::realseq_t ftbins(Response::as_array(fravg.planes[0]).cols());
-    for (int i = 0; i != Response::as_array(fravg.planes[0]).cols(); i++)
-    {
+    for (int i = 0; i != Response::as_array(fravg.planes[0]).cols(); i++) {
         ftbins.at(i) = i * fravg.period;
     }
 
     // Convert each average FR to a 2D array
-    for (int ind = 0; ind < 3; ++ind)
-    {
+    for (int ind = 0; ind < 3; ++ind) {
         auto arr = Response::as_array(fravg.planes[ind]);
 
         // do FFT for response ...
@@ -95,10 +88,8 @@ int main(int argc, char *argv[])
         int nrows = c_data.rows();
         int ncols = c_data.cols();
 
-        for (int irow = 0; irow < nrows; ++irow)
-        {
-            for (int icol = 0; icol < ncols; ++icol)
-            {
+        for (int irow = 0; irow < nrows; ++irow) {
+            for (int icol = 0; icol < ncols; ++icol) {
                 c_data(irow, icol) = c_data(irow, icol) * elec.at(icol) * fine_period;
             }
         }
@@ -111,33 +102,25 @@ int main(int argc, char *argv[])
         arr.block(0, ncols - 100, nrows, 100) = arr1;
 
         // redigitize ...
-        for (int irow = 0; irow < nrows; ++irow)
-        {
+        for (int irow = 0; irow < nrows; ++irow) {
             // gtemp = new TGraph();
 
             int fcount = 1;
-            for (int i = 0; i != 9594; i++)
-            {
+            for (int i = 0; i != 9594; i++) {
                 double ctime = ctbins.at(i);
 
                 if (fcount < 1000)
-                    while (ctime > ftbins.at(fcount))
-                    {
+                    while (ctime > ftbins.at(fcount)) {
                         fcount++;
-                        if (fcount >= 1000)
-                            break;
+                        if (fcount >= 1000) break;
                     }
 
-                if (fcount < 1000)
-                {
+                if (fcount < 1000) {
                     // interpolate between fbins.at(fcount - 1) and fbins.at(fcount)
-                    wfs.at(i) =
-                        (ctime - ftbins.at(fcount - 1)) / fravg.period *
-                            arr(irow, fcount - 1) +
-                        (ftbins.at(fcount) - ctime) / fravg.period * arr(irow, fcount);
+                    wfs.at(i) = (ctime - ftbins.at(fcount - 1)) / fravg.period * arr(irow, fcount - 1) +
+                                (ftbins.at(fcount) - ctime) / fravg.period * arr(irow, fcount);
                 }
-                else
-                {
+                else {
                     wfs.at(i) = 0;
                 }
 

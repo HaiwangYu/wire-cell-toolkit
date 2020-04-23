@@ -4,12 +4,9 @@
 #include "WireCellIface/IFrameSink.h"
 #include "WireCellUtil/Logging.h"
 
-namespace WireCell
-{
-    namespace Gen
-    {
-        class DumpFrames : public IFrameSink
-        {
+namespace WireCell {
+    namespace Gen {
+        class DumpFrames : public IFrameSink {
            public:
             DumpFrames();
             virtual ~DumpFrames();

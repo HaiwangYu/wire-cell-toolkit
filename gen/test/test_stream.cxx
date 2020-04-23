@@ -8,8 +8,7 @@
 #include <set>
 #include <string>
 
-struct MyData
-{
+struct MyData {
     int i;
     float f;
     double d;
@@ -25,24 +24,21 @@ struct MyData
 
 std::ostream &operator<<(std::ostream &o, const MyData &md)
 {
-    o << "<MyData i:" << md.i << " f:" << md.f << " d:" << md.d << " s:\"" << md.s
-      << "\">";
+    o << "<MyData i:" << md.i << " f:" << md.f << " d:" << md.d << " s:\"" << md.s << "\">";
     return o;
 }
 
 typedef std::shared_ptr<const MyData> MyDataPtr;
 typedef std::set<MyDataPtr> MyDataStore;
 
-class IMySource
-{
+class IMySource {
    public:
     virtual ~IMySource() {}
     virtual MyDataPtr operator()() = 0;
     virtual bool eof() = 0;
 };
 
-class MyGen : virtual public IMySource
-{
+class MyGen : virtual public IMySource {
     int m_count;
     int m_max;
 
@@ -61,14 +57,12 @@ class MyGen : virtual public IMySource
     }
     virtual bool eof()
     {
-        if (m_max < 0)
-            return false;
+        if (m_max < 0) return false;
         return m_count >= m_max;
     }
 };
 
-class MyFilter : virtual public IMySource
-{
+class MyFilter : virtual public IMySource {
     IMySource &m_src;
     int m_mod;
 
@@ -82,11 +76,9 @@ class MyFilter : virtual public IMySource
 
     virtual MyDataPtr operator()()
     {
-        while (!m_src.eof())
-        {
+        while (!m_src.eof()) {
             MyDataPtr p = m_src();
-            if (0 == p->i % m_mod)
-            {
+            if (0 == p->i % m_mod) {
                 return p;
             }
         }
@@ -102,8 +94,7 @@ int main()
     MyGen mg(10);
     MyFilter mf(mg);
     MyDataPtr p;
-    while ((p = mf()))
-    {
+    while ((p = mf())) {
         cerr << *p << endl;
     }
 }

@@ -5,12 +5,9 @@
 #include "WireCellIface/IConfigurable.h"
 #include "WireCellIface/IFrameSource.h"
 
-namespace WireCell
-{
-    namespace Root
-    {
-        class CelltreeSource : public IFrameSource, public IConfigurable
-        {
+namespace WireCell {
+    namespace Root {
+        class CelltreeSource : public IFrameSource, public IConfigurable {
            public:
             CelltreeSource();
             virtual ~CelltreeSource();

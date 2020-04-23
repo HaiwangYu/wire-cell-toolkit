@@ -9,8 +9,7 @@
 #include "WireCellIface/ITensorSet.h"
 #include "WireCellUtil/Exceptions.h"
 
-WIRECELL_FACTORY(Decon2DResponse, WireCell::Sig::Decon2DResponse,
-                 WireCell::ITensorSetFilter, WireCell::IConfigurable)
+WIRECELL_FACTORY(Decon2DResponse, WireCell::Sig::Decon2DResponse, WireCell::ITensorSetFilter, WireCell::IConfigurable)
 
 using namespace WireCell;
 
@@ -26,24 +25,18 @@ Configuration Sig::Decon2DResponse::default_configuration() const
     return cfg;
 }
 
-void Sig::Decon2DResponse::configure(const WireCell::Configuration &cfg)
-{
-    m_cfg = cfg;
-}
+void Sig::Decon2DResponse::configure(const WireCell::Configuration &cfg) { m_cfg = cfg; }
 
-namespace
-{
+namespace {
     std::string dump(const ITensorSet::pointer &itens)
     {
         std::stringstream ss;
         ss << "ITensorSet: ";
         Json::FastWriter jwriter;
         ss << itens->ident() << ", " << jwriter.write(itens->metadata());
-        for (auto iten : *itens->tensors())
-        {
+        for (auto iten : *itens->tensors()) {
             ss << "shape: [";
-            for (auto l : iten->shape())
-            {
+            for (auto l : iten->shape()) {
                 ss << l << " ";
             }
             ss << "]\n";
@@ -52,19 +45,16 @@ namespace
     }
 }  // namespace
 
-bool Sig::Decon2DResponse::operator()(const ITensorSet::pointer &in,
-                                      ITensorSet::pointer &out)
+bool Sig::Decon2DResponse::operator()(const ITensorSet::pointer &in, ITensorSet::pointer &out)
 {
     l->debug("Decon2DResponse: start");
 
-    if (!in)
-    {
+    if (!in) {
         out = nullptr;
         return true;
     }
 
-    if (in->tensors()->size() != 1)
-    {
+    if (in->tensors()->size() != 1) {
         THROW(ValueError() << errmsg{"in->tensors()->size()!=1"});
     }
 
@@ -89,8 +79,7 @@ bool Sig::Decon2DResponse::operator()(const ITensorSet::pointer &in,
     // FIXME use a correct seqno
     int seqno = 0;
     Configuration md;
-    out = std::make_shared<Aux::SimpleTensorSet>(seqno, md,
-                                                 ITensor::shared_vector(itv));
+    out = std::make_shared<Aux::SimpleTensorSet>(seqno, md, ITensor::shared_vector(itv));
 
     l->debug("Decon2DResponse: end");
 

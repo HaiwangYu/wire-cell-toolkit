@@ -13,10 +13,8 @@
 #include "WireCellIface/IFrame.h"
 #include "WireCellIface/IFunctionNode.h"
 
-namespace WireCell
-{
-    class IDepoFramer : public IFunctionNode<IDepoSet, IFrame>
-    {
+namespace WireCell {
+    class IDepoFramer : public IFunctionNode<IDepoSet, IFrame> {
        public:
         virtual ~IDepoFramer();
 

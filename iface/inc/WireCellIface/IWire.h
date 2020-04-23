@@ -11,11 +11,9 @@
 #include <set>
 #include <vector>
 
-namespace WireCell
-{
+namespace WireCell {
     /// Interface to information about a physical wire segment.
-    class IWire : public IData<IWire>
-    {
+    class IWire : public IData<IWire> {
        public:
         virtual ~IWire();
 
@@ -55,12 +53,10 @@ namespace WireCell
     typedef std::pair<IWire::pointer, IWire::pointer> IWirePair;
 
     // A set ordered by wire ident
-    struct IWireCompareIdent
-    {
+    struct IWireCompareIdent {
         bool operator()(const IWire::pointer &lhs, const IWire::pointer &rhs) const
         {
-            if (lhs->ident() == rhs->ident())
-            {
+            if (lhs->ident() == rhs->ident()) {
                 return lhs.get() < rhs.get();  // break tie with pointer
             }
             return lhs->ident() < rhs->ident();
@@ -69,14 +65,12 @@ namespace WireCell
     typedef std::set<IWire::pointer, IWireCompareIdent> IWireSet;
 
     // Compare by wire index
-    struct IWireCompareIndex
-    {
+    struct IWireCompareIndex {
         bool operator()(const IWire::pointer &lhs, const IWire::pointer &rhs) const
         {
             // fixme: should probably do something smarter here if two are not in same
             // plane.....
-            if (lhs->index() == rhs->index())
-            {
+            if (lhs->index() == rhs->index()) {
                 return lhs.get() < rhs.get();  // break tie with pointer
             }
             return lhs->index() < rhs->index();
@@ -85,12 +79,10 @@ namespace WireCell
     typedef std::set<IWire::pointer, IWireCompareIndex> IWireIndexSet;
 
     // A set ordered by wire segment
-    struct IWireCompareSegment
-    {
+    struct IWireCompareSegment {
         bool operator()(const IWire::pointer &lhs, const IWire::pointer &rhs) const
         {
-            if (lhs->segment() == rhs->segment())
-            {
+            if (lhs->segment() == rhs->segment()) {
                 return lhs.get() < rhs.get();  // break tie with pointer
             }
             return lhs->segment() < rhs->segment();

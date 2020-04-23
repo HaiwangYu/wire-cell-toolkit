@@ -8,10 +8,8 @@
 
 #include "WireCellUtil/IComponent.h"
 
-namespace WireCell
-{
-    class IChannelStatus : public IComponent<IChannelStatus>
-    {
+namespace WireCell {
+    class IChannelStatus : public IComponent<IChannelStatus> {
        public:
         virtual ~IChannelStatus();
 

@@ -6,17 +6,14 @@
 
 #include <boost/multi_array.hpp>
 
-namespace WireCell
-{
-    class Diffusion : public IDiffusion
-    {
+namespace WireCell {
+    class Diffusion : public IDiffusion {
         IDepo::pointer m_depo;
         boost::multi_array<double, 2> array;
         double lmin, tmin, lmax, tmax, lbin, tbin;
 
        public:
-        Diffusion(IDepo::pointer depo, int nlong, int ntrans, double lmin,
-                  double tmin, double lmax, double tmax);
+        Diffusion(IDepo::pointer depo, int nlong, int ntrans, double lmin, double tmin, double lmax, double tmax);
 
         Diffusion(const Diffusion &other);
         Diffusion &operator=(const Diffusion &other);

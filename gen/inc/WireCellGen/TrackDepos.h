@@ -9,13 +9,10 @@
 #include <deque>
 #include <tuple>
 
-namespace WireCell
-{
-    namespace Gen
-    {
+namespace WireCell {
+    namespace Gen {
         /// A producer of depositions created from some number of simple, linear tracks.
-        class TrackDepos : public IDepoSource, public IConfigurable
-        {
+        class TrackDepos : public IDepoSource, public IConfigurable {
            public:
             /// Create tracks with depositions every stepsize and assumed
             /// to be traveling at clight.

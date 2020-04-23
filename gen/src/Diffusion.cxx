@@ -1,8 +1,7 @@
 #include "WireCellGen/Diffusion.h"
 using namespace WireCell;
 
-Diffusion::Diffusion(IDepo::pointer depo, int nlong, int ntrans, double lmin,
-                     double tmin, double lmax, double tmax)
+Diffusion::Diffusion(IDepo::pointer depo, int nlong, int ntrans, double lmin, double tmin, double lmax, double tmax)
   : m_depo(depo)
   , array(boost::extents[nlong][ntrans])
   , lmin(lmin)
@@ -50,12 +49,6 @@ double Diffusion::set(int lind, int tind, double value)
     return value;
 }
 
-double Diffusion::lpos(int ind, double offset) const
-{
-    return lmin + (ind + offset) * lbin;
-}
+double Diffusion::lpos(int ind, double offset) const { return lmin + (ind + offset) * lbin; }
 
-double Diffusion::tpos(int ind, double offset) const
-{
-    return tmin + (ind + offset) * tbin;
-}
+double Diffusion::tpos(int ind, double offset) const { return tmin + (ind + offset) * tbin; }

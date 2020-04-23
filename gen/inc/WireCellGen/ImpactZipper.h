@@ -4,17 +4,14 @@
 #include "WireCellGen/BinnedDiffusion.h"
 #include "WireCellIface/IPlaneImpactResponse.h"
 
-namespace WireCell
-{
-    namespace Gen
-    {
+namespace WireCell {
+    namespace Gen {
         /** An ImpactZipper "zips" up through all the impact positions
- * along a wire plane convolving the response functions and
- * the local drifted charge distribution producing a waveform
- * on each central wire.
- */
-        class ImpactZipper
-        {
+         * along a wire plane convolving the response functions and
+         * the local drifted charge distribution producing a waveform
+         * on each central wire.
+         */
+        class ImpactZipper {
             IPlaneImpactResponse::pointer m_pir;
             BinnedDiffusion &m_bd;
 

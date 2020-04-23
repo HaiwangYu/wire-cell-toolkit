@@ -30,51 +30,41 @@ int main(int argc, char **argv)
     int nEnd = 0;
     int id = 0;
 
-    for (int i = 1; i < argc; i++)
-    {
-        if (strcmp(argv[i], "-n") == 0)
-        {
+    for (int i = 1; i < argc; i++) {
+        if (strcmp(argv[i], "-n") == 0) {
             stringstream convert(argv[i + 1]);
-            if (!(convert >> nInputs))
-            {
+            if (!(convert >> nInputs)) {
                 cerr << " ---> Error Scan !" << endl;
                 exit(0);
             }
         }
 
-        if (strcmp(argv[i], "-b") == 0)
-        {
+        if (strcmp(argv[i], "-b") == 0) {
             stringstream convert(argv[i + 1]);
-            if (!(convert >> nBegin))
-            {
+            if (!(convert >> nBegin)) {
                 cerr << " ---> Error Scan !" << endl;
                 exit(0);
             }
         }
 
-        if (strcmp(argv[i], "-e") == 0)
-        {
+        if (strcmp(argv[i], "-e") == 0) {
             stringstream convert(argv[i + 1]);
-            if (!(convert >> nEnd))
-            {
+            if (!(convert >> nEnd)) {
                 cerr << " ---> Error Scan !" << endl;
                 exit(0);
             }
         }
 
-        if (strcmp(argv[i], "-id") == 0)
-        {
+        if (strcmp(argv[i], "-id") == 0) {
             stringstream convert(argv[i + 1]);
-            if (!(convert >> id))
-            {
+            if (!(convert >> id)) {
                 cerr << " ---> Error Scan !" << endl;
                 exit(0);
             }
         }
     }
 
-    if (nInputs == 0 || nBegin == 0 || nEnd == 0 || id == 0)
-    {
+    if (nInputs == 0 || nBegin == 0 || nEnd == 0 || id == 0) {
         cerr << endl
              << " Usage: " << endl
              << "\t"
@@ -82,8 +72,7 @@ int main(int argc, char **argv)
              << endl;
     }
 
-    cout << TString::Format(" ---> nInputs %d, %d, %d", nInputs, nBegin, nEnd)
-         << endl;
+    cout << TString::Format(" ---> nInputs %d, %d, %d", nInputs, nBegin, nEnd) << endl;
 
     const std::vector<double> gains = {7.8 * GUnit, 14.0 * GUnit};
     const std::vector<double> shapings = {1.0 * units::us, 2.0 * units::us};
@@ -102,31 +91,25 @@ int main(int argc, char **argv)
              << endl
              << endl;
 
-        ofstream output(TString::Format("%s_%02d.txt", argv[0], id),
-                        ios::out | ios::trunc);
+        ofstream output(TString::Format("%s_%02d.txt", argv[0], id), ios::out | ios::trunc);
 
         std::vector<int> nsampleslist;
 
-        for (int i = 0; i < nInputs; i++)
-        {
+        for (int i = 0; i < nInputs; i++) {
             int nsamples = nBegin + i;
-            if (nsamples > nEnd)
-                break;
+            if (nsamples > nEnd) break;
             nsampleslist.push_back(nsamples);
         }
 
         const int ntries = 1000;
-        for (auto nsamps : nsampleslist)
-        {
+        for (auto nsamps : nsampleslist) {
             // Response::ColdElec ce(gains[1], shapings[1]);
             // const Binning bins(nsamps, 0, maxtime);
             // Waveform::realseq_t res = ce.generate(bins);
             // Waveform::compseq_t spec;
             Array::array_xxc test_array = Array::array_xxc::Zero(ntries, nsamps);
-            for (int i = 0; i != ntries; i++)
-            {
-                for (int j = 0; j != nsamps; j++)
-                {
+            for (int i = 0; i != ntries; i++) {
+                for (int j = 0; j != nsamps; j++) {
                     test_array(i, j) = std::complex<float>(1.1, 1.3);
                 }
             }
@@ -144,9 +127,7 @@ int main(int argc, char **argv)
             auto t1 = std::chrono::high_resolution_clock::now();
             Array::dft_cc(test_array, 0);
             auto t2 = std::chrono::high_resolution_clock::now();
-            fwd_time = std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1)
-                           .count() /
-                       ntries;
+            fwd_time = std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count() / ntries;
 
             double rev_time = 0.0;
             // for (int itry=0; itry<ntries; ++itry) {
@@ -154,9 +135,7 @@ int main(int argc, char **argv)
             // 	res = Waveform::idft(spec);
             Array::idft_cc(test_array, 0);
             auto t4 = std::chrono::high_resolution_clock::now();
-            rev_time = std::chrono::duration_cast<std::chrono::nanoseconds>(t4 - t3)
-                           .count() /
-                       ntries;
+            rev_time = std::chrono::duration_cast<std::chrono::nanoseconds>(t4 - t3).count() / ntries;
             // }
             // rev_time /= ntries;
 
@@ -168,9 +147,8 @@ int main(int argc, char **argv)
             // 			    0.5*(fwd_time+rev_time)/1000.
             // 			    )<<endl;
 
-            output << TString::Format("%5d %7.2f %9.6f %7.2f %9.6f %7.2f", nsamps,
-                                      fwd_time / 1000., fwd_time / nsamps / 1000.,
-                                      rev_time / 1000., rev_time / nsamps / 1000.,
+            output << TString::Format("%5d %7.2f %9.6f %7.2f %9.6f %7.2f", nsamps, fwd_time / 1000.,
+                                      fwd_time / nsamps / 1000., rev_time / 1000., rev_time / nsamps / 1000.,
                                       0.5 * (fwd_time + rev_time) / 1000.)
                    << endl;
 
@@ -179,8 +157,6 @@ int main(int argc, char **argv)
         output.close();
     }
 
-    cout << endl
-         << " Complete " << endl
-         << endl;
+    cout << endl << " Complete " << endl << endl;
 
 }  // main

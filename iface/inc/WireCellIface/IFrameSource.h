@@ -5,12 +5,10 @@
 #include "WireCellIface/ISourceNode.h"
 #include "WireCellUtil/IComponent.h"
 
-namespace WireCell
-{
+namespace WireCell {
     /** A frame source is something that generates IFrames.
- */
-    class IFrameSource : public ISourceNode<IFrame>
-    {
+     */
+    class IFrameSource : public ISourceNode<IFrame> {
        public:
         typedef std::shared_ptr<IFrameSource> pointer;
 

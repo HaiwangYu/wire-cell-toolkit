@@ -6,17 +6,15 @@
 
 #include <deque>
 
-namespace WireCell
-{
+namespace WireCell {
     /** A source of wire (segment) geometry as generated from parameters.
- *
- * All wires in one plane are constructed to be parallel to
- * one-another and to be equally spaced between neighbors and
- * perpendicular to the drift direction.
- */
+     *
+     * All wires in one plane are constructed to be parallel to
+     * one-another and to be equally spaced between neighbors and
+     * perpendicular to the drift direction.
+     */
 
-    class WireGenerator : public IWireGenerator
-    {
+    class WireGenerator : public IWireGenerator {
        public:
         WireGenerator();
         virtual ~WireGenerator();

@@ -3,12 +3,9 @@
 
 #include "TCanvas.h"
 
-namespace WireCell
-{
-    namespace Test
-    {
-        struct MultiPdf
-        {
+namespace WireCell {
+    namespace Test {
+        struct MultiPdf {
             TCanvas canvas;
             const char *name;
             MultiPdf(const char *name)
@@ -25,8 +22,7 @@ namespace WireCell
             }
             void close()
             {
-                if (name)
-                {
+                if (name) {
                     canvas.Print(Form("%s.pdf]", name), "pdf");
                     name = nullptr;
                 }

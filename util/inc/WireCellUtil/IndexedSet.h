@@ -4,14 +4,12 @@
 #include <unordered_map>
 #include <vector>
 
-namespace WireCell
-{
+namespace WireCell {
     /** IndexedSet - maintain a collection of exactly one thing in a
- * first added order */
+     * first added order */
 
     template <class TYPE>
-    class IndexedSet
-    {
+    class IndexedSet {
        public:
         // the passed objects in order of first seen
 
@@ -26,8 +24,7 @@ namespace WireCell
         int operator()(const TYPE &obj) const
         {
             auto mit = index.find(obj);
-            if (mit != index.end())
-            {
+            if (mit != index.end()) {
                 return mit->second;
             }
             return -1;
@@ -35,8 +32,7 @@ namespace WireCell
         int operator()(const TYPE &obj)
         {
             auto mit = index.find(obj);
-            if (mit != index.end())
-            {
+            if (mit != index.end()) {
                 return mit->second;
             }
             int index_number = collection.size();

@@ -2,8 +2,7 @@
 
 #include "WireCellUtil/NamedFactory.h"
 
-WIRECELL_FACTORY(StripesSink, WireCell::Img::StripesSink,
-                 WireCell::IStripeSetSink)
+WIRECELL_FACTORY(StripesSink, WireCell::Img::StripesSink, WireCell::IStripeSetSink)
 
 using namespace WireCell;
 
@@ -11,8 +10,7 @@ Img::StripesSink::~StripesSink() {}
 
 bool Img::StripesSink::operator()(const IStripeSet::pointer &ss)
 {
-    if (!ss)
-    {
+    if (!ss) {
         return true;
     }
 

@@ -6,28 +6,24 @@
 #include "WireCellIface/IDrifter.h"
 #include "WireCellIface/IDuctor.h"
 
-namespace WireCell
-{
-    namespace Gen
-    {
+namespace WireCell {
+    namespace Gen {
         /** DepoFramer handles simulating the signal from a set of
- * depositions returning a frame of signal voltage traces.
- * The frame ident is taken from the the ident of the input
- * IDepoSet.  It delegates to a "drifter" and a "ductor" to
- * perform bulk drifting through the detector volume and
- * conversion of charge distribution to signals via
- * convolution with field and electronics response,
- * respectively.
- *
- * Because the output frame will span the entire signal
- * corresponding to the sent of input depositions, it is up to
- * the caller to limit this set accordingly.
- */
-        class DepoFramer : public IDepoFramer, public IConfigurable
-        {
+         * depositions returning a frame of signal voltage traces.
+         * The frame ident is taken from the the ident of the input
+         * IDepoSet.  It delegates to a "drifter" and a "ductor" to
+         * perform bulk drifting through the detector volume and
+         * conversion of charge distribution to signals via
+         * convolution with field and electronics response,
+         * respectively.
+         *
+         * Because the output frame will span the entire signal
+         * corresponding to the sent of input depositions, it is up to
+         * the caller to limit this set accordingly.
+         */
+        class DepoFramer : public IDepoFramer, public IConfigurable {
            public:
-            DepoFramer(const std::string &drifter = "Drifter",
-                       const std::string &ductor = "Ductor");
+            DepoFramer(const std::string &drifter = "Drifter", const std::string &ductor = "Ductor");
             virtual ~DepoFramer();
 
             // IDepoFramer interface

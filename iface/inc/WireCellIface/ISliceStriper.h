@@ -5,12 +5,10 @@
 #include "WireCellIface/ISlice.h"
 #include "WireCellIface/IStripeSet.h"
 
-namespace WireCell
-{
+namespace WireCell {
     /** A slice striper produces a set of stripes from a slice.
- */
-    class ISliceStriper : public IFunctionNode<ISlice, IStripeSet>
-    {
+     */
+    class ISliceStriper : public IFunctionNode<ISlice, IStripeSet> {
        public:
         typedef std::shared_ptr<ISliceStriper> pointer;
 

@@ -22,13 +22,10 @@ really?)
 #include "WireCellIface/IConfigurable.h"
 #include "WireCellIface/IDepoSource.h"
 
-namespace WireCell
-{
-    namespace Sio
-    {
+namespace WireCell {
+    namespace Sio {
         class JsonRecombinationAdaptor;
-        class JsonDepoSource : public IDepoSource, public IConfigurable
-        {
+        class JsonDepoSource : public IDepoSource, public IConfigurable {
            public:
             JsonDepoSource();
             virtual ~JsonDepoSource();

@@ -11,12 +11,9 @@
 #include <string>
 #include <unordered_map>
 
-namespace WireCell
-{
-    namespace SigProc
-    {
-        class PerChannelResponse : public IChannelResponse, public IConfigurable
-        {
+namespace WireCell {
+    namespace SigProc {
+        class PerChannelResponse : public IChannelResponse, public IConfigurable {
            public:
             PerChannelResponse(const char *filename = "");
 

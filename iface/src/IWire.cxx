@@ -10,8 +10,7 @@ WireCell::Point WireCell::IWire::center() const
 
 bool WireCell::ascending_index(IWire::pointer lhs, IWire::pointer rhs)
 {
-    if (lhs->planeid() == rhs->planeid())
-    {
+    if (lhs->planeid() == rhs->planeid()) {
         return lhs->index() < rhs->index();
     }
     return lhs->planeid() < lhs->planeid();

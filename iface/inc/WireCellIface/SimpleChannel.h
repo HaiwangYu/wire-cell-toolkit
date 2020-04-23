@@ -5,13 +5,10 @@
 
 #include "WireCellIface/IChannel.h"
 
-namespace WireCell
-{
-    class SimpleChannel : public IChannel
-    {
+namespace WireCell {
+    class SimpleChannel : public IChannel {
        public:
-        SimpleChannel(int ident = -1, int index = -1,
-                      const IWire::vector &wires = IWire::vector());
+        SimpleChannel(int ident = -1, int index = -1, const IWire::vector &wires = IWire::vector());
         virtual ~SimpleChannel();
 
         // IChannel interface

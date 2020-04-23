@@ -15,12 +15,9 @@
 
 #include <unordered_map>
 
-namespace WireCell
-{
-    namespace SigProc
-    {
-        class ChannelSplitter : public IFrameFanout, public IConfigurable
-        {
+namespace WireCell {
+    namespace SigProc {
+        class ChannelSplitter : public IFrameFanout, public IConfigurable {
            public:
             ChannelSplitter(size_t multiplicity = 0);
             virtual ~ChannelSplitter();

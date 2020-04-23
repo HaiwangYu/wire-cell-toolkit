@@ -9,12 +9,9 @@
 #include "WireCellIface/IFrameJoiner.h"
 #include "WireCellUtil/Configuration.h"
 
-namespace WireCell
-{
-    namespace SigProc
-    {
-        class FrameMerger : public IFrameJoiner, public IConfigurable
-        {
+namespace WireCell {
+    namespace SigProc {
+        class FrameMerger : public IFrameJoiner, public IConfigurable {
            public:
             FrameMerger();
             virtual ~FrameMerger();

@@ -7,12 +7,9 @@
 #include "WireCellIface/IConfigurable.h"
 #include "WireCellIface/IFrameJoiner.h"
 
-namespace WireCell
-{
-    namespace Gen
-    {
-        class FrameSummer : public IFrameJoiner, public IConfigurable
-        {
+namespace WireCell {
+    namespace Gen {
+        class FrameSummer : public IFrameJoiner, public IConfigurable {
            public:
             FrameSummer();
             virtual ~FrameSummer();

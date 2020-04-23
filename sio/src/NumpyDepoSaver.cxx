@@ -10,8 +10,7 @@
 #include <tuple>
 #include <vector>
 
-WIRECELL_FACTORY(NumpyDepoSaver, WireCell::Sio::NumpyDepoSaver,
-                 WireCell::IDepoFilter, WireCell::IConfigurable)
+WIRECELL_FACTORY(NumpyDepoSaver, WireCell::Sio::NumpyDepoSaver, WireCell::IDepoFilter, WireCell::IConfigurable)
 
 using namespace WireCell;
 
@@ -35,41 +34,32 @@ WireCell::Configuration Sio::NumpyDepoSaver::default_configuration() const
     return cfg;
 }
 
-void Sio::NumpyDepoSaver::configure(const WireCell::Configuration &config)
-{
-    m_cfg = config;
-}
+void Sio::NumpyDepoSaver::configure(const WireCell::Configuration &config) { m_cfg = config; }
 
 typedef std::tuple<IDepo::pointer, size_t, size_t> depo_gen_child;
 typedef std::vector<depo_gen_child> depos_with_prior;
 
-static void push_depo(depos_with_prior &dp, WireCell::IDepo::pointer depo,
-                      size_t gen = 0, size_t childid = 0)
+static void push_depo(depos_with_prior &dp, WireCell::IDepo::pointer depo, size_t gen = 0, size_t childid = 0)
 {
     dp.push_back(depo_gen_child(depo, gen, childid));
     auto prior = depo->prior();
-    if (!prior)
-    {
+    if (!prior) {
         return;
     }
     push_depo(dp, prior, gen + 1, dp.size());
 }
-static depos_with_prior
-flatten_depos(std::vector<WireCell::IDepo::pointer> depos)
+static depos_with_prior flatten_depos(std::vector<WireCell::IDepo::pointer> depos)
 {
     depos_with_prior ret;
-    for (auto depo : depos)
-    {
+    for (auto depo : depos) {
         push_depo(ret, depo);
     }
     return ret;
 }
 
-bool Sio::NumpyDepoSaver::operator()(const WireCell::IDepo::pointer &indepo,
-                                     WireCell::IDepo::pointer &outdepo)
+bool Sio::NumpyDepoSaver::operator()(const WireCell::IDepo::pointer &indepo, WireCell::IDepo::pointer &outdepo)
 {
-    if (indepo)
-    {
+    if (indepo) {
         outdepo = indepo;
         m_depos.push_back(indepo);
         return true;
@@ -77,8 +67,7 @@ bool Sio::NumpyDepoSaver::operator()(const WireCell::IDepo::pointer &indepo,
     outdepo = nullptr;
 
     const size_t ndepos = m_depos.size();
-    if (!ndepos)
-    {
+    if (!ndepos) {
         std::cerr << "NumpyDepoSaver: warning: EOS and no depos seen.\n";
         return true;
     }
@@ -92,8 +81,7 @@ bool Sio::NumpyDepoSaver::operator()(const WireCell::IDepo::pointer &indepo,
     // ID, pdg, gen, child
     const size_t ninfo = 4;
     Array::array_xxi info(nfdepos, ninfo);
-    for (size_t idepo = 0; idepo != nfdepos; ++idepo)
-    {
+    for (size_t idepo = 0; idepo != nfdepos; ++idepo) {
         auto depogc = fdepos[idepo];
         auto depo = std::get<0>(depogc);
         auto gen = std::get<1>(depogc);

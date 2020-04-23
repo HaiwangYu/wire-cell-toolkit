@@ -20,10 +20,8 @@
 
 #include "WireCellUtil/RayTiling.h"
 
-namespace WireCell
-{
-    class IBlob : public IData<IBlob>
-    {
+namespace WireCell {
+    class IBlob : public IData<IBlob> {
        public:
         virtual ~IBlob();
 

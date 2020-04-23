@@ -10,19 +10,16 @@
 
 #include <deque>
 
-namespace WireCell
-{
-    namespace Gen
-    {
+namespace WireCell {
+    namespace Gen {
         /**  A BinnedDiffusion maintains an association between impact
- * positions along the pitch direction of a wire plane and
- * the diffused depositions that drift to them.
- *
- * It covers a fixed and discretely sampled time and pitch
- * domain.
- */
-        class BinnedDiffusion
-        {
+         * positions along the pitch direction of a wire plane and
+         * the diffused depositions that drift to them.
+         *
+         * It covers a fixed and discretely sampled time and pitch
+         * domain.
+         */
+        class BinnedDiffusion {
            public:
             /** Create a BinnedDiffusion.
 
@@ -45,15 +42,10 @@ namespace WireCell
    */
 
             /// Useful to client code to mark a calculation strategy.
-            enum ImpactDataCalculationStrategy
-            {
-                constant = 1,
-                linear = 2
-            };
+            enum ImpactDataCalculationStrategy { constant = 1, linear = 2 };
 
-            BinnedDiffusion(const Pimpos &pimpos, const Binning &tbins,
-                            double nsigma = 3.0, IRandom::pointer fluctuate = nullptr,
-                            ImpactDataCalculationStrategy calcstrat = linear);
+            BinnedDiffusion(const Pimpos &pimpos, const Binning &tbins, double nsigma = 3.0,
+                            IRandom::pointer fluctuate = nullptr, ImpactDataCalculationStrategy calcstrat = linear);
 
             const Pimpos &pimpos() const { return m_pimpos; }
             const Binning &tbins() const { return m_tbins; }
@@ -80,7 +72,7 @@ namespace WireCell
 
             // test ...
             //	    void get_charge_vec(std::vector<std::vector<std::tuple<int,int,
-            //double> > >& vec_vec_charge, std::vector<int>& vec_impact);
+            // double> > >& vec_vec_charge, std::vector<int>& vec_impact);
 
             /// Return the range of pitch containing depos out to
             /// given nsigma and without bounds checking.

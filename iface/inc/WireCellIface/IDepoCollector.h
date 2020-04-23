@@ -5,17 +5,15 @@
 #include "WireCellIface/IDepoSet.h"
 #include "WireCellIface/IQueuedoutNode.h"
 
-namespace WireCell
-{
+namespace WireCell {
     /** A depo collector if fed depos one at a time, possibly applying
- * some filtering, until some condition is met at which time it
- * produces a DepoSet.
- *
- * No depos will be retained after an EOS is received and it will
- * lead to an EOS being emitted.
- */
-    class IDepoCollector : public IQueuedoutNode<IDepo, IDepoSet>
-    {
+     * some filtering, until some condition is met at which time it
+     * produces a DepoSet.
+     *
+     * No depos will be retained after an EOS is received and it will
+     * lead to an EOS being emitted.
+     */
+    class IDepoCollector : public IQueuedoutNode<IDepo, IDepoSet> {
        public:
         typedef std::shared_ptr<IDepoCollector> pointer;
 

@@ -28,12 +28,9 @@
 
 #include <string>
 
-namespace WireCell
-{
-    namespace Img
-    {
-        class JsonClusterTap : public IClusterFilter, public IConfigurable
-        {
+namespace WireCell {
+    namespace Img {
+        class JsonClusterTap : public IClusterFilter, public IConfigurable {
            public:
             JsonClusterTap();
             virtual ~JsonClusterTap();

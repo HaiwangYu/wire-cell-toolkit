@@ -5,10 +5,8 @@
 
 using namespace WireCell;
 
-namespace WireCell
-{
-    namespace Hio
-    {
+namespace WireCell {
+    namespace Hio {
         std::mutex g_h5cpp_mutex;
     }
 }  // namespace WireCell

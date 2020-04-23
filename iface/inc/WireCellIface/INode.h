@@ -9,17 +9,14 @@
 #include <memory>
 #include <vector>
 
-namespace WireCell
-{
+namespace WireCell {
     /** A data flow node
- */
-    class INode : public IComponent<INode>
-    {
+     */
+    class INode : public IComponent<INode> {
        public:
         virtual ~INode();
 
-        enum NodeCategory
-        {
+        enum NodeCategory {
             unknown,
             sourceNode,     // one pointer output
             sinkNode,       // one pointer input
@@ -51,17 +48,11 @@ namespace WireCell
 
         // Return string representations of the C++ types this node takes as input.
         // When a node is used in a DFP graph, these enumerate the input ports.
-        virtual std::vector<std::string> input_types()
-        {
-            return std::vector<std::string>();
-        }
+        virtual std::vector<std::string> input_types() { return std::vector<std::string>(); }
         // Return string representations of the C++ types this node produces as
         // output. When a node is used in a DFP graph, these enumerate the output
         // ports.
-        virtual std::vector<std::string> output_types()
-        {
-            return std::vector<std::string>();
-        }
+        virtual std::vector<std::string> output_types() { return std::vector<std::string>(); }
 
         /// Optional hook to be implemented in order to reset after an
         /// end of stream is encountered.  Fixme: this should be removed.

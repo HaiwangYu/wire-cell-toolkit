@@ -6,22 +6,17 @@
 #include "WireCellIface/IFrameFilter.h"
 #include "WireCellUtil/Waveform.h"
 
-namespace WireCell
-{
-    namespace SigProc
-    {
-        class OmnibusPMTNoiseFilter : public WireCell::IFrameFilter,
-                                      public WireCell::IConfigurable
-        {
+namespace WireCell {
+    namespace SigProc {
+        class OmnibusPMTNoiseFilter : public WireCell::IFrameFilter, public WireCell::IConfigurable {
            public:
             typedef std::vector<std::vector<int>> grouped_channels_t;
 
             /// Create an OmnibusPMTNoiseFilter.
-            OmnibusPMTNoiseFilter(const std::string anode_tn = "AnodePlane",
-                                  int pad_window = 5, int min_window_length = 4,
-                                  int threshold = 4, float rms_threshold = 0.5,
-                                  int sort_wires = 4, float ind_th1 = 2.0,
-                                  float ind_th2 = 0.5, int nwire_pmt_col_th = 6);
+            OmnibusPMTNoiseFilter(const std::string anode_tn = "AnodePlane", int pad_window = 5,
+                                  int min_window_length = 4, int threshold = 4, float rms_threshold = 0.5,
+                                  int sort_wires = 4, float ind_th1 = 2.0, float ind_th2 = 0.5,
+                                  int nwire_pmt_col_th = 6);
             virtual ~OmnibusPMTNoiseFilter();
 
             /// IFrameFilter interface.
@@ -33,10 +28,8 @@ namespace WireCell
 
             /// Explicitly inject required services
             void IDPMTSignalCollection(Waveform::realseq_t &signal, double rms, int ch);
-            void IDPMTSignalInduction(Waveform::realseq_t &signal, double rms, int ch,
-                                      int plane);
-            void RemovePMTSignal(Waveform::realseq_t &signal, int start_bin, int end_bin,
-                                 int flag = 0);
+            void IDPMTSignalInduction(Waveform::realseq_t &signal, double rms, int ch, int plane);
+            void RemovePMTSignal(Waveform::realseq_t &signal, int start_bin, int end_bin, int flag = 0);
 
            private:
             std::string m_intag, m_outtag;

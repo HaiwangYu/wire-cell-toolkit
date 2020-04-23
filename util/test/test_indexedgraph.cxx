@@ -11,8 +11,7 @@ typedef std::shared_ptr<int> iptr_t;
 typedef std::shared_ptr<float> fptr_t;
 typedef std::variant<iptr_t, fptr_t> if_t;
 
-struct if_node_t
-{
+struct if_node_t {
     if_t ptr;
     if_node_t()
       : ptr()
@@ -34,19 +33,15 @@ struct if_node_t
     bool operator==(const if_node_t &other) const { return ptr == other.ptr; }
 };
 
-namespace std
-{
+namespace std {
     template <>
-    struct hash<if_node_t>
-    {
+    struct hash<if_node_t> {
         std::size_t operator()(const if_node_t &n) const
         {
-            if (std::holds_alternative<iptr_t>(n.ptr))
-            {
+            if (std::holds_alternative<iptr_t>(n.ptr)) {
                 return (size_t)(std::get<iptr_t>(n.ptr).get());
             }
-            if (std::holds_alternative<fptr_t>(n.ptr))
-            {
+            if (std::holds_alternative<fptr_t>(n.ptr)) {
                 return (size_t)(std::get<fptr_t>(n.ptr).get());
             }
             return 0;
@@ -94,20 +89,17 @@ int main()
 
     indexed_graph_t g2(g.graph());
 
-    for (auto n : g2.neighbors(two))
-    {
+    for (auto n : g2.neighbors(two)) {
         Assert(g2.has(n));
     }
 
     std::vector<std::string> names{"one", "two", "tre"};
     std::unordered_map<indexed_graph_t::vdesc_t, std::string> ids;
-    for (auto u : boost::make_iterator_range(vertices(g2.graph())))
-    {
+    for (auto u : boost::make_iterator_range(vertices(g2.graph()))) {
         ids[u] = names[ids.size()];
     }
     boost::default_writer w;
-    boost::write_graphviz(std::cout, g2.graph(), w, w, w,
-                          boost::make_assoc_property_map(ids));
+    boost::write_graphviz(std::cout, g2.graph(), w, w, w, boost::make_assoc_property_map(ids));
 
     return 0;
 }

@@ -7,21 +7,17 @@
 
 // class TFile;
 
-namespace WireCell
-{
-    namespace Root
-    {
-        class RootfileCreation_depos : public IDepoFilter, public IConfigurable
-        {
+namespace WireCell {
+    namespace Root {
+        class RootfileCreation_depos : public IDepoFilter, public IConfigurable {
            public:
             RootfileCreation_depos();
             virtual ~RootfileCreation_depos();
 
-            virtual bool operator()(const WireCell::IDepo::pointer &indepo,
-                                    WireCell::IDepo::pointer &outdepo);
+            virtual bool operator()(const WireCell::IDepo::pointer &indepo, WireCell::IDepo::pointer &outdepo);
 
             /* virtual bool operator()(const IFrame::pointer& in, IFrame::pointer& out);
-   */
+             */
 
             /// IConfigurable
             virtual WireCell::Configuration default_configuration() const;
@@ -32,8 +28,7 @@ namespace WireCell
             void create_file();
         };
 
-        class RootfileCreation_frames : public IFrameFilter, public IConfigurable
-        {
+        class RootfileCreation_frames : public IFrameFilter, public IConfigurable {
            public:
             RootfileCreation_frames();
             virtual ~RootfileCreation_frames();

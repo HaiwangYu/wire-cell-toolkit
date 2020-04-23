@@ -5,18 +5,16 @@
 
 #include <memory>
 
-namespace WireCell
-{
+namespace WireCell {
     /** Abstract base class interface for sequence of data providing
- * facade iterators over abstract base iterators.
- *
- * If a subclass multiply-inherits then one has to do
- * myobj->ISequence<IThisData>::begin() etc or cast to the desired
- * interface.
- */
+     * facade iterators over abstract base iterators.
+     *
+     * If a subclass multiply-inherits then one has to do
+     * myobj->ISequence<IThisData>::begin() etc or cast to the desired
+     * interface.
+     */
     template <class IDataClass>
-    class ISequence
-    {  // note: not a WireCell::Interface
+    class ISequence {  // note: not a WireCell::Interface
        public:
         typedef ISequence<IDataClass> this_type;
 
@@ -55,11 +53,10 @@ namespace WireCell
     };
 
     /** An ISequence made by adapting begin/end iterators of some
- * other type.
- */
+     * other type.
+     */
     template <class IDataClass>
-    class SequenceAdapter : public ISequence<IDataClass>
-    {
+    class SequenceAdapter : public ISequence<IDataClass> {
        public:
         typedef typename ISequence<IDataClass>::iterator iterator;
 

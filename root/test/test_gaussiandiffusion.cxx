@@ -35,25 +35,21 @@ void test_binint()
     cerr << "erf(+1) = " << std::erf(+1.0) << endl;
     cerr << "erf(-1) = " << std::erf(-1.0) << endl;
 
-    for (size_t ind = 0; ind < nbinsv.size(); ++ind)
-    {
+    for (size_t ind = 0; ind < nbinsv.size(); ++ind) {
         const int nbins = nbinsv[ind];
         Binning b(nbins, xmin, xmax);
         auto bi = gd.binint(b.min(), b.binsize(), nbins);
         TH1F *h = new TH1F("h", "binint Gaussian per binsize", nbins, xmin, xmax);
-        for (int bin = 0; bin < nbins; ++bin)
-        {
+        for (int bin = 0; bin < nbins; ++bin) {
             h->Fill(b.center(bin), bi[bin] / b.binsize());
         }
         const double integ = h->Integral();
         cerr << ind << " integ=" << b.binsize() * integ << " raw=" << integ << endl;
         h->SetLineColor(color[ind]);
-        if (ind)
-        {
+        if (ind) {
             h->Draw("HIST,SAME");
         }
-        else
-        {
+        else {
             h->Draw("HIST");
         }
     }
@@ -99,8 +95,8 @@ void test_gd(IRandom::pointer fluctuate)
     Gen::GaussianDiffusion gd(depo, tdesc, pdesc);
 
     /// Rastering to an array is delayed
-    cerr << "Set sampling: tbins=" << tbins << ", pbins=" << pbins
-         << ", nsigma=" << nsigma << ", fluctuate:" << fluctuate << endl;
+    cerr << "Set sampling: tbins=" << tbins << ", pbins=" << pbins << ", nsigma=" << nsigma
+         << ", fluctuate:" << fluctuate << endl;
     gd.set_sampling(tbins, pbins, nsigma, fluctuate);
 
     /// patch only covers +/- nsigma
@@ -122,19 +118,16 @@ void test_gd(IRandom::pointer fluctuate)
     marker->SetMarkerStyle(5);
     cerr << "center t=" << t_center / tunit << ", p=" << p_center / punit << endl;
 
-    TH2F *hist = new TH2F("patch1", "Diffusion Patch", tbins.nbins(),
-                          tbins.min() / tunit, tbins.max() / tunit, pbins.nbins(),
-                          pbins.min() / punit, pbins.max() / punit);
+    TH2F *hist = new TH2F("patch1", "Diffusion Patch", tbins.nbins(), tbins.min() / tunit, tbins.max() / tunit,
+                          pbins.nbins(), pbins.min() / punit, pbins.max() / punit);
 
     double total = 0.0;
     hist->SetXTitle("time (us)");
     hist->SetYTitle("pitch (mm)");
-    for (int it = 0; it < patch.cols(); ++it)
-    {
+    for (int it = 0; it < patch.cols(); ++it) {
         double tval = tbins.center(it + toffset);
         Assert(tbins.inside(tval));
-        for (int ip = 0; ip < patch.rows(); ++ip)
-        {
+        for (int ip = 0; ip < patch.rows(); ++ip) {
             double pval = pbins.edge(ip + poffset) + 0.0001;
             Assert(pbins.inside(pval));
             const double value = patch(ip, it);
@@ -145,8 +138,7 @@ void test_gd(IRandom::pointer fluctuate)
     hist->Write();
     hist->Draw("colz");
     marker->Draw();
-    cerr << "total=" << total << " integ=" << hist->Integral()
-         << " maximum=" << hist->GetMaximum() << endl;
+    cerr << "total=" << total << " integ=" << hist->Integral() << " maximum=" << hist->GetMaximum() << endl;
 }
 
 int main(int argc, char *argv[])
@@ -163,8 +155,7 @@ int main(int argc, char *argv[])
     const char *me = argv[0];
 
     TApplication *theApp = 0;
-    if (argc > 1)
-    {
+    if (argc > 1) {
         theApp = new TApplication(me, 0, 0);
     }
     TFile output(Form("%s.root", me), "RECREATE");
@@ -180,12 +171,10 @@ int main(int argc, char *argv[])
     test_gd(rng);
     canvas.Print(Form("%s.pdf", me), "pdf");
 
-    if (theApp)
-    {
+    if (theApp) {
         theApp->Run();
     }
-    else
-    {  // batch
+    else {  // batch
         canvas.Print(Form("%s.pdf]", me), "pdf");
     }
 

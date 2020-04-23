@@ -3,40 +3,32 @@
 using namespace WireCell;
 using namespace std;
 
-WireCell::Configuration WireCell::branch(WireCell::Configuration cfg,
-                                         const std::string &dotpath)
+WireCell::Configuration WireCell::branch(WireCell::Configuration cfg, const std::string &dotpath)
 {
     std::vector<std::string> path;
     boost::algorithm::split(path, dotpath, boost::algorithm::is_any_of("."));
-    for (auto name : path)
-    {
+    for (auto name : path) {
         cfg = cfg[name];
     }
     return cfg;
 }
 
 // http://stackoverflow.com/a/23860017
-WireCell::Configuration WireCell::update(WireCell::Configuration &a,
-                                         WireCell::Configuration &b)
+WireCell::Configuration WireCell::update(WireCell::Configuration &a, WireCell::Configuration &b)
 {
-    if (a.isNull())
-    {
+    if (a.isNull()) {
         a = b;
         return b;
     }
-    if (!a.isObject() || !b.isObject())
-    {
+    if (!a.isObject() || !b.isObject()) {
         return a;
     }
 
-    for (const auto &key : b.getMemberNames())
-    {
-        if (a[key].isObject())
-        {
+    for (const auto &key : b.getMemberNames()) {
+        if (a[key].isObject()) {
             update(a[key], b[key]);
         }
-        else
-        {
+        else {
             a[key] = b[key];
         }
     }
@@ -47,12 +39,10 @@ WireCell::Configuration WireCell::update(WireCell::Configuration &a,
 WireCell::Configuration WireCell::append(Configuration &a, Configuration &b)
 {
     Configuration ret(Json::arrayValue);
-    for (auto x : a)
-    {
+    for (auto x : a) {
         ret.append(x);
     }
-    for (auto x : b)
-    {
+    for (auto x : b) {
         ret.append(x);
     }
     return ret;

@@ -8,13 +8,10 @@
 #include <string>
 #include <vector>
 
-namespace WireCell
-{
-    namespace Gen
-    {
+namespace WireCell {
+    namespace Gen {
         // Fan in N frames to one.
-        class FrameFanin : public IFrameFanin, public IConfigurable
-        {
+        class FrameFanin : public IFrameFanin, public IConfigurable {
            public:
             FrameFanin(size_t multiplicity = 2);
             virtual ~FrameFanin();

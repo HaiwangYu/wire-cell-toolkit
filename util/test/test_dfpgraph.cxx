@@ -45,8 +45,7 @@ int main()
     DfpGraph dfp;
     dfp.configure(cfg["edges"]);
 
-    for (auto thc : dfp.connections())
-    {
+    for (auto thc : dfp.connections()) {
         auto tail = get<0>(thc);
         auto head = get<1>(thc);
         auto conn = get<2>(thc);

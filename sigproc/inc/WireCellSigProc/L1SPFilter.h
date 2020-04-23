@@ -12,16 +12,12 @@
 #include "WireCellIface/SimpleTrace.h"
 #include "WireCellUtil/Interpolate.h"
 
-namespace WireCell
-{
-    namespace SigProc
-    {
-        class L1SPFilter : public IFrameFilter, public IConfigurable
-        {
+namespace WireCell {
+    namespace SigProc {
+        class L1SPFilter : public IFrameFilter, public IConfigurable {
            public:
-            L1SPFilter(double gain = 14.0 * units::mV / units::fC,
-                       double shaping = 2.2 * units::microsecond, double postgain = 1.2,
-                       double ADC_mV = 4096 / (2000. * units::mV),
+            L1SPFilter(double gain = 14.0 * units::mV / units::fC, double shaping = 2.2 * units::microsecond,
+                       double postgain = 1.2, double ADC_mV = 4096 / (2000. * units::mV),
                        double fine_time_offset = 0.0 * units::microsecond,
                        double coarse_time_offset = -8.0 * units::microsecond);
             virtual ~L1SPFilter();
@@ -36,8 +32,8 @@ namespace WireCell
             void init_resp();
 
             int L1_fit(std::shared_ptr<WireCell::SimpleTrace> &newtrace,
-                       std::shared_ptr<const WireCell::ITrace> &adctrace, int start_tick,
-                       int end_tick, bool flag_shorted = false);
+                       std::shared_ptr<const WireCell::ITrace> &adctrace, int start_tick, int end_tick,
+                       bool flag_shorted = false);
 
            private:
             Configuration m_cfg;

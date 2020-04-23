@@ -4,14 +4,12 @@
 #include "WireCellIface/IFanoutNode.h"
 #include "WireCellIface/ISlice.h"
 
-namespace WireCell
-{
+namespace WireCell {
     /** A slice fan-out component takes 1 input slice and produces one
- * slice on each of its output ports.  What each of those N slices
- * are depends on implementation.
- */
-    class ISliceFanout : public IFanoutNode<ISlice, ISlice, 0>
-    {
+     * slice on each of its output ports.  What each of those N slices
+     * are depends on implementation.
+     */
+    class ISliceFanout : public IFanoutNode<ISlice, ISlice, 0> {
        public:
         virtual ~ISliceFanout();
 

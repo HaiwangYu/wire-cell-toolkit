@@ -9,8 +9,7 @@
 
 #include <vector>
 
-namespace WireCell
-{
+namespace WireCell {
     /**
    Use like:
 
@@ -22,8 +21,7 @@ namespace WireCell
 
  */
     template <class Real>
-    class linterp
-    {
+    class linterp {
        public:
         template <class BidiIterator>
         linterp(BidiIterator f, BidiIterator end_p, Real left_endpoint, Real step)
@@ -36,10 +34,8 @@ namespace WireCell
 
         Real operator()(Real x) const
         {
-            if (x <= m_le)
-                return m_dat.front();
-            if (x >= m_re)
-                return m_dat.back();
+            if (x <= m_le) return m_dat.front();
+            if (x >= m_re) return m_dat.back();
 
             int ind = int((x - m_le) / m_step);
             Real y0 = m_dat[ind];

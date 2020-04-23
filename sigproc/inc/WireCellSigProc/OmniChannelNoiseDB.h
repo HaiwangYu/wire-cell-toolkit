@@ -18,13 +18,9 @@
 #include <unordered_map>
 #include <vector>
 
-namespace WireCell
-{
-    namespace SigProc
-    {
-        class OmniChannelNoiseDB : public WireCell::IChannelNoiseDatabase,
-                                   public WireCell::IConfigurable
-        {
+namespace WireCell {
+    namespace SigProc {
+        class OmniChannelNoiseDB : public WireCell::IChannelNoiseDatabase, public WireCell::IConfigurable {
            public:
             /// Create a configurable channel noise DB for digitized
             /// waveforms with the given size and number of samples.
@@ -64,10 +60,7 @@ namespace WireCell
 
             // todo:
 
-            virtual std::vector<channel_group_t> coherent_channels() const
-            {
-                return m_channel_groups;
-            }
+            virtual std::vector<channel_group_t> coherent_channels() const { return m_channel_groups; }
             virtual channel_group_t bad_channels() const { return m_bad_channels; }
             virtual channel_group_t miscfg_channels() const { return m_miscfg_channels; }
 
@@ -80,10 +73,7 @@ namespace WireCell
             // multiple times
 
             // Override the bad channels.
-            virtual void set_bad_channels(const channel_group_t &bad)
-            {
-                m_bad_channels = bad;
-            }
+            virtual void set_bad_channels(const channel_group_t &bad) { m_bad_channels = bad; }
 
             // Override the reconfigured spectrum for a set of
             // channels.  If `reset` is true then all channels
@@ -91,10 +81,8 @@ namespace WireCell
             // the reconfig spectrum associated with the given from/to
             // gain/shaping.  If false, then other channels are not
             // touched.
-            virtual void set_misconfigured(const std::vector<int> &channels,
-                                           double from_gain, double from_shaping,
-                                           double to_gain, double to_shaping,
-                                           bool reset = false);
+            virtual void set_misconfigured(const std::vector<int> &channels, double from_gain, double from_shaping,
+                                           double to_gain, double to_shaping, bool reset = false);
 
            private:
             double m_tick;
@@ -107,13 +95,11 @@ namespace WireCell
             typedef std::vector<shared_filter_t> filter_vector_t;
 
             // Embody the "database" entry for one channel.
-            struct ChannelInfo
-            {
+            struct ChannelInfo {
                 int chid;
 
                 // direct scalar values
-                double nominal_baseline, gain_correction, response_offset, min_rms_cut,
-                    max_rms_cut;
+                double nominal_baseline, gain_correction, response_offset, min_rms_cut, max_rms_cut;
                 int pad_window_front, pad_window_back;
 
                 float decon_limit;
@@ -139,14 +125,12 @@ namespace WireCell
             const ChannelInfo &dbget(int ch) const
             {
                 auto it = m_db.find(ch);
-                if (it == m_db.end())
-                {
+                if (it == m_db.end()) {
                     // it = m_db.find(defch);
                     // return *(it->second);
                     // m_db.insert(std::make_pair(ch, new ChannelInfo));
                     // return *(m_db[ch]);
-                    THROW(KeyError() << errmsg{
-                              String::format("no db info for channel %d", ch)});
+                    THROW(KeyError() << errmsg{String::format("no db info for channel %d", ch)});
                 }
                 return it->second;
                 // return m_db.at(ch);
@@ -158,15 +142,13 @@ namespace WireCell
 
             // JSON parsing.  Exhausting.
             std::vector<int> parse_channels(const Json::Value &jchannels);
-            shared_filter_t
-            make_filter(std::complex<float> defval = std::complex<float>(1, 0));
+            shared_filter_t make_filter(std::complex<float> defval = std::complex<float>(1, 0));
             shared_filter_t default_filter();
             shared_filter_t parse_freqmasks(Json::Value jfm);
             shared_filter_t parse_rcrc(Json::Value jrcrc, int nrc);
             double parse_gain(Json::Value jreconfig);
             shared_filter_t parse_reconfig(Json::Value jreconfig);
-            shared_filter_t get_reconfig(double from_gain, double from_shaping,
-                                         double to_gain, double to_shaping);
+            shared_filter_t get_reconfig(double from_gain, double from_shaping, double to_gain, double to_shaping);
             shared_filter_t parse_response(Json::Value jreconfig);
             // ChannelInfo* make_ci(int chid, Json::Value jci);
             void update_channels(Json::Value cfg);

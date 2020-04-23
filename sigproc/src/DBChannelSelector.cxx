@@ -5,8 +5,8 @@
 
 #include "WireCellUtil/NamedFactory.h"
 
-WIRECELL_FACTORY(DBChannelSelector, WireCell::SigProc::DBChannelSelector,
-                 WireCell::IFrameFilter, WireCell::IConfigurable)
+WIRECELL_FACTORY(DBChannelSelector, WireCell::SigProc::DBChannelSelector, WireCell::IFrameFilter,
+                 WireCell::IConfigurable)
 
 using namespace WireCell;
 using namespace WireCell::SigProc;
@@ -34,25 +34,20 @@ void DBChannelSelector::configure(const WireCell::Configuration &cfg)
 
     // channels from database
     auto jcndb = cfg["channelDB"];
-    if (!jcndb.empty())
-    {
+    if (!jcndb.empty()) {
         m_db = Factory::find_tn<IChannelNoiseDatabase>(jcndb.asString());
         std::cerr << "DBChannelSelector: using channel database object: "
                   << " \"" << jcndb.asString() << "\" type: \"" << m_type << "\"\n";
     }
-    else
-    {
+    else {
         THROW(ValueError() << errmsg{"DBChannelSelector: no database configured"});
     }
 }
 
-bool DBChannelSelector::operator()(const input_pointer &in,
-                                   output_pointer &out)
+bool DBChannelSelector::operator()(const input_pointer &in, output_pointer &out)
 {
-    if (m_type == "bad")
-        ChannelSelector::set_channels(m_db->bad_channels());
-    if (m_type == "misconfigured")
-        ChannelSelector::set_channels(m_db->miscfg_channels());
+    if (m_type == "bad") ChannelSelector::set_channels(m_db->bad_channels());
+    if (m_type == "misconfigured") ChannelSelector::set_channels(m_db->miscfg_channels());
     // std::vector<int> miscfg_channels = db->miscfg_channels();
     // std::cout << "miscfg channel size: " << miscfg_channels.size() <<"\n";
     // for(size_t i=0; i< miscfg_channels.size(); i++) {

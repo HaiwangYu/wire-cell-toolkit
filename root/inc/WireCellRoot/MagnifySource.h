@@ -11,12 +11,9 @@
 #include "WireCellIface/IConfigurable.h"
 #include "WireCellIface/IFrameSource.h"
 
-namespace WireCell
-{
-    namespace Root
-    {
-        class MagnifySource : public IFrameSource, public IConfigurable
-        {
+namespace WireCell {
+    namespace Root {
+        class MagnifySource : public IFrameSource, public IConfigurable {
            public:
             MagnifySource();
             virtual ~MagnifySource();

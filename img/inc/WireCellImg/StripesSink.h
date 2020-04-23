@@ -4,11 +4,9 @@
 #include "WireCellIface/ISinkNode.h"
 #include "WireCellIface/IStripeSet.h"
 
-namespace WireCell
-{
+namespace WireCell {
     // don't bother with an intermediate stripe set sink node interface...
-    class IStripeSetSink : public ISinkNode<IStripeSet>
-    {
+    class IStripeSetSink : public ISinkNode<IStripeSet> {
        public:
         typedef std::shared_ptr<IStripeSetSink> pointer;
 
@@ -17,10 +15,8 @@ namespace WireCell
         virtual std::string signature() { return typeid(IStripeSetSink).name(); }
     };
 
-    namespace Img
-    {
-        class StripesSink : public IStripeSetSink
-        {
+    namespace Img {
+        class StripesSink : public IStripeSetSink {
            public:
             virtual ~StripesSink();
 

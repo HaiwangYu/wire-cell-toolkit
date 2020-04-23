@@ -7,10 +7,8 @@
 #include "WireCellIface/IQueuedoutNode.h"
 #include "WireCellTbb/NodeWrapper.h"
 
-namespace WireCellTbb
-{
-    class QueuedoutBody
-    {
+namespace WireCellTbb {
+    class QueuedoutBody {
         WireCell::IQueuedoutNodeBase::pointer m_wcnode;
 
        public:
@@ -23,22 +21,18 @@ namespace WireCellTbb
         {
             WireCell::IQueuedoutNodeBase::queuedany outq;
             bool ok = (*m_wcnode)(in, outq);
-            if (!ok)
-            {
+            if (!ok) {
                 return;
             }  // fixme: do something better here!
-            for (auto a : outq)
-            {
+            for (auto a : outq) {
                 std::get<0>(out).try_put(a);
             }
         }
     };
-    class QueuedoutWrapper : public NodeWrapper
-    {
+    class QueuedoutWrapper : public NodeWrapper {
        public:
         QueuedoutWrapper(tbb::flow::graph &graph, WireCell::INode::pointer wcnode)
-          : m_tbbnode(new queuedout_node(graph, wcnode->concurrency(),
-                                         QueuedoutBody(wcnode)))
+          : m_tbbnode(new queuedout_node(graph, wcnode->concurrency(), QueuedoutBody(wcnode)))
         {
         }
         virtual ~QueuedoutWrapper()

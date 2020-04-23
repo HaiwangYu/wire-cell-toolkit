@@ -9,13 +9,11 @@
 #include <string>
 #include <vector>
 
-namespace WireCell
-{
+namespace WireCell {
     /** Interface to a sequence of traces.
- *
- */
-    class IFrame : public IData<IFrame>
-    {
+     *
+     */
+    class IFrame : public IData<IFrame> {
        public:
         virtual ~IFrame();
 

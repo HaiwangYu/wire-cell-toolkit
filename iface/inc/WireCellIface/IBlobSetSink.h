@@ -4,12 +4,10 @@
 #include "WireCellIface/IBlobSet.h"
 #include "WireCellIface/ISinkNode.h"
 
-namespace WireCell
-{
+namespace WireCell {
     /** A blob set sink is a node that consumes IBlobSet objects.
- */
-    class IBlobSetSink : public ISinkNode<IBlobSet>
-    {
+     */
+    class IBlobSetSink : public ISinkNode<IBlobSet> {
        public:
         virtual ~IBlobSetSink();
 

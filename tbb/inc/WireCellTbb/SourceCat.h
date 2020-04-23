@@ -5,11 +5,9 @@
 #include "WireCellIface/ISourceNode.h"
 #include "WireCellTbb/NodeWrapper.h"
 
-namespace WireCellTbb
-{
+namespace WireCellTbb {
     // adapter to convert from WC source node to TBB source node body.
-    class SourceBody
-    {
+    class SourceBody {
         WireCell::ISourceNodeBase::pointer m_wcnode;
 
        public:
@@ -23,8 +21,7 @@ namespace WireCellTbb
     };
 
     // implement facade to access ports for source nodes
-    class SourceNodeWrapper : public NodeWrapper
-    {
+    class SourceNodeWrapper : public NodeWrapper {
         source_node *m_tbbnode;
 
        public:

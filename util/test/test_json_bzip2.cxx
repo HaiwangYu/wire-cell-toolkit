@@ -25,11 +25,9 @@ int main(int argc, char *argv[])
     const int narrays = 100;
     double data[narrays][nbins];
     Json::Value jroot;
-    for (int ind = 0; ind < narrays; ++ind)
-    {
+    for (int ind = 0; ind < narrays; ++ind) {
         Json::Value jarr;
-        for (int ibin = 0; ibin < nbins; ++ibin)
-        {
+        for (int ibin = 0; ibin < nbins; ++ibin) {
             auto number = uni();
             data[ind][ibin] = number;
             jarr.append(number);

@@ -8,10 +8,8 @@
 #include "WireCellIface/ITensorSet.h"
 #include "WireCellUtil/IComponent.h"
 
-namespace WireCell
-{
-    class ITensorSetFilter : public IFunctionNode<ITensorSet, ITensorSet>
-    {
+namespace WireCell {
+    class ITensorSetFilter : public IFunctionNode<ITensorSet, ITensorSet> {
        public:
         typedef std::shared_ptr<ITensorSetFilter> pointer;
 

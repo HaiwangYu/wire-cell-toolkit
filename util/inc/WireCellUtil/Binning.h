@@ -5,15 +5,13 @@
 #include <iostream>  // for ostream
 #include <map>       // for std::pair
 
-namespace WireCell
-{
+namespace WireCell {
     /** A binning is a uniform discretization of a linear space.
 
     This class largely provides methods that give semantic labels
     to various calculations related to a binned region.
 */
-    class Binning
-    {
+    class Binning {
         int m_nbins;
         double m_minval, m_maxval, m_binsize;
 
@@ -62,10 +60,7 @@ namespace WireCell
         double span() const { return m_maxval - m_minval; }
 
         // Binning as a range.
-        std::pair<double, double> range() const
-        {
-            return std::make_pair(m_minval, m_maxval);
-        }
+        std::pair<double, double> range() const { return std::make_pair(m_minval, m_maxval); }
 
         // Return half open range of bin indices or alternatively
         // fully closed range of edge indices.
@@ -86,10 +81,7 @@ namespace WireCell
         /// Return the edge, nominally in [0,nbins] closest to the
         /// given value.  Range checking is not done so returned edge
         /// may be outside of range.
-        int edge_index(double val) const
-        {
-            return int(round((val - m_minval) / m_binsize));
-        }
+        int edge_index(double val) const { return int(round((val - m_minval) / m_binsize)); }
 
         /// Return the position of the given bin edge.  Range checking
         /// is not done.
@@ -106,13 +98,11 @@ namespace WireCell
         /// values.  Bounds are forced to return values in [0,nbins].
         std::pair<int, int> sample_bin_range(double minval, double maxval) const
         {
-            return std::make_pair(std::max(bin(minval), 0),
-                                  std::min(bin(maxval) + 1, m_nbins));
+            return std::make_pair(std::max(bin(minval), 0), std::min(bin(maxval) + 1, m_nbins));
         }
     };
 
-    inline std::ostream &operator<<(std::ostream &os,
-                                    const WireCell::Binning &bins)
+    inline std::ostream &operator<<(std::ostream &os, const WireCell::Binning &bins)
     {
         os << bins.nbins() << "@[" << bins.min() << "," << bins.max() << "]";
         return os;

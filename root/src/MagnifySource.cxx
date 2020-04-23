@@ -8,8 +8,7 @@
 #include "TH2.h"
 #include "TTree.h"
 
-WIRECELL_FACTORY(MagnifySource, WireCell::Root::MagnifySource,
-                 WireCell::IFrameSource, WireCell::IConfigurable)
+WIRECELL_FACTORY(MagnifySource, WireCell::Root::MagnifySource, WireCell::IFrameSource, WireCell::IConfigurable)
 
 using namespace WireCell;
 
@@ -22,8 +21,7 @@ Root::MagnifySource::~MagnifySource() {}
 
 void Root::MagnifySource::configure(const WireCell::Configuration &cfg)
 {
-    if (cfg["filename"].empty())
-    {
+    if (cfg["filename"].empty()) {
         THROW(ValueError() << errmsg{"MagnifySource: must supply input "
                                      "\"filename\" configuration item."});
     }
@@ -55,13 +53,11 @@ bool Root::MagnifySource::operator()(IFrame::pointer &out)
     out = nullptr;
     ++m_calls;
     std::cerr << "MagnifySource: called " << m_calls << " times\n";
-    if (m_calls > 2)
-    {
+    if (m_calls > 2) {
         std::cerr << "MagnifySource: past EOS\n";
         return false;
     }
-    if (m_calls > 1)
-    {
+    if (m_calls > 1) {
         std::cerr << "MagnifySource: EOS\n";
         return true;  // this is to send out EOS
     }
@@ -75,12 +71,10 @@ bool Root::MagnifySource::operator()(IFrame::pointer &out)
     double frame_time = 0;
     {
         TTree *trun = (TTree *) tfile->Get("Trun");
-        if (!trun)
-        {
+        if (!trun) {
             std::cerr << "No tree: Trun in input file \n";
         }
-        else
-        {
+        else {
             // runNo, subRunNo??
             trun->SetBranchAddress("eventNo", &frame_ident);
             trun->SetBranchAddress("total_time_bin", &nticks);
@@ -88,24 +82,20 @@ bool Root::MagnifySource::operator()(IFrame::pointer &out)
             trun->GetEntry(0);
         }
     }
-    std::cerr << "MagnifySource: frame ident=" << frame_ident
-              << ", time=0, nticks=" << nticks << "\n";
+    std::cerr << "MagnifySource: frame ident=" << frame_ident << ", time=0, nticks=" << nticks << "\n";
 
     WireCell::Waveform::ChannelMaskMap cmm;
-    for (auto jcmmtree : m_cfg["cmmtree"])
-    {
+    for (auto jcmmtree : m_cfg["cmmtree"]) {
         auto cmmkey = jcmmtree[0].asString();
         auto treename = jcmmtree[1].asString();
         TTree *tree = dynamic_cast<TTree *>(tfile->Get(treename.c_str()));
-        if (!tree)
-        {
-            std::cerr << "MagnifySource: failed to find tree \"" << treename
-                      << "\" in " << tfile->GetName() << std::endl;
+        if (!tree) {
+            std::cerr << "MagnifySource: failed to find tree \"" << treename << "\" in " << tfile->GetName()
+                      << std::endl;
             THROW(IOError() << errmsg{"MagnifySource: failed to find tree."});
         }
 
-        std::cerr << "MagnifySource: loading channel mask \"" << cmmkey
-                  << "\" from tree \"" << treename << "\"\n";
+        std::cerr << "MagnifySource: loading channel mask \"" << cmmkey << "\" from tree \"" << treename << "\"\n";
 
         int chid = 0, plane = 0, start_time = 0, end_time = 0;
         tree->SetBranchAddress("chid", &chid);
@@ -114,8 +104,7 @@ bool Root::MagnifySource::operator()(IFrame::pointer &out)
         tree->SetBranchAddress("end_time", &end_time);
 
         const int nentries = tree->GetEntries();
-        for (int ientry = 0; ientry < nentries; ++ientry)
-        {
+        for (int ientry = 0; ientry < nentries; ++ientry) {
             tree->GetEntry(ientry);
             WireCell::Waveform::BinRange br;
             br.first = start_time;
@@ -128,12 +117,10 @@ bool Root::MagnifySource::operator()(IFrame::pointer &out)
     std::unordered_map<IFrame::tag_t, IFrame::trace_list_t> tagged_traces;
 
     {
-        for (auto jtag : m_cfg["frames"])
-        {
+        for (auto jtag : m_cfg["frames"]) {
             auto frametag = jtag.asString();
             int channel_number = 0;
-            for (int iplane = 0; iplane < 3; ++iplane)
-            {
+            for (int iplane = 0; iplane < 3; ++iplane) {
                 std::string plane_name = Form("%cplane", 'u' + iplane);
                 std::string hist_name = Form("h%c_%s", 'u' + iplane, frametag.c_str());
                 std::cerr << "MagnifySource: loading " << hist_name << std::endl;
@@ -146,37 +133,31 @@ bool Root::MagnifySource::operator()(IFrame::pointer &out)
                 double qtot = 0;
 
                 // loop over channels in plane
-                for (int chip = 0; chip < nchannels; ++chip)
-                {
+                for (int chip = 0; chip < nchannels; ++chip) {
                     const int ichbin = chip + 1;
 
                     ITrace::ChargeSequence charges;
-                    for (int itickbin = 1; itickbin <= nticks; ++itickbin)
-                    {
+                    for (int itickbin = 1; itickbin <= nticks; ++itickbin) {
                         auto q = hist->GetBinContent(ichbin, itickbin);
                         charges.push_back(q);
                         qtot += q;
                     }
                     const size_t index = all_traces.size();
                     tagged_traces[frametag].push_back(index);
-                    all_traces.push_back(
-                        std::make_shared<SimpleTrace>(channel_number, 0, charges));
+                    all_traces.push_back(std::make_shared<SimpleTrace>(channel_number, 0, charges));
 
                     ++channel_number;
                 }
-                std::cerr << "MagnifySource: plane " << iplane << ": " << nchannels
-                          << " X " << nticks << " qtot=" << qtot << std::endl;
+                std::cerr << "MagnifySource: plane " << iplane << ": " << nchannels << " X " << nticks
+                          << " qtot=" << qtot << std::endl;
             }  // plane
         }
     }
 
-    auto sframe = new SimpleFrame(frame_ident, frame_time, all_traces,
-                                  0.5 * units::microsecond, cmm);
-    for (auto const &it : tagged_traces)
-    {
+    auto sframe = new SimpleFrame(frame_ident, frame_time, all_traces, 0.5 * units::microsecond, cmm);
+    for (auto const &it : tagged_traces) {
         sframe->tag_traces(it.first, it.second);
-        std::cerr << "MagnifySource: tag " << it.second.size() << " traces as: \""
-                  << it.first << "\"\n";
+        std::cerr << "MagnifySource: tag " << it.second.size() << " traces as: \"" << it.first << "\"\n";
     }
 
     out = IFrame::pointer(sframe);

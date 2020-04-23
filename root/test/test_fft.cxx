@@ -20,16 +20,13 @@ using namespace WireCell::Test;
 // The preferred display units for gain.
 const double GUnit = units::mV / units::fC;
 
-void draw_time_freq(MultiPdf &pdf, Waveform::realseq_t &res,
-                    const std::string &title, const Binning &tbins)
+void draw_time_freq(MultiPdf &pdf, Waveform::realseq_t &res, const std::string &title, const Binning &tbins)
 {
     Waveform::compseq_t spec = Waveform::dft(res);
     Waveform::realseq_t res2 = Waveform::idft(spec);
 
-    TH1F h_wave("response", title.c_str(), tbins.nbins(), tbins.min() / units::us,
-                tbins.max() / units::us);
-    TH1F h_wave2("response2", title.c_str(), tbins.nbins(),
-                 tbins.min() / units::us, tbins.max() / units::us);
+    TH1F h_wave("response", title.c_str(), tbins.nbins(), tbins.min() / units::us, tbins.max() / units::us);
+    TH1F h_wave2("response2", title.c_str(), tbins.nbins(), tbins.min() / units::us, tbins.max() / units::us);
     cout << "tbins.min()" << tbins.min() << endl;
     cout << "tbins.max()" << tbins.max() << endl;
     h_wave2.SetLineColor(2);
@@ -39,8 +36,7 @@ void draw_time_freq(MultiPdf &pdf, Waveform::realseq_t &res,
     h_wave.GetXaxis()->SetRangeUser(0, 10.0);
 
     const int nticks = tbins.nbins();
-    for (int ind = 0; ind < nticks; ++ind)
-    {
+    for (int ind = 0; ind < nticks; ++ind) {
         h_wave.Fill(tbins.center(ind) / units::us, res[ind] / GUnit);
         h_wave2.Fill(tbins.center(ind) / units::us, res2[ind] / GUnit);
     }
@@ -50,18 +46,17 @@ void draw_time_freq(MultiPdf &pdf, Waveform::realseq_t &res,
     const double tick = tbins.binsize();
     const Binning fbins(nticks, 0, 1 / tick);
 
-    TH1F h_mag("mag", "Magnitude of Fourier transform of response", fbins.nbins(),
-               fbins.min() / units::megahertz, fbins.max() / units::megahertz);
+    TH1F h_mag("mag", "Magnitude of Fourier transform of response", fbins.nbins(), fbins.min() / units::megahertz,
+               fbins.max() / units::megahertz);
     h_mag.SetYTitle("Amplitude [mV/fC]");
     h_mag.SetXTitle("MHz");
 
-    TH1F h_phi("phi", "Phase of Fourier transform of response", fbins.nbins(),
-               fbins.min() / units::megahertz, fbins.max() / units::megahertz);
+    TH1F h_phi("phi", "Phase of Fourier transform of response", fbins.nbins(), fbins.min() / units::megahertz,
+               fbins.max() / units::megahertz);
     h_phi.SetYTitle("Phase [radian]");
     h_phi.SetXTitle("MHz");
 
-    for (int ind = 0; ind < nticks; ++ind)
-    {
+    for (int ind = 0; ind < nticks; ++ind) {
         auto c = spec[ind];
         const double freq = fbins.center(ind);
         h_mag.Fill(freq / units::megahertz, std::abs(c) / GUnit);
@@ -122,8 +117,7 @@ int main(int argc, char *argv[])
 
     MultiPdf pdf(argv[0]);
 
-    for (size_t ind = 0; ind < gains.size(); ++ind)
-    {
+    for (size_t ind = 0; ind < gains.size(); ++ind) {
         Response::ColdElec ce(gains[ind], shapings[ind]);
         Waveform::realseq_t res = ce.generate(tbins);
 
@@ -177,65 +171,54 @@ int main(int argc, char *argv[])
         TGraph *timings[4] = {new TGraph, new TGraph, new TGraph, new TGraph};
 
         // Some popular choices with powers-of-two sprinkled in
-        std::vector<int> nsampleslist{
-            128, 256, 400, 480,  // protoDUNE U/V and W channels per plane
-            512,
-            800,  // protoDUNE, sum of U or V channels for both faces
-            960,  // protoDUNE, sum of W channels (or wires) for both faces
-            1024,
-            1148,  // N wires in U/V plane for protodune
-            2048,
-            2400,  // number of channels in U or V in microboone
-            2560,  // DUNE, total APA channels
-            3456,  // number of channels in microboone's W
-            4096,
-            6000,  // one choice of nticks for protoDUNE
-            8192,
-            8256,                    // total microboone channels
-            9592, 9594, 9595, 9600,  // various microboone readout lengths
-            10000,                   // 5 ms at 2MHz readout
-            10240, 16384};
+        std::vector<int> nsampleslist{128,   256,  400,  480,  // protoDUNE U/V and W channels per plane
+                                      512,
+                                      800,  // protoDUNE, sum of U or V channels for both faces
+                                      960,  // protoDUNE, sum of W channels (or wires) for both faces
+                                      1024,
+                                      1148,  // N wires in U/V plane for protodune
+                                      2048,
+                                      2400,  // number of channels in U or V in microboone
+                                      2560,  // DUNE, total APA channels
+                                      3456,  // number of channels in microboone's W
+                                      4096,
+                                      6000,  // one choice of nticks for protoDUNE
+                                      8192,
+                                      8256,                     // total microboone channels
+                                      9592,  9594, 9595, 9600,  // various microboone readout lengths
+                                      10000,                    // 5 ms at 2MHz readout
+                                      10240, 16384};
         const int ntries = 1000;
-        for (auto nsamps : nsampleslist)
-        {
+        for (auto nsamps : nsampleslist) {
             Response::ColdElec ce(gains[1], shapings[1]);
             const Binning bins(nsamps, 0, maxtime);
             Waveform::realseq_t res = ce.generate(bins);
             Waveform::compseq_t spec;
 
             double fwd_time = 0.0;
-            for (int itry = 0; itry < ntries; ++itry)
-            {
+            for (int itry = 0; itry < ntries; ++itry) {
                 auto t1 = std::chrono::high_resolution_clock::now();
                 spec = Waveform::dft(res);
                 auto t2 = std::chrono::high_resolution_clock::now();
-                fwd_time +=
-                    std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1)
-                        .count();
+                fwd_time += std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count();
             }
             fwd_time /= ntries;
 
             double rev_time = 0.0;
-            for (int itry = 0; itry < ntries; ++itry)
-            {
+            for (int itry = 0; itry < ntries; ++itry) {
                 auto t1 = std::chrono::high_resolution_clock::now();
                 res = Waveform::idft(spec);
                 auto t2 = std::chrono::high_resolution_clock::now();
-                rev_time +=
-                    std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1)
-                        .count();
+                rev_time += std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count();
             }
             rev_time /= ntries;
 
-            cerr << "DFT nsamples=" << nsamps << "\n\tforward: " << fwd_time / 1000.0
-                 << " us, " << fwd_time / nsamps / 1000.0 << " us/sample"
-                 << "\n\treverse: " << rev_time / 1000.0 << " us, "
-                 << rev_time / nsamps / 1000.0 << " us/sample"
-                 << "\n\taverage: " << 0.5 * (fwd_time + rev_time) / 1000.0 << " us"
-                 << endl;
+            cerr << "DFT nsamples=" << nsamps << "\n\tforward: " << fwd_time / 1000.0 << " us, "
+                 << fwd_time / nsamps / 1000.0 << " us/sample"
+                 << "\n\treverse: " << rev_time / 1000.0 << " us, " << rev_time / nsamps / 1000.0 << " us/sample"
+                 << "\n\taverage: " << 0.5 * (fwd_time + rev_time) / 1000.0 << " us" << endl;
 
-            cout << "timing " << nsamps << " " << fwd_time / 1000.0 << " "
-                 << rev_time / 1000.0 << "\n";
+            cout << "timing " << nsamps << " " << fwd_time / 1000.0 << " " << rev_time / 1000.0 << "\n";
 
             timings[0]->SetPoint(timings[0]->GetN(), nsamps, fwd_time);
             timings[1]->SetPoint(timings[1]->GetN(), nsamps, fwd_time / nsamps);
@@ -259,8 +242,7 @@ int main(int argc, char *argv[])
             frame->GetYaxis()->SetTitle("time (ns)");
             timings[0]->Draw("AL");
             timings[2]->Draw("L");
-            for (int ind = 0; ind < graph->GetN(); ++ind)
-            {
+            for (int ind = 0; ind < graph->GetN(); ++ind) {
                 auto x = graph->GetX()[ind];
                 auto y = graph->GetY()[ind];
                 text->DrawText(x, y, Form("%.0f", x));

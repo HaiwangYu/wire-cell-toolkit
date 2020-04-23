@@ -14,32 +14,25 @@
 #include <unordered_map>
 #include <vector>
 
-namespace WireCell
-{
-    namespace RayGrid
-    {
-        class Grouping
-        {
+namespace WireCell {
+    namespace RayGrid {
+        class Grouping {
            public:
             Grouping() = default;
             virtual ~Grouping() = default;
 
             typedef size_t ident_t;
-            struct node_t
-            {
+            struct node_t {
                 char ntype;     // 'm', 'w', or 's'
                 ident_t ident;  // an ident for a 'm' or an 's'
                 float value;
                 float weight;
             };
-            typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS,
-                                          node_t>
-                graph_t;
+            typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS, node_t> graph_t;
             typedef boost::graph_traits<graph_t>::vertex_descriptor vertex_t;
 
             // Add an 'm' or 's' type node.
-            virtual void add(char ntype, ident_t chid, std::vector<ident_t> wids,
-                             float value, float weight = 1.0);
+            virtual void add(char ntype, ident_t chid, std::vector<ident_t> wids, float value, float weight = 1.0);
 
             typedef std::vector<node_t> cluster_t;
             typedef std::unordered_map<int, cluster_t> clusterset_t;
@@ -57,23 +50,19 @@ namespace WireCell
             vertex_t wire_node(ident_t wid);
         };
 
-        class Solving
-        {
+        class Solving {
            public:
             Solving() = default;
             ~Solving() = default;
 
             typedef size_t ident_t;
-            struct node_t
-            {
+            struct node_t {
                 char ntype;     // 'm' or 's'
                 ident_t ident;  // an ident number for a 'm' or an 's'
                 float value;
                 float weight;
             };
-            typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS,
-                                          node_t>
-                graph_t;
+            typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS, node_t> graph_t;
             typedef boost::graph_traits<graph_t>::vertex_descriptor vertex_t;
 
             //

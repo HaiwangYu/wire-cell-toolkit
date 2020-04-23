@@ -6,13 +6,12 @@
 
 #include <iostream>
 
-WIRECELL_FACTORY(TaggedFrameTensorSet, WireCell::Aux::TaggedFrameTensorSet,
-                 WireCell::IFrameTensorSet, WireCell::IConfigurable)
+WIRECELL_FACTORY(TaggedFrameTensorSet, WireCell::Aux::TaggedFrameTensorSet, WireCell::IFrameTensorSet,
+                 WireCell::IConfigurable)
 
 using namespace WireCell;
 
-WireCell::Configuration
-Aux::TaggedFrameTensorSet::default_configuration() const
+WireCell::Configuration Aux::TaggedFrameTensorSet::default_configuration() const
 {
     // Each tag will produce a tensor.
     Configuration cfg;
@@ -20,18 +19,12 @@ Aux::TaggedFrameTensorSet::default_configuration() const
     return cfg;
 }
 
-void Aux::TaggedFrameTensorSet::configure(
-    const WireCell::Configuration &config)
-{
-    m_cfg = config;
-}
+void Aux::TaggedFrameTensorSet::configure(const WireCell::Configuration &config) { m_cfg = config; }
 
-bool Aux::TaggedFrameTensorSet::operator()(const input_pointer &in,
-                                           output_pointer &out)
+bool Aux::TaggedFrameTensorSet::operator()(const input_pointer &in, output_pointer &out)
 {
     out = nullptr;
-    if (!in)
-    {  // pass on EOS
+    if (!in) {  // pass on EOS
         return true;
     }
 
@@ -41,8 +34,7 @@ bool Aux::TaggedFrameTensorSet::operator()(const input_pointer &in,
     md["time"] = in->time();
     md["tick"] = in->tick();
 
-    for (auto jten : m_cfg["tensors"])
-    {
+    for (auto jten : m_cfg["tensors"]) {
         auto tag = get<std::string>(jten, "tag", "");
         jten["tag"] = tag;  // assure it is there for output
         auto traces = FrameTools::tagged_traces(in, tag);
@@ -54,8 +46,7 @@ bool Aux::TaggedFrameTensorSet::operator()(const input_pointer &in,
         // traces may be degenerate/overlapping in channels and ticks.
         // Do a little dance to map chid to an index sorted by chid.
         std::vector<int> uchid;
-        for (const auto trace : traces)
-        {
+        for (const auto trace : traces) {
             uchid.push_back(trace->channel());
         }
         std::sort(uchid.begin(), uchid.end());
@@ -63,16 +54,14 @@ bool Aux::TaggedFrameTensorSet::operator()(const input_pointer &in,
         const size_t nchans = std::distance(uchid.begin(), it);
         uchid.resize(nchans);
         std::map<int, size_t> chid2ind;
-        for (auto chid : uchid)
-        {
+        for (auto chid : uchid) {
             size_t ind = chid2ind.size();
             chid2ind[chid] = ind;
             jten["channels"].append(chid);
         }
 
         const auto &ts = in->trace_summary(tag);
-        for (int ind = 0; ind < (int) ts.size(); ++ind)
-        {
+        for (int ind = 0; ind < (int) ts.size(); ++ind) {
             jten["summary"][ind] = ts[ind];
         }
 
@@ -85,8 +74,7 @@ bool Aux::TaggedFrameTensorSet::operator()(const input_pointer &in,
         Eigen::Map<Eigen::ArrayXXf> arr((float *) st->data(), nchans, nticks);
         arr.setZero();
 
-        for (size_t itr = 0; itr < ntraces; ++itr)
-        {
+        for (size_t itr = 0; itr < ntraces; ++itr) {
             auto trace = traces[itr];
             const auto &qarr = trace->charge();
             size_t nq = qarr.size();
@@ -94,8 +82,7 @@ bool Aux::TaggedFrameTensorSet::operator()(const input_pointer &in,
             int chid = trace->channel();
             size_t chind = chid2ind[chid];
 
-            size_t tbini =
-                trace->tbin() - tbin0;  // where in output to lay-down charge.
+            size_t tbini = trace->tbin() - tbin0;  // where in output to lay-down charge.
             size_t tbinf = std::min(nticks, tbini + nq);
             size_t tbinn = tbinf - tbini;
 
@@ -107,8 +94,7 @@ bool Aux::TaggedFrameTensorSet::operator()(const input_pointer &in,
         itv->push_back(ITensor::pointer(st));
     }
 
-    out = std::make_shared<SimpleTensorSet>(in->ident(), md,
-                                            ITensor::shared_vector(itv));
+    out = std::make_shared<SimpleTensorSet>(in->ident(), md, ITensor::shared_vector(itv));
     return true;
 }
 

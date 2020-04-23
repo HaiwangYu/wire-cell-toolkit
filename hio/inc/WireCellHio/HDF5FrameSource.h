@@ -9,12 +9,9 @@
 #include "WireCellIface/IFrameSource.h"
 #include "WireCellUtil/Logging.h"
 
-namespace WireCell
-{
-    namespace Hio
-    {
-        class HDF5FrameSource : public IFrameSource, public IConfigurable
-        {
+namespace WireCell {
+    namespace Hio {
+        class HDF5FrameSource : public IFrameSource, public IConfigurable {
            public:
             HDF5FrameSource();
             virtual ~HDF5FrameSource();
@@ -27,9 +24,8 @@ namespace WireCell
             virtual void configure(const WireCell::Configuration &config);
 
            private:
-            Configuration m_cfg;  /// copy of configuration
-            IAnodePlane::pointer
-                m_anode;  /// pointer to some APA, needed to associate chnnel ID to planes
+            Configuration m_cfg;           /// copy of configuration
+            IAnodePlane::pointer m_anode;  /// pointer to some APA, needed to associate chnnel ID to planes
 
             std::vector<std::string> m_filenames;
             std::string m_policy;

@@ -6,15 +6,13 @@
 
 #include <vector>
 
-namespace WireCell
-{
+namespace WireCell {
     /** Interface to charge vs time waveform signal on a channel.
- *
- *	A trace is an ordered sequence of charge measurements in
- *	contiguous time bins.
- */
-    class ITrace : public IData<ITrace>
-    {
+     *
+     *	A trace is an ordered sequence of charge measurements in
+     *	contiguous time bins.
+     */
+    class ITrace : public IData<ITrace> {
        public:
         /// Sequential collection of charge.
         //

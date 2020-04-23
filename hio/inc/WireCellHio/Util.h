@@ -10,10 +10,8 @@
 
 #include <h5cpp/all>
 
-namespace WireCell
-{
-    namespace Hio
-    {
+namespace WireCell {
+    namespace Hio {
         extern std::mutex g_h5cpp_mutex;
 
     };  // namespace Hio

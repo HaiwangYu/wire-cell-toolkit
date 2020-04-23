@@ -14,12 +14,9 @@
 #include <string>
 #include <vector>
 
-namespace WireCell
-{
-    namespace SigProc
-    {
-        class Omnibus : public WireCell::IApplication, public WireCell::IConfigurable
-        {
+namespace WireCell {
+    namespace SigProc {
+        class Omnibus : public WireCell::IApplication, public WireCell::IConfigurable {
            public:
             Omnibus();
             virtual ~Omnibus();

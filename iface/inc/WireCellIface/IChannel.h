@@ -10,10 +10,8 @@
 #include "WireCellIface/IData.h"
 #include "WireCellIface/IWire.h"
 
-namespace WireCell
-{
-    class IChannel : public IData<IChannel>
-    {
+namespace WireCell {
+    class IChannel : public IData<IChannel> {
        public:
         virtual ~IChannel();
 

@@ -9,14 +9,12 @@
 #include <memory>
 #include <vector>
 
-namespace WireCell
-{
+namespace WireCell {
     /** A node which splits 1 data into N objects each of a distinct
- * type.
- */
+     * type.
+     */
 
-    class ISplitNodeBase : public INode
-    {
+    class ISplitNodeBase : public INode {
        public:
         typedef std::shared_ptr<ISplitNodeBase> pointer;
 
@@ -35,13 +33,10 @@ namespace WireCell
 
     //
     template <typename InputType, typename OutputTuple>
-    class ISplitNode : public ISplitNodeBase
-    {
+    class ISplitNode : public ISplitNodeBase {
        public:
         typedef tuple_helper<OutputTuple> port_helper_type;
-        typedef
-            typename port_helper_type::template WrappedConst<std::shared_ptr>::type
-                output_tuple_type;
+        typedef typename port_helper_type::template WrappedConst<std::shared_ptr>::type output_tuple_type;
         typedef tuple_helper<output_tuple_type> output_helper_type;
 
         typedef InputType input_type;
@@ -58,8 +53,7 @@ namespace WireCell
             output_helper_type oh;
 
             bool ok = (*this)(in, outtup);
-            if (ok)
-            {
+            if (ok) {
                 anyvout = oh.as_any(outtup);
             }
             return ok;
@@ -68,10 +62,7 @@ namespace WireCell
         virtual bool operator()(const input_pointer &in, output_tuple_type &out) = 0;
 
         // Return the names of the types this node takes as input.
-        virtual std::vector<std::string> input_types()
-        {
-            return std::vector<std::string>{typeid(input_type).name()};
-        }
+        virtual std::vector<std::string> input_types() { return std::vector<std::string>{typeid(input_type).name()}; }
         // Return the names of the types this node produces as output.
         virtual std::vector<std::string> output_types()
         {

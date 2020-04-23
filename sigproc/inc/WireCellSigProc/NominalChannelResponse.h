@@ -9,17 +9,13 @@
 #include "WireCellIface/IConfigurable.h"
 #include "WireCellUtil/Units.h"
 
-namespace WireCell
-{
-    namespace SigProc
-    {
-        class NominalChannelResponse : public IChannelResponse, public IConfigurable
-        {
+namespace WireCell {
+    namespace SigProc {
+        class NominalChannelResponse : public IChannelResponse, public IConfigurable {
            public:
-            NominalChannelResponse(
-                double gain = 14 * WireCell::units::mV / WireCell::units::fC,
-                double shaping = 2 * WireCell::units::us,
-                const Binning &binning = Binning(100, 0, 10 * WireCell::units::us));
+            NominalChannelResponse(double gain = 14 * WireCell::units::mV / WireCell::units::fC,
+                                   double shaping = 2 * WireCell::units::us,
+                                   const Binning &binning = Binning(100, 0, 10 * WireCell::units::us));
 
             virtual ~NominalChannelResponse();
 

@@ -6,18 +6,16 @@
 #include "WireCellIface/ISlice.h"
 #include "WireCellUtil/IComponent.h"
 
-namespace WireCell
-{
+namespace WireCell {
     /** A frame slicer conceptually performs a transpose of a frame
- * from being tick-major order to being channel-major while on the
- * way possibly rebinning the per-tick samples by applying some
- * metric function (typically just a sum) and possibly some
- * uncertainty function.
- *
- * See also ISliceFrame which is a more monolithic but function node.
- */
-    class IFrameSlices : public IQueuedoutNode<IFrame, ISlice>
-    {
+     * from being tick-major order to being channel-major while on the
+     * way possibly rebinning the per-tick samples by applying some
+     * metric function (typically just a sum) and possibly some
+     * uncertainty function.
+     *
+     * See also ISliceFrame which is a more monolithic but function node.
+     */
+    class IFrameSlices : public IQueuedoutNode<IFrame, ISlice> {
        public:
         typedef std::shared_ptr<IFrameSlices> pointer;
 

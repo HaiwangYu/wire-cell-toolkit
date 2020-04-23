@@ -2,8 +2,7 @@
 
 #include "WireCellUtil/NamedFactory.h"
 
-WIRECELL_FACTORY(LfFilter, WireCell::SigProc::LfFilter,
-                 WireCell::IFilterWaveform, WireCell::IConfigurable)
+WIRECELL_FACTORY(LfFilter, WireCell::SigProc::LfFilter, WireCell::IFilterWaveform, WireCell::IConfigurable)
 
 using namespace WireCell;
 
@@ -35,11 +34,9 @@ const Waveform::realseq_t SigProc::LfFilter::filter_waveform(int nbins) const
 
     Response::LfFilter lf_filter(m_tau);
 
-    for (size_t i = 0; i != m_wfs.size(); i++)
-    {
+    for (size_t i = 0; i != m_wfs.size(); i++) {
         double freq = i * 1.0 / int(m_wfs.size()) * 2 * m_max_freq;
-        if (freq > m_max_freq)
-            freq = freq - 2 * m_max_freq;
+        if (freq > m_max_freq) freq = freq - 2 * m_max_freq;
         m_wfs.at(i) = lf_filter(fabs(freq));
     }
     // std::cout << m_wfs.size() << std::endl;

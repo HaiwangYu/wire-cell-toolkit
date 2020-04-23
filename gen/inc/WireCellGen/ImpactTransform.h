@@ -8,23 +8,19 @@
 
 #include <Eigen/Sparse>
 
-namespace WireCell
-{
-    namespace Gen
-    {
+namespace WireCell {
+    namespace Gen {
         /** An ImpactTransform transforms charge on impact positions
- * into waveforms via 2D FFT.
- */
-        class ImpactTransform
-        {
+         * into waveforms via 2D FFT.
+         */
+        class ImpactTransform {
             IPlaneImpactResponse::pointer m_pir;
             BinnedDiffusion_transform &m_bd;
 
             int m_num_group;     // how many 2D convolution is needed
             int m_num_pad_wire;  // how many wires are needed to pad on each side
             std::vector<std::map<int, IImpactResponse::pointer>> m_vec_map_resp;
-            std::vector<std::vector<std::tuple<int, int, double>>>
-                m_vec_vec_charge;  // ch, time, charge
+            std::vector<std::vector<std::tuple<int, int, double>>> m_vec_vec_charge;  // ch, time, charge
             // std::vector<Eigen::SparseMatrix<float>* > m_vec_spmatrix;
 
             std::vector<int> m_vec_impact;
@@ -37,8 +33,7 @@ namespace WireCell
             Log::logptr_t log;
 
            public:
-            ImpactTransform(IPlaneImpactResponse::pointer pir,
-                            BinnedDiffusion_transform &bd);
+            ImpactTransform(IPlaneImpactResponse::pointer pir, BinnedDiffusion_transform &bd);
             virtual ~ImpactTransform();
 
             /// Return the wire's waveform.  If the response functions

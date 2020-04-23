@@ -11,12 +11,9 @@
 #include "WireCellIface/IClusterFilter.h"
 #include "WireCellIface/IConfigurable.h"
 
-namespace WireCell
-{
-    namespace Img
-    {
-        class BlobSolving : public IClusterFilter, public IConfigurable
-        {
+namespace WireCell {
+    namespace Img {
+        class BlobSolving : public IClusterFilter, public IConfigurable {
            public:
             BlobSolving();
             virtual ~BlobSolving();

@@ -8,8 +8,7 @@
 #include <sstream>
 #include <vector>
 
-namespace WireCell
-{
+namespace WireCell {
     /** The Wire Cell Toolkit configuration layer uses Json::Value
     objects for its transient data model.
 
@@ -66,48 +65,40 @@ namespace WireCell
     template <>
     inline bool convert<bool>(const Configuration &cfg, const bool &def)
     {
-        if (cfg.isNull())
-            return def;
+        if (cfg.isNull()) return def;
         return cfg.asBool();
     }
     template <>
     inline int convert<int>(const Configuration &cfg, const int &def)
     {
-        if (cfg.isNull())
-            return def;
+        if (cfg.isNull()) return def;
         return cfg.asInt();
     }
     template <>
     inline float convert<float>(const Configuration &cfg, const float &def)
     {
-        if (cfg.isNull())
-            return def;
+        if (cfg.isNull()) return def;
         return cfg.asDouble();
     }
     template <>
     inline double convert<double>(const Configuration &cfg, const double &def)
     {
-        if (cfg.isNull())
-            return def;
+        if (cfg.isNull()) return def;
         return cfg.asDouble();
     }
     template <>
-    inline std::string convert<std::string>(const Configuration &cfg,
-                                            const std::string &def)
+    inline std::string convert<std::string>(const Configuration &cfg, const std::string &def)
     {
-        if (cfg.isNull())
-            return def;
+        if (cfg.isNull()) return def;
         return cfg.asString();
     }
     template <>
     inline  // fixme: ignores default
         std::vector<std::string>
-        convert<std::vector<std::string>>(const Configuration &cfg,
-                                          const std::vector<std::string> &def)
+        convert<std::vector<std::string>>(const Configuration &cfg, const std::vector<std::string> &def)
     {
         std::vector<std::string> ret;
-        for (auto v : cfg)
-        {
+        for (auto v : cfg) {
             ret.push_back(convert<std::string>(v));
         }
         return ret;
@@ -115,12 +106,10 @@ namespace WireCell
     template <>
     inline  // fixme: ignores default
         std::vector<int>
-        convert<std::vector<int>>(const Configuration &cfg,
-                                  const std::vector<int> &def)
+        convert<std::vector<int>>(const Configuration &cfg, const std::vector<int> &def)
     {
         std::vector<int> ret;
-        for (auto v : cfg)
-        {
+        for (auto v : cfg) {
             ret.push_back(convert<int>(v));
         }
         return ret;
@@ -128,12 +117,10 @@ namespace WireCell
     template <>
     inline  // fixme: ignores default
         std::vector<double>
-        convert<std::vector<double>>(const Configuration &cfg,
-                                     const std::vector<double> &def)
+        convert<std::vector<double>>(const Configuration &cfg, const std::vector<double> &def)
     {
         std::vector<double> ret;
-        for (auto v : cfg)
-        {
+        for (auto v : cfg) {
             ret.push_back(convert<double>(v));
         }
         return ret;
@@ -152,18 +139,14 @@ namespace WireCell
 
     /// Return dictionary in given list if it value at dotpath matches
     template <typename T>
-    Configuration find(Configuration &lst, const std::string &dotpath,
-                       const T &val)
+    Configuration find(Configuration &lst, const std::string &dotpath, const T &val)
     {
-        for (auto ent : lst)
-        {
+        for (auto ent : lst) {
             auto maybe = branch(ent, dotpath);
-            if (maybe.isNull())
-            {
+            if (maybe.isNull()) {
                 continue;
             }
-            if (convert<T>(maybe) == val)
-            {
+            if (convert<T>(maybe) == val) {
                 return maybe;
             }
         }
@@ -184,8 +167,7 @@ namespace WireCell
         Configuration *ptr = &cfg;
         std::vector<std::string> path;
         boost::algorithm::split(path, dotpath, boost::algorithm::is_any_of("."));
-        for (auto name : path)
-        {
+        for (auto name : path) {
             ptr = &(*ptr)[name];
         }
         *ptr = val;

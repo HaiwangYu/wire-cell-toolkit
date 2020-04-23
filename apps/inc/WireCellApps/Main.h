@@ -17,10 +17,8 @@
 #include <string>
 #include <vector>
 
-namespace WireCell
-{
-    class Main
-    {
+namespace WireCell {
+    class Main {
        public:
         Main();
         ~Main();

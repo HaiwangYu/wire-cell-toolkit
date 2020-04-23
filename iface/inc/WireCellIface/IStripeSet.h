@@ -3,12 +3,10 @@
 
 #include "WireCellIface/IStripe.h"
 
-namespace WireCell
-{
+namespace WireCell {
     /** An interface to information about a collection of IStripe.
- */
-    class IStripeSet : public IData<IStripeSet>
-    {
+     */
+    class IStripeSet : public IData<IStripeSet> {
        public:
         virtual ~IStripeSet();
 

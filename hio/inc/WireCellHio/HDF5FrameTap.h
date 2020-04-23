@@ -18,20 +18,16 @@
 #include "WireCellIface/IFrameSink.h"
 #include "WireCellUtil/Logging.h"
 
-namespace WireCell
-{
-    namespace Hio
-    {
-        class HDF5FrameTap : public IFrameFilter, public IConfigurable
-        {
+namespace WireCell {
+    namespace Hio {
+        class HDF5FrameTap : public IFrameFilter, public IConfigurable {
            public:
             HDF5FrameTap();
             virtual ~HDF5FrameTap();
 
             /// working operation - interface from IFrameFilter
             /// executed when called by pgrapher
-            virtual bool operator()(const IFrame::pointer &inframe,
-                                    IFrame::pointer &outframe);
+            virtual bool operator()(const IFrame::pointer &inframe, IFrame::pointer &outframe);
 
             /// interfaces from IConfigurable
 
@@ -42,9 +38,8 @@ namespace WireCell
             virtual void configure(const WireCell::Configuration &config);
 
            private:
-            Configuration m_cfg;  /// copy of configuration
-            IAnodePlane::pointer
-                m_anode;  /// pointer to some APA, needed to associate chnnel ID to planes
+            Configuration m_cfg;           /// copy of configuration
+            IAnodePlane::pointer m_anode;  /// pointer to some APA, needed to associate chnnel ID to planes
 
             int m_save_count;  // count frames saved
 

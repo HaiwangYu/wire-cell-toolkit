@@ -9,8 +9,7 @@
 #include <map>
 #include <memory>
 
-namespace WireCellTbb
-{
+namespace WireCellTbb {
     // Broken out sender/receiver types, vectors of their pointers
     typedef tbb::flow::sender<boost::any> sender_type;
     typedef tbb::flow::receiver<boost::any> receiver_type;
@@ -34,16 +33,12 @@ namespace WireCellTbb
     // A base facade which expose sender/receiver ports and provide
     // initialize hook.  There is one NodeWrapper for each node
     // category.
-    class NodeWrapper
-    {
+    class NodeWrapper {
        public:
         virtual ~NodeWrapper() {}
 
         virtual sender_port_vector sender_ports() { return sender_port_vector(); }
-        virtual receiver_port_vector receiver_ports()
-        {
-            return receiver_port_vector();
-        }
+        virtual receiver_port_vector receiver_ports() { return receiver_port_vector(); }
 
         // call before running graph
         virtual void initialize() {}
@@ -54,8 +49,7 @@ namespace WireCellTbb
 
     // internal
     template <typename Tuple, std::size_t... Is>
-    receiver_port_vector receiver_ports(tbb::flow::join_node<Tuple> &jn,
-                                        std::index_sequence<Is...>)
+    receiver_port_vector receiver_ports(tbb::flow::join_node<Tuple> &jn, std::index_sequence<Is...>)
     {
         return {dynamic_cast<receiver_type *>(&tbb::flow::input_port<Is>(jn))...};
     }
@@ -63,13 +57,11 @@ namespace WireCellTbb
     template <typename Tuple>
     receiver_port_vector receiver_ports(tbb::flow::join_node<Tuple> &jn)
     {
-        return receiver_ports(
-            jn, std::make_index_sequence<std::tuple_size<Tuple>::value>{});
+        return receiver_ports(jn, std::make_index_sequence<std::tuple_size<Tuple>::value>{});
     }
 
     template <typename Tuple, std::size_t... Is>
-    sender_port_vector sender_ports(tbb::flow::split_node<Tuple> &sp,
-                                    std::index_sequence<Is...>)
+    sender_port_vector sender_ports(tbb::flow::split_node<Tuple> &sp, std::index_sequence<Is...>)
     {
         return {dynamic_cast<sender_type *>(&tbb::flow::output_port<Is>(sp))...};
     }
@@ -77,8 +69,7 @@ namespace WireCellTbb
     template <typename Tuple>
     sender_port_vector sender_ports(tbb::flow::split_node<Tuple> &sp)
     {
-        return sender_ports(
-            sp, std::make_index_sequence<std::tuple_size<Tuple>::value>{});
+        return sender_ports(sp, std::make_index_sequence<std::tuple_size<Tuple>::value>{});
     }
 
 }  // namespace WireCellTbb

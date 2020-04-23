@@ -28,8 +28,7 @@ int main()
     const Point pt1(1 * units::m, 2 * units::m, 3 * units::m);
     const Point pt2(1 * units::mm, 2 * units::mm, 3 * units::mm);
 
-    for (int ind = 0; ind < 3; ++ind)
-    {
+    for (int ind = 0; ind < 3; ++ind) {
         cerr << "axis" << ind << ": " << pimpos.axis(ind) << endl;
     }
 
@@ -46,8 +45,7 @@ int main()
     }
 
     auto rb = pimpos.region_binning();
-    cerr << str(rb.range()) << " " << str(rb.irange())
-         << " binsize:" << rb.binsize() / units::mm << "mm\n";
+    cerr << str(rb.range()) << " " << str(rb.irange()) << " binsize:" << rb.binsize() / units::mm << "mm\n";
     Assert(rb.nbins() == nwires);
     Assert(rb.min() == -3001.5 * units::mm);
     Assert(rb.max() == 3001.5 * units::mm);

@@ -7,8 +7,7 @@ using namespace std;
 using namespace WireCell;
 
 template <typename Container>
-struct EveryOther
-{
+struct EveryOther {
     typedef typename Container::value_type value_type;
     typedef typename Container::iterator iterator;
     typedef typename Container::const_iterator const_iterator;
@@ -20,17 +19,14 @@ struct EveryOther
       , other(begin)
       , end(end)
     {
-        if (other != end)
-            ++other;
-        if (other != end)
-            ++other;
+        if (other != end) ++other;
+        if (other != end) ++other;
         cerr << "Creating EveryOther " << std::distance(begin, end) << endl;
     }
     value_type operator()()
     {
         value_type ret{};
-        if (*this)
-        {
+        if (*this) {
             ret = *it + *other;
             ++it;
             ++other;
@@ -41,8 +37,7 @@ struct EveryOther
     operator bool() const
     {
         bool exhausted = false;
-        if (end - it < 2)
-        {
+        if (end - it < 2) {
             exhausted = true;
         }
         cerr << "Are we exhausted? " << exhausted << endl;
@@ -50,8 +45,7 @@ struct EveryOther
     }
     bool operator==(const EveryOther &rhs) const
     {
-        if (this == &rhs)
-            return true;
+        if (this == &rhs) return true;
         return it == rhs.it;
     }
 };
@@ -81,8 +75,7 @@ int main()
 
     auto its = make_every_other(vi.begin(), vi.end());
 
-    for (auto it = its.first; it != its.second; ++it)
-    {
+    for (auto it = its.first; it != its.second; ++it) {
         cout << *it << endl;
     }
     return 0;

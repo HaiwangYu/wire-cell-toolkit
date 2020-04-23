@@ -18,8 +18,7 @@ void mutate(enumerated &en)
 
 bool equal(double a, double b)
 {
-    if (a == b)
-    {
+    if (a == b) {
         return true;
     }
 
@@ -34,11 +33,9 @@ int main()
     stuff[1] = {10.0, 20.0, 30.0};
     mutate(stuff);
 
-    for (auto iv : stuff)
-    {
+    for (auto iv : stuff) {
         cerr << iv.first << ":";
-        for (auto x : iv.second)
-        {
+        for (auto x : iv.second) {
             cerr << " " << x;
         }
         cerr << endl;

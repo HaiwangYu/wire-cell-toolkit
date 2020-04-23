@@ -24,24 +24,22 @@
 #include <vector>
 #include "libjsonnet++.h"
 
-namespace WireCell
-{
-    namespace Persist
-    {
+namespace WireCell {
+    namespace Persist {
         /// Return true file exists (no file resolution performed).
         bool exists(const std::string &filename);
 
         /** Return full path to a file of the given filename.  If the
- * file is not directly located and is a relative path then
- * the file will be first located in the current working
- * directory.  Failing that if the `WIRECELL_PATH` environment
- * variable is defined and set as a `:`-separated list it will
- * be checked. Failure to resolve returns an empty string. */
+         * file is not directly located and is a relative path then
+         * the file will be first located in the current working
+         * directory.  Failing that if the `WIRECELL_PATH` environment
+         * variable is defined and set as a `:`-separated list it will
+         * be checked. Failure to resolve returns an empty string. */
         std::string resolve(const std::string &filename);
 
         /** Return a string holding the entire contents of the file.
- * File resolution is performed.  WireCell::IOError is thrown
- * if file is not found. */
+         * File resolution is performed.  WireCell::IOError is thrown
+         * if file is not found. */
         std::string slurp(const std::string &filename);
 
         /// Save the data structure held by the given top Json::Value
@@ -55,8 +53,7 @@ namespace WireCell
         /// If `pretty` is true then format the JSON text with
         /// indents.  If also compressed, this formatting can actually
         /// lead to *smaller* files.
-        void dump(const std::string &filename, const Json::Value &top,
-                  bool pretty = false);
+        void dump(const std::string &filename, const Json::Value &top, bool pretty = false);
 
         /// As above but dump to a JSON text string.
         // fixme: no "pretty" for dumps() is implemented.
@@ -77,13 +74,11 @@ namespace WireCell
 
     WireCell::IOError is thrown if file is not found.
 */
-        Json::Value load(const std::string &filename,
-                         const externalvars_t &extvar = externalvars_t(),
+        Json::Value load(const std::string &filename, const externalvars_t &extvar = externalvars_t(),
                          const externalvars_t &extcode = externalvars_t());
 
         /** Load a JSON or Jsonnet string, returning a Json::Value. */
-        Json::Value loads(const std::string &text,
-                          const externalvars_t &extvar = externalvars_t(),
+        Json::Value loads(const std::string &text, const externalvars_t &extvar = externalvars_t(),
                           const externalvars_t &extcode = externalvars_t());
 
         /** Explicitly evaluate contents of file with Jsonnet.  If no
@@ -93,10 +88,8 @@ namespace WireCell
     WireCell::IOError is thrown if file is not found.
     WireCell::ValueError is thrown parsing fails.
 */
-        std::string
-        evaluate_jsonnet_file(const std::string &filename,
-                              const externalvars_t &extvar = externalvars_t(),
-                              const externalvars_t &extcode = externalvars_t());
+        std::string evaluate_jsonnet_file(const std::string &filename, const externalvars_t &extvar = externalvars_t(),
+                                          const externalvars_t &extcode = externalvars_t());
 
         /** Explicitly evaluate text with JSonnet.  If no support for
     Jsonnet is built, return the text. Return empty string if
@@ -104,10 +97,8 @@ namespace WireCell
 
     WireCell::ValueError is thrown parsing fails.
 */
-        std::string
-        evaluate_jsonnet_text(const std::string &text,
-                              const externalvars_t &extvar = externalvars_t(),
-                              const externalvars_t &extcode = externalvars_t());
+        std::string evaluate_jsonnet_text(const std::string &text, const externalvars_t &extvar = externalvars_t(),
+                                          const externalvars_t &extcode = externalvars_t());
 
         /** Explicitly convert JSON text to Json::Value object */
         Json::Value json2object(const std::string &text);
@@ -118,8 +109,7 @@ namespace WireCell
         Json::Value iterable2json(Iterable const &cont)
         {
             Json::Value v;
-            for (auto &&element : cont)
-            {
+            for (auto &&element : cont) {
                 v.append(element);
             }
             return v;
@@ -128,13 +118,11 @@ namespace WireCell
         // This provides a super set of the functionality as the above
         // free functions.  It wraps a persistent Jsonnet parser and
         // in particular allows more control over the load path.
-        class Parser
-        {
+        class Parser {
            public:
             typedef std::vector<std::string> pathlist_t;
 
-            Parser(const pathlist_t &load_paths = pathlist_t(),
-                   const externalvars_t &extvar = externalvars_t(),
+            Parser(const pathlist_t &load_paths = pathlist_t(), const externalvars_t &extvar = externalvars_t(),
                    const externalvars_t &extcode = externalvars_t());
 
             // Load a Jonnet file (or .json or .json.bz2) and return the Json object

@@ -9,14 +9,12 @@
 #include <memory>
 #include <vector>
 
-namespace WireCell
-{
+namespace WireCell {
     /** A node which joins N data objects each of a distinct type and
- * arriving synchronously to produce a single output object.
- */
+     * arriving synchronously to produce a single output object.
+     */
 
-    class IJoinNodeBase : public INode
-    {
+    class IJoinNodeBase : public INode {
        public:
         typedef std::shared_ptr<IJoinNodeBase> pointer;
 
@@ -35,13 +33,10 @@ namespace WireCell
 
     //
     template <typename InputTuple, typename OutputType>
-    class IJoinNode : public IJoinNodeBase
-    {
+    class IJoinNode : public IJoinNodeBase {
        public:
         typedef tuple_helper<InputTuple> port_helper_type;
-        typedef
-            typename port_helper_type::template WrappedConst<std::shared_ptr>::type
-                input_tuple_type;
+        typedef typename port_helper_type::template WrappedConst<std::shared_ptr>::type input_tuple_type;
         typedef tuple_helper<input_tuple_type> input_helper_type;
 
         typedef OutputType output_type;
@@ -57,15 +52,13 @@ namespace WireCell
 
             output_pointer out;
             bool ok = (*this)(intup, out);
-            if (ok)
-            {
+            if (ok) {
                 anyout = out;
             }
             return ok;
         }
 
-        virtual bool operator()(const input_tuple_type &intup,
-                                output_pointer &out) = 0;
+        virtual bool operator()(const input_tuple_type &intup, output_pointer &out) = 0;
 
         // Return the names of the types this node takes as input.
         virtual std::vector<std::string> input_types()
@@ -74,10 +67,7 @@ namespace WireCell
             return iph.type_names();
         }
         // Return the names of the types this node produces as output.
-        virtual std::vector<std::string> output_types()
-        {
-            return std::vector<std::string>{typeid(output_type).name()};
-        }
+        virtual std::vector<std::string> output_types() { return std::vector<std::string>{typeid(output_type).name()}; }
     };
 
 }  // namespace WireCell

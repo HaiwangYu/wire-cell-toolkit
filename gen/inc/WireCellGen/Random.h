@@ -8,15 +8,11 @@
 #include "WireCellIface/IConfigurable.h"
 #include "WireCellIface/IRandom.h"
 
-namespace WireCell
-{
-    namespace Gen
-    {
-        class Random : public IRandom, public IConfigurable
-        {
+namespace WireCell {
+    namespace Gen {
+        class Random : public IRandom, public IConfigurable {
            public:
-            Random(const std::string &generator = "default",
-                   const std::vector<unsigned int> seeds = {0, 0, 0, 0, 0});
+            Random(const std::string &generator = "default", const std::vector<unsigned int> seeds = {0, 0, 0, 0, 0});
             virtual ~Random() {}
 
             // IConfigurable interface

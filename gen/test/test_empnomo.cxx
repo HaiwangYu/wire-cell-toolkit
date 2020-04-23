@@ -58,12 +58,10 @@ int main(int argc, char *argv[])
 
     auto chids = anode->channels();
     cerr << "Got " << chids.size() << " channels\n";
-    for (auto chid : chids)
-    {
+    for (auto chid : chids) {
         const auto &amp = (*empnomo)(chid);
         double tot = 0;
-        for (auto v : amp)
-        {
+        for (auto v : amp) {
             tot += v;
         }
         cerr << "ch:" << chid << " " << amp.size() << " tot=" << tot << endl;

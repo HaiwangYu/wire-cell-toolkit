@@ -5,22 +5,18 @@
 
 #include <Eigen/Dense>
 
-namespace WireCell
-{
-    namespace Ress
-    {
+namespace WireCell {
+    namespace Ress {
         typedef Eigen::VectorXd vector_t;
         typedef Eigen::MatrixXd matrix_t;
 
-        enum Model
-        {
+        enum Model {
             unknown = 0,
             lasso,  // Lasso model
             elnet   // elastic net
         };
 
-        struct Params
-        {
+        struct Params {
             Model model = elnet;
             double lambda = 1.0;
             int max_iter = 100000;

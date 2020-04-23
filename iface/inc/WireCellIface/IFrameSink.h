@@ -4,12 +4,10 @@
 #include "WireCellIface/IFrame.h"
 #include "WireCellIface/ISinkNode.h"
 
-namespace WireCell
-{
+namespace WireCell {
     /** A frame sink is something that generates IFrames.
- */
-    class IFrameSink : public ISinkNode<IFrame>
-    {
+     */
+    class IFrameSink : public ISinkNode<IFrame> {
        public:
         typedef std::shared_ptr<IFrameSink> pointer;
 

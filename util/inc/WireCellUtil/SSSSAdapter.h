@@ -1,14 +1,12 @@
 #ifndef WIRECELL_SSSSADAPTER
 #define WIRECELL_SSSSADAPTER
 
-namespace WireCell
-{
+namespace WireCell {
     /** An adapter which drives the push-pull sink/process/source
- * paradigm to the pure-pull signal/slot execution model.
- */
+     * paradigm to the pure-pull signal/slot execution model.
+     */
     template <typename InputType, typename OutputType, class Processor>
-    class SigSlotSinkSourceAdapter
-    {
+    class SigSlotSinkSourceAdapter {
        public:
         typedef boost::signals2::signal<InputType()> signal_type;
         typedef signal_type::slot_type input_slot_type;

@@ -9,10 +9,8 @@
 
 #include <iostream>
 
-namespace WireCellTbb
-{
-    class MockDepoSource : public WireCell::IDepoSource
-    {
+namespace WireCellTbb {
+    class MockDepoSource : public WireCell::IDepoSource {
         int m_count;
         const int m_maxdepos;
 
@@ -26,8 +24,7 @@ namespace WireCellTbb
 
         virtual bool operator()(output_pointer &out)
         {
-            if (m_count > m_maxdepos)
-            {
+            if (m_count > m_maxdepos) {
                 return false;
             }
             ++m_count;
@@ -35,14 +32,12 @@ namespace WireCellTbb
             double time = m_count * WireCell::units::microsecond;
             WireCell::Point pos(dist, dist, dist);
             out = WireCell::IDepo::pointer(new WireCell::SimpleDepo(time, pos));
-            std::cerr << "Source: " << out->time() / WireCell::units::millimeter
-                      << std::endl;
+            std::cerr << "Source: " << out->time() / WireCell::units::millimeter << std::endl;
             return true;
         }
     };
 
-    class MockDrifter : public WireCell::IDrifter
-    {
+    class MockDrifter : public WireCell::IDrifter {
         std::deque<input_pointer> m_depos;
 
        public:
@@ -54,32 +49,27 @@ namespace WireCellTbb
 
             // simulate some buffering condition
             size_t n_to_keep = 2;
-            if (!in)
-            {
+            if (!in) {
                 n_to_keep = 0;
             }
 
-            while (m_depos.size() > n_to_keep)
-            {
+            while (m_depos.size() > n_to_keep) {
                 auto depo = m_depos.front();
                 m_depos.pop_front();
                 outq.push_back(depo);
-                std::cerr << "Drift: " << depo->time() / WireCell::units::millimeter
-                          << std::endl;
+                std::cerr << "Drift: " << depo->time() / WireCell::units::millimeter << std::endl;
             }
 
             return true;
         }
     };
 
-    class MockDepoSink : public WireCell::IDepoSink
-    {
+    class MockDepoSink : public WireCell::IDepoSink {
        public:
         virtual ~MockDepoSink() {}
         virtual bool operator()(const input_pointer &depo)
         {
-            std::cerr << "Sink: " << depo->time() / WireCell::units::millimeter
-                      << std::endl;
+            std::cerr << "Sink: " << depo->time() / WireCell::units::millimeter << std::endl;
             return true;
         }
     };

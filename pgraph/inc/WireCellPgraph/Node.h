@@ -3,13 +3,10 @@
 
 #include "WireCellPgraph/Port.h"
 
-namespace WireCell
-{
-    namespace Pgraph
-    {
+namespace WireCell {
+    namespace Pgraph {
         // A node in the DFP graph must inherit from Node.
-        class Node
-        {
+        class Node {
            public:
             Node() {}  // constructures may wish to resize/populate m_ports.
             virtual ~Node() {}
@@ -29,18 +26,15 @@ namespace WireCell
 
             Port &port(Port::Type type, size_t ind = 0)
             {
-                if (ind >= m_ports[type].size())
-                {
+                if (ind >= m_ports[type].size()) {
                     THROW(ValueError() << errmsg{"unknown port"});
                 }
                 return m_ports[type][ind];
             }
             Port &port(Port::Type type, const std::string &name)
             {
-                for (size_t ind = 0; ind < m_ports[type].size(); ++ind)
-                {
-                    if (m_ports[type][ind].name() != name)
-                    {
+                for (size_t ind = 0; ind < m_ports[type].size(); ++ind) {
+                    if (m_ports[type][ind].name() != name) {
                         continue;
                     }
                     return port(type, ind);
@@ -50,17 +44,13 @@ namespace WireCell
 
             bool connected()
             {
-                for (auto &p : input_ports())
-                {
-                    if (!p.edge())
-                    {
+                for (auto &p : input_ports()) {
+                    if (!p.edge()) {
                         return false;
                     }
                 }
-                for (auto &p : output_ports())
-                {
-                    if (!p.edge())
-                    {
+                for (auto &p : output_ports()) {
+                    if (!p.edge()) {
                         return false;
                     }
                 }

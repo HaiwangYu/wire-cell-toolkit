@@ -10,47 +10,32 @@
 
 #include <list>
 
-namespace WireCell
-{
-    namespace SigProc
-    {
+namespace WireCell {
+    namespace SigProc {
         class SignalROI;  // forward declaration
-        class OmnibusSigProc : public WireCell::IFrameFilter,
-                               public WireCell::IConfigurable
-        {
+        class OmnibusSigProc : public WireCell::IFrameFilter, public WireCell::IConfigurable {
            public:
             OmnibusSigProc(
-                const std::string &anode_tn = "AnodePlane",
-                const std::string &per_chan_resp_tn = "PerChannelResponse",
-                const std::string &field_response = "FieldResponse",
-                double fine_time_offset = 0.0 * units::microsecond,
-                double coarse_time_offset = -8.0 * units::microsecond,
-                double gain = 14.0 * units::mV / units::fC,
+                const std::string &anode_tn = "AnodePlane", const std::string &per_chan_resp_tn = "PerChannelResponse",
+                const std::string &field_response = "FieldResponse", double fine_time_offset = 0.0 * units::microsecond,
+                double coarse_time_offset = -8.0 * units::microsecond, double gain = 14.0 * units::mV / units::fC,
                 double shaping_time = 2.2 * units::microsecond, double inter_gain = 1.2,
-                double ADC_mV = 4096 / (2000. * units::mV), float th_factor_ind = 3,
-                float th_factor_col = 5, int pad = 5, float asy = 0.1, int rebin = 6,
-                double l_factor = 3.5, double l_max_th = 10000, double l_factor1 = 0.7,
-                int l_short_length = 3, int l_jump_one_bin = 0, double r_th_factor = 3.0,
+                double ADC_mV = 4096 / (2000. * units::mV), float th_factor_ind = 3, float th_factor_col = 5,
+                int pad = 5, float asy = 0.1, int rebin = 6, double l_factor = 3.5, double l_max_th = 10000,
+                double l_factor1 = 0.7, int l_short_length = 3, int l_jump_one_bin = 0, double r_th_factor = 3.0,
                 double r_fake_signal_low_th = 500, double r_fake_signal_high_th = 1000,
-                double r_fake_signal_low_th_ind_factor = 1.0,
-                double r_fake_signal_high_th_ind_factor = 1.0, int r_pad = 5,
-                int r_break_roi_loop = 2, double r_th_peak = 3.0, double r_sep_peak = 6.0,
-                double r_low_peak_sep_threshold_pre = 1200, int r_max_npeaks = 200,
-                double r_sigma = 2.0, double r_th_percent = 0.1,
-                std::vector<int> process_planes = {0, 1, 2}, int charge_ch_offset = 10000,
-                const std::string &wiener_tag = "wiener",
-                const std::string &wiener_threshold_tag = "threshold",
-                const std::string &decon_charge_tag = "decon_charge",
-                const std::string &gauss_tag = "gauss", bool use_roi_debug_mode = false,
-                const std::string &tight_lf_tag = "tight_lf",
-                const std::string &loose_lf_tag = "loose_lf",
-                const std::string &cleanup_roi_tag = "cleanup_roi",
+                double r_fake_signal_low_th_ind_factor = 1.0, double r_fake_signal_high_th_ind_factor = 1.0,
+                int r_pad = 5, int r_break_roi_loop = 2, double r_th_peak = 3.0, double r_sep_peak = 6.0,
+                double r_low_peak_sep_threshold_pre = 1200, int r_max_npeaks = 200, double r_sigma = 2.0,
+                double r_th_percent = 0.1, std::vector<int> process_planes = {0, 1, 2}, int charge_ch_offset = 10000,
+                const std::string &wiener_tag = "wiener", const std::string &wiener_threshold_tag = "threshold",
+                const std::string &decon_charge_tag = "decon_charge", const std::string &gauss_tag = "gauss",
+                bool use_roi_debug_mode = false, const std::string &tight_lf_tag = "tight_lf",
+                const std::string &loose_lf_tag = "loose_lf", const std::string &cleanup_roi_tag = "cleanup_roi",
                 const std::string &break_roi_loop1_tag = "break_roi_1st",
                 const std::string &break_roi_loop2_tag = "break_roi_2nd",
-                const std::string &shrink_roi_tag = "shrink_roi",
-                const std::string &extend_roi_tag = "extend_roi",
-                const std::string &mp3_roi_tag = "mp3_roi",
-                const std::string &mp2_roi_tag = "mp2_roi");
+                const std::string &shrink_roi_tag = "shrink_roi", const std::string &extend_roi_tag = "extend_roi",
+                const std::string &mp3_roi_tag = "mp3_roi", const std::string &mp2_roi_tag = "mp2_roi");
             virtual ~OmnibusSigProc();
 
             virtual bool operator()(const input_pointer &in, output_pointer &out);
@@ -77,23 +62,19 @@ namespace WireCell
             void decon_2D_looseROI_debug_mode(int plane);
 
             // save data into the out frame and collect the indices
-            void save_data(ITrace::vector &itraces, IFrame::trace_list_t &indices,
-                           int plane, const std::vector<float> &perwire_rmses,
-                           IFrame::trace_summary_t &threshold);
+            void save_data(ITrace::vector &itraces, IFrame::trace_list_t &indices, int plane,
+                           const std::vector<float> &perwire_rmses, IFrame::trace_summary_t &threshold);
 
             // save ROI into the out frame (set use_roi_debug_mode=true)
-            void save_roi(ITrace::vector &itraces, IFrame::trace_list_t &indices,
-                          int plane,
+            void save_roi(ITrace::vector &itraces, IFrame::trace_list_t &indices, int plane,
                           std::vector<std::list<SignalROI *>> &roi_channel_list);
 
             // save Multi-Plane ROI into the out frame (set use_roi_debug_mode=true)
             // mp_rois: osp-chid, start -> start, end
-            void
-            save_mproi(ITrace::vector &itraces, IFrame::trace_list_t &indices, int plane,
-                       std::multimap<std::pair<int, int>, std::pair<int, int>> mp_rois);
+            void save_mproi(ITrace::vector &itraces, IFrame::trace_list_t &indices, int plane,
+                            std::multimap<std::pair<int, int>, std::pair<int, int>> mp_rois);
 
-            void save_ext_roi(ITrace::vector &itraces, IFrame::trace_list_t &indices,
-                              int plane,
+            void save_ext_roi(ITrace::vector &itraces, IFrame::trace_list_t &indices, int plane,
                               std::vector<std::list<SignalROI *>> &roi_channel_list);
 
             // initialize the overall response function ...
@@ -104,8 +85,7 @@ namespace WireCell
             // This little struct is used to map between WCT channel idents
             // and internal OmnibusSigProc wire/channel numbers.  See
             // m_channel_map and m_channel_range below.
-            struct OspChan
-            {
+            struct OspChan {
                 int channel;  // between 0 and nwire_u+nwire_v+nwire_w-1
                 int wire;     // between 0 and nwire_{u,v,w,}-1 depending on plane
                 int plane;    // 0,1,2

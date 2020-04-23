@@ -14,13 +14,11 @@
 #include <deque>
 #include <vector>
 
-namespace WireCell
-{
+namespace WireCell {
     /** Base hydra node class.
- *
- */
-    class IHydraNodeBase : public INode
-    {
+     *
+     */
+    class IHydraNodeBase : public INode {
        public:
         typedef std::shared_ptr<IHydraNodeBase> pointer;
 
@@ -30,8 +28,7 @@ namespace WireCell
         typedef std::vector<any_queue> any_queue_vector;
 
         /// The calling signature:
-        virtual bool operator()(any_queue_vector &anyinq,
-                                any_queue_vector &anyoutq) = 0;
+        virtual bool operator()(any_queue_vector &anyinq, any_queue_vector &anyoutq) = 0;
 
         virtual NodeCategory category() { return hydraNode; }
 
@@ -40,10 +37,9 @@ namespace WireCell
     };
 
     /** A hydra with input and output fixed at compile-time with tuples.
- */
+     */
     template <typename InputTuple, typename OutputTuple>
-    class IHydraNode : public IHydraNodeBase
-    {
+    class IHydraNode : public IHydraNodeBase {
        public:
         typedef InputTuple input_tuple_type;
         typedef OutputTuple output_tuple_type;
@@ -66,8 +62,7 @@ namespace WireCell
             output_queues_type outq;
 
             bool ok = (*this)(inq, outq);
-            if (ok)
-            {
+            if (ok) {
                 anyoutq = oh.as_any_queue(outq);
             }
 
@@ -77,8 +72,7 @@ namespace WireCell
         }
 
         /// Typed interface for subclass to implement.
-        virtual bool operator()(input_queues_type &inqs,
-                                output_queues_type &outqs) = 0;
+        virtual bool operator()(input_queues_type &inqs, output_queues_type &outqs) = 0;
 
         // Return the names of the types this node takes as input.
         virtual std::vector<std::string> input_types()

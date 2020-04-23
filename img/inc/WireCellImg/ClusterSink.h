@@ -6,12 +6,9 @@
 
 #include <string>
 
-namespace WireCell
-{
-    namespace Img
-    {
-        class ClusterSink : public IClusterSink, public IConfigurable
-        {
+namespace WireCell {
+    namespace Img {
+        class ClusterSink : public IClusterSink, public IConfigurable {
            public:
             ClusterSink();
             virtual ~ClusterSink();

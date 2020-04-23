@@ -20,16 +20,11 @@
 
 #include "WireCellIface/ITensorSet.h"
 
-namespace WireCell
-{
-    namespace Zio
-    {
-        class FlowConfigurable : public WireCell::IConfigurable,
-                                 public WireCell::ITerminal
-        {
+namespace WireCell {
+    namespace Zio {
+        class FlowConfigurable : public WireCell::IConfigurable, public WireCell::ITerminal {
            public:
-            FlowConfigurable(const std::string &direction,
-                             const std::string &nodename = "");
+            FlowConfigurable(const std::string &direction, const std::string &nodename = "");
             virtual ~FlowConfigurable();
 
             virtual WireCell::Configuration default_configuration() const;
@@ -61,15 +56,11 @@ namespace WireCell
             bool pre_flow();
 
             /// Give subclass a chance to add to a configuration
-            virtual void
-            user_default_configuration(WireCell::Configuration &cfg) const {};
+            virtual void user_default_configuration(WireCell::Configuration &cfg) const {};
 
             /// Give subclass a chance to read a configuration.  Ports
             /// are not yet online.
-            virtual bool user_configure(const WireCell::Configuration &cfg)
-            {
-                return true;
-            };
+            virtual bool user_configure(const WireCell::Configuration &cfg) { return true; };
 
             /// Called after going online and before configuration phase is over
             virtual bool user_online() { return true; }

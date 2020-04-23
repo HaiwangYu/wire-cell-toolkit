@@ -4,12 +4,10 @@
 #include "WireCellIface/ISourceNode.h"
 #include "WireCellIface/IWire.h"
 
-namespace WireCell
-{
+namespace WireCell {
     /** Return a vector of wires.
- */
-    class IWireSource : public ISourceNode<IWire::vector>
-    {
+     */
+    class IWireSource : public ISourceNode<IWire::vector> {
        public:
         virtual ~IWireSource();
 

@@ -20,12 +20,9 @@
 #include "WireCellIface/ITiling.h"
 #include "WireCellUtil/Logging.h"
 
-namespace WireCell
-{
-    namespace Img
-    {
-        class GridTiling : public ITiling, public IConfigurable
-        {
+namespace WireCell {
+    namespace Img {
+        class GridTiling : public ITiling, public IConfigurable {
            public:
             GridTiling();
             virtual ~GridTiling();

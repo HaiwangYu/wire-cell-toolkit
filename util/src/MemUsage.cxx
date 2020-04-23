@@ -13,8 +13,7 @@ static double memusage_linux_resident()
     buffer >> tSize >> resident >> share;
     buffer.close();
 
-    long page_size_kb = sysconf(_SC_PAGE_SIZE) /
-                        1024;  // in case x86-64 is configured to use 2MB pages
+    long page_size_kb = sysconf(_SC_PAGE_SIZE) / 1024;  // in case x86-64 is configured to use 2MB pages
     double rss = resident * page_size_kb;
     return rss;
 }
@@ -26,8 +25,7 @@ static double memusage_linux_shared()
     buffer >> tSize >> resident >> share;
     buffer.close();
 
-    long page_size_kb = sysconf(_SC_PAGE_SIZE) /
-                        1024;  // in case x86-64 is configured to use 2MB pages
+    long page_size_kb = sysconf(_SC_PAGE_SIZE) / 1024;  // in case x86-64 is configured to use 2MB pages
     double shm = share * page_size_kb;
     return shm;
 }
@@ -39,8 +37,7 @@ static double memusage_linux_size()
     buffer >> tSize >> resident >> share;
     buffer.close();
 
-    long page_size_kb = sysconf(_SC_PAGE_SIZE) /
-                        1024;  // in case x86-64 is configured to use 2MB pages
+    long page_size_kb = sysconf(_SC_PAGE_SIZE) / 1024;  // in case x86-64 is configured to use 2MB pages
     double siz = tSize * page_size_kb;
     return siz;
 }
@@ -72,14 +69,10 @@ MemUsage::MemUsage(const std::string &msg) { push(msg); }
 
 MemUsage::~MemUsage() {}
 
-MemUsage::memusage MemUsage::current() const
-{
-    return memusage(memusage_size(), memusage_resident());
-}
+MemUsage::memusage MemUsage::current() const { return memusage(memusage_size(), memusage_resident()); }
 void MemUsage::push(const std::string &msg, MemUsage::memusage mu)
 {
-    if (mu.first < 0 && mu.second < 0)
-    {
+    if (mu.first < 0 && mu.second < 0) {
         mu = current();
     }
     m_events.push_back(event(mu, msg));
@@ -94,8 +87,7 @@ std::string MemUsage::operator()(std::string msg, MemUsage::memusage mu)
 /// Return event by index.
 MemUsage::event MemUsage::operator[](int ind) const
 {
-    while (ind < 0)
-    {
+    while (ind < 0) {
         ind += m_events.size();
     }
 
@@ -105,8 +97,7 @@ MemUsage::event MemUsage::operator[](int ind) const
 std::string MemUsage::summary() const
 {
     stringstream ss;
-    for (size_t ind = 0; ind < m_events.size(); ++ind)
-    {
+    for (size_t ind = 0; ind < m_events.size(); ++ind) {
         ss << this->emit(ind) << "\n";
     }
     return ss.str();
@@ -114,25 +105,20 @@ std::string MemUsage::summary() const
 
 std::string MemUsage::emit(int ind) const
 {
-    while (ind < 0)
-    {
+    while (ind < 0) {
         ind += m_events.size();
     }
     int prev_ind = ind - 1;
-    if (prev_ind < 0)
-        prev_ind = 0;
+    if (prev_ind < 0) prev_ind = 0;
 
     const memusage &prev_mem = (*this)[prev_ind].first;
     const memusage &evt_mem = (*this)[ind].first;
     const string &evt_msg = (*this)[ind].second;
 
-    memusage from_prev(evt_mem.first - prev_mem.first,
-                       evt_mem.second - prev_mem.second);
+    memusage from_prev(evt_mem.first - prev_mem.first, evt_mem.second - prev_mem.second);
 
     stringstream ss;
-    ss << "MEM: total: size=" << evt_mem.first << "K, res=" << evt_mem.second
-       << "K "
-       << "increment: size=" << from_prev.first << "K, res=" << from_prev.second
-       << "K " << evt_msg;
+    ss << "MEM: total: size=" << evt_mem.first << "K, res=" << evt_mem.second << "K "
+       << "increment: size=" << from_prev.first << "K, res=" << from_prev.second << "K " << evt_msg;
     return ss.str();
 }

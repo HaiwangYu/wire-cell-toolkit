@@ -15,10 +15,8 @@
 #include "WireCellIface/WirePlaneId.h"
 #include "WireCellUtil/IComponent.h"
 
-namespace WireCell
-{
-    class IAnodePlane : public IComponent<IAnodePlane>
-    {
+namespace WireCell {
+    class IAnodePlane : public IComponent<IAnodePlane> {
        public:
         virtual ~IAnodePlane();
 

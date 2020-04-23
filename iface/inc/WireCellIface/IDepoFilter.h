@@ -4,12 +4,10 @@
 #include "WireCellIface/IDepo.h"
 #include "WireCellIface/IFunctionNode.h"
 
-namespace WireCell
-{
+namespace WireCell {
     /** Depos go in, depos go out.
- */
-    class IDepoFilter : public IFunctionNode<IDepo, IDepo>
-    {
+     */
+    class IDepoFilter : public IFunctionNode<IDepo, IDepo> {
        public:
         virtual ~IDepoFilter();
 

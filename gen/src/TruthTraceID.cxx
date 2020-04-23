@@ -8,8 +8,7 @@
 
 #include <string>
 
-WIRECELL_FACTORY(TruthTraceID, WireCell::Gen::TruthTraceID, WireCell::IDuctor,
-                 WireCell::IConfigurable)
+WIRECELL_FACTORY(TruthTraceID, WireCell::Gen::TruthTraceID, WireCell::IDuctor, WireCell::IConfigurable)
 
 using namespace std;
 using namespace WireCell;
@@ -75,8 +74,7 @@ void Gen::TruthTraceID::configure(const WireCell::Configuration &cfg)
 {
     m_anode_tn = get<string>(cfg, "anode", m_anode_tn);
     m_anode = Factory::find_tn<IAnodePlane>(m_anode_tn);
-    if (!m_anode)
-    {
+    if (!m_anode) {
         cerr << "Gen::Truth: failed to get anode: \"" << m_anode_tn << "\"\n";
         return;
     }
@@ -84,8 +82,7 @@ void Gen::TruthTraceID::configure(const WireCell::Configuration &cfg)
     m_nsigma = get<double>(cfg, "nsigma", m_nsigma);
     m_fluctuate = get<bool>(cfg, "fluctuate", m_fluctuate);
     m_rng = nullptr;
-    if (m_fluctuate)
-    {
+    if (m_fluctuate) {
         m_rng_tn = get(cfg, "rng", m_rng_tn);
         m_rng = Factory::find_tn<IRandom>(m_rng_tn);
     }
@@ -127,15 +124,12 @@ void Gen::TruthTraceID::process(output_queue &frames)
 
     const int nbins = m_readout_time / m_tick;
 
-    for (auto face : m_anode->faces())
-    {
-        for (auto plane : face->planes())
-        {
+    for (auto face : m_anode->faces()) {
+        for (auto plane : face->planes()) {
             const Pimpos *pimpos = plane->pimpos();
 
             Binning tbins(nbins, m_start_time, m_start_time + m_readout_time);
-            if (tick < 0)
-            {
+            if (tick < 0) {
                 tick = tbins.binsize();
             }
 
@@ -146,70 +140,53 @@ void Gen::TruthTraceID::process(output_queue &frames)
 
             // ### apply diffusion at wire plane ###
             Gen::BinnedDiffusion bindiff(*pimpos, tbins, m_nsigma, m_rng);
-            for (auto depo : m_depos)
-            {
-                bindiff.add(depo, depo->extent_long() / m_drift_speed,
-                            depo->extent_tran());
+            for (auto depo : m_depos) {
+                bindiff.add(depo, depo->extent_long() / m_drift_speed, depo->extent_tran());
 
                 auto &wires = plane->wires();
                 const int numwires = pimpos->region_binning().nbins();
-                for (int iwire = 0; iwire < numwires; iwire++)
-                {
+                for (int iwire = 0; iwire < numwires; iwire++) {
                     const auto rbins = pimpos->region_binning();
                     const auto ibins = pimpos->impact_binning();
                     const double wire_pos = rbins.center(iwire);
                     // fixme (?) this under-calculates the min/max impact position by 1/2
                     // wire region (bv).
-                    const int min_impact =
-                        ibins.edge_index(wire_pos - 0.5 * m_pitch_range);
-                    const int max_impact =
-                        ibins.edge_index(wire_pos + 0.5 * m_pitch_range);
+                    const int min_impact = ibins.edge_index(wire_pos - 0.5 * m_pitch_range);
+                    const int max_impact = ibins.edge_index(wire_pos + 0.5 * m_pitch_range);
                     const int nsamples = tbins.nbins();
-                    Waveform::compseq_t total_spectrum(nsamples,
-                                                       Waveform::complex_t(0.0, 0.0));
+                    Waveform::compseq_t total_spectrum(nsamples, Waveform::complex_t(0.0, 0.0));
 
-                    for (int imp = min_impact; imp <= max_impact; imp++)
-                    {
+                    for (int imp = min_impact; imp <= max_impact; imp++) {
                         auto id = bindiff.impact_data(imp);
-                        if (!id)
-                        {
+                        if (!id) {
                             continue;
                         }
 
                         // debugging
-                        std::cout << "Truth: charge spectrum extracted." << imp
-                                  << std::endl;
+                        std::cout << "Truth: charge spectrum extracted." << imp << std::endl;
 
-                        if (m_truth_type == "Bare")
-                        {
+                        if (m_truth_type == "Bare") {
                             const Waveform::compseq_t &charge_spectrum = id->spectrum();
-                            if (charge_spectrum.empty())
-                            {
+                            if (charge_spectrum.empty()) {
                                 continue;
                             }
                             Waveform::increase(total_spectrum, charge_spectrum);
                         }
-                        else
-                        {  // ### convolve with charge w/ hf filters ###
+                        else {  // ### convolve with charge w/ hf filters ###
                             const Waveform::compseq_t &charge_spectrum = id->spectrum();
-                            if (charge_spectrum.empty())
-                            {
+                            if (charge_spectrum.empty()) {
                                 continue;
                             }
-                            Waveform::compseq_t conv_spectrum(nsamples,
-                                                              Waveform::complex_t(0.0, 0.0));
+                            Waveform::compseq_t conv_spectrum(nsamples, Waveform::complex_t(0.0, 0.0));
                             std::complex<float> charge_gain = m_truth_gain;
-                            for (int ind = 0; ind < nsamples; ind++)
-                            {
-                                if (wires[iwire]->channel() < 4800)
-                                {
-                                    conv_spectrum[ind] = charge_gain * charge_spectrum[ind] *
-                                                         timeTruth[ind] * indTruth[iwire];
+                            for (int ind = 0; ind < nsamples; ind++) {
+                                if (wires[iwire]->channel() < 4800) {
+                                    conv_spectrum[ind] =
+                                        charge_gain * charge_spectrum[ind] * timeTruth[ind] * indTruth[iwire];
                                 }
-                                else
-                                {
-                                    conv_spectrum[ind] = charge_gain * charge_spectrum[ind] *
-                                                         timeTruth[ind] * colTruth[iwire];
+                                else {
+                                    conv_spectrum[ind] =
+                                        charge_gain * charge_spectrum[ind] * timeTruth[ind] * colTruth[iwire];
                                 }
                             }
                             Waveform::increase(total_spectrum, conv_spectrum);
@@ -220,15 +197,13 @@ void Gen::TruthTraceID::process(output_queue &frames)
                     Waveform::realseq_t wave(nsamples, 0.0);
                     wave = Waveform::idft(total_spectrum);
                     auto mm = Waveform::edge(wave);
-                    if (mm.first == (int) wave.size())
-                    {
+                    if (mm.first == (int) wave.size()) {
                         continue;
                     }
 
                     // ### push to trace ###
                     int chid = wires[iwire]->channel();
-                    ITrace::ChargeSequence charge(wave.begin() + mm.first,
-                                                  wave.begin() + mm.second);
+                    ITrace::ChargeSequence charge(wave.begin() + mm.first, wave.begin() + mm.second);
                     auto trace = make_shared<SimpleTrace>(chid, mm.first, charge);
                     traces.push_back(trace);
                 }
@@ -237,8 +212,7 @@ void Gen::TruthTraceID::process(output_queue &frames)
     }
 
     // ### push to frame ###
-    auto frame =
-        make_shared<SimpleFrame>(m_frame_count, m_start_time, traces, tick);
+    auto frame = make_shared<SimpleFrame>(m_frame_count, m_start_time, traces, tick);
     frames.push_back(frame);
 
     m_depos.clear();
@@ -252,26 +226,21 @@ void Gen::TruthTraceID::reset()
     m_eos = false;
 }
 
-bool Gen::TruthTraceID::operator()(const input_pointer &depo,
-                                   output_queue &frames)
+bool Gen::TruthTraceID::operator()(const input_pointer &depo, output_queue &frames)
 {
-    if (m_eos)
-    {
+    if (m_eos) {
         return false;
     }
 
     double target_time = m_start_time + m_readout_time;
-    if (!depo || depo->time() > target_time)
-    {
+    if (!depo || depo->time() > target_time) {
         process(frames);
     }
 
-    if (depo)
-    {
+    if (depo) {
         m_depos.push_back(depo);
     }
-    else
-    {
+    else {
         m_eos = true;
     }
 

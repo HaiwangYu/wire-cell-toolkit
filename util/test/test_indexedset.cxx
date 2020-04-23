@@ -13,8 +13,7 @@ int main()
     AssertMsg(isi(0) == 2, "Failed to index");
     AssertMsg(isi(69) == 1, "Failed to index");
 
-    AssertMsg(isi.collection.size() == 3,
-              "Wrong number of stuff in the collection");
+    AssertMsg(isi.collection.size() == 3, "Wrong number of stuff in the collection");
 
     return 0;
 }

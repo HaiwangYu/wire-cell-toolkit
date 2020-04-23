@@ -12,19 +12,15 @@
 #include <map>
 #include <string>
 
-namespace WireCellTbb
-{
-    class DataFlowGraph : public WireCell::IDataFlowGraph,
-                          public WireCell::IConfigurable
-    {
+namespace WireCellTbb {
+    class DataFlowGraph : public WireCell::IDataFlowGraph, public WireCell::IConfigurable {
        public:
         DataFlowGraph(int max_threads = 0);
         virtual ~DataFlowGraph();
 
         /// Connect two nodes so that data runs from tail to head.
         /// Return false on error.
-        virtual bool connect(WireCell::INode::pointer tail,
-                             WireCell::INode::pointer head, size_t tail_port = 0,
+        virtual bool connect(WireCell::INode::pointer tail, WireCell::INode::pointer head, size_t tail_port = 0,
                              size_t head_port = 0);
 
         /// Run the graph, return false on error.

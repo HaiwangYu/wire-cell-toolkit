@@ -6,21 +6,17 @@
 
 #include <map>
 
-namespace WireCell
-{
+namespace WireCell {
     /** A simple frame.
- *
- * This is is nothing more than a bag of data.
- */
-    class SimpleFrame : public IFrame
-    {
+     *
+     * This is is nothing more than a bag of data.
+     */
+    class SimpleFrame : public IFrame {
        public:
-        SimpleFrame(int ident, double time, const ITrace::vector &traces,
-                    double tick = 0.5 * units::microsecond,
+        SimpleFrame(int ident, double time, const ITrace::vector &traces, double tick = 0.5 * units::microsecond,
                     const Waveform::ChannelMaskMap &cmm = Waveform::ChannelMaskMap());
 
-        SimpleFrame(int ident, double time, ITrace::shared_vector traces,
-                    double tick = 0.5 * units::microsecond,
+        SimpleFrame(int ident, double time, ITrace::shared_vector traces, double tick = 0.5 * units::microsecond,
                     const Waveform::ChannelMaskMap &cmm = Waveform::ChannelMaskMap());
 
         ~SimpleFrame();
@@ -43,9 +39,8 @@ namespace WireCell
         void tag_frame(const tag_t &tag);
 
         // Tag a subset of traces with optional trace summary
-        void tag_traces(
-            const tag_t &tag, const IFrame::trace_list_t &indices,
-            const IFrame::trace_summary_t &summary = IFrame::trace_summary_t(0));
+        void tag_traces(const tag_t &tag, const IFrame::trace_list_t &indices,
+                        const IFrame::trace_summary_t &summary = IFrame::trace_summary_t(0));
 
        private:
         int m_ident;
@@ -55,8 +50,7 @@ namespace WireCell
 
         IFrame::tag_list_t m_frame_tags, m_trace_tags;
 
-        struct SimpleTraceInfo
-        {
+        struct SimpleTraceInfo {
             IFrame::trace_list_t indices;
             IFrame::trace_summary_t summary;
             SimpleTraceInfo();

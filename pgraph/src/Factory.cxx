@@ -22,22 +22,18 @@ Factory::Factory()
 
 Node *Factory::operator()(WireCell::INode::pointer wcnode)
 {
-    if (!wcnode)
-    {
+    if (!wcnode) {
         l->critical("factory given nullptr wcnode");
         THROW(ValueError() << errmsg{"nullptr wcnode"});
     }
 
     auto nit = m_nodes.find(wcnode);
-    if (nit != m_nodes.end())
-    {
+    if (nit != m_nodes.end()) {
         return nit->second;
     }
     auto mit = m_factory.find(wcnode->category());
-    if (mit == m_factory.end())
-    {
-        l->critical("factory failed to find maker for category: {}",
-                    wcnode->category());
+    if (mit == m_factory.end()) {
+        l->critical("factory failed to find maker for category: {}", wcnode->category());
         THROW(ValueError() << errmsg{"failed to find maker"});
     }
     auto maker = mit->second;

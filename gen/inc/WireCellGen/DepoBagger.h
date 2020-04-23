@@ -18,19 +18,15 @@
 #include <map>
 #include <vector>
 
-namespace WireCell
-{
-    namespace Gen
-    {
-        class DepoBagger : public IDepoCollector, public IConfigurable
-        {
+namespace WireCell {
+    namespace Gen {
+        class DepoBagger : public IDepoCollector, public IConfigurable {
            public:
             DepoBagger();
             virtual ~DepoBagger();
 
             // IDepoCollector
-            virtual bool operator()(const input_pointer &depo,
-                                    output_queue &deposetqueue);
+            virtual bool operator()(const input_pointer &depo, output_queue &deposetqueue);
 
             // IConfigurable
             virtual void configure(const WireCell::Configuration &config);

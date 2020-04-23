@@ -4,11 +4,9 @@
 #include "WireCellIface/ISinkNode.h"
 #include "WireCellUtil/Point.h"
 
-namespace WireCell
-{
+namespace WireCell {
     /** Base class for a sink of cells. */
-    class IPointFieldSink : public ISinkNode<PointVector>
-    {
+    class IPointFieldSink : public ISinkNode<PointVector> {
        public:
         virtual ~IPointFieldSink();
 

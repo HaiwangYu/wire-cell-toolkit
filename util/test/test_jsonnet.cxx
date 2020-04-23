@@ -45,9 +45,7 @@ const std::string want1 = R"({
 int main()
 {
     Persist::externalvars_t extravars{{"person", "Malory"}};
-    Persist::externalvars_t extracode{
-        {"override",
-         "{person4: {name: \"Surley\", welcome:\"Don't call my Shirley\"}}"}};
+    Persist::externalvars_t extracode{{"override", "{person4: {name: \"Surley\", welcome:\"Don't call my Shirley\"}}"}};
 
     string got1 = Persist::evaluate_jsonnet_text(give1, extravars, extracode);
     cerr << "------give:\n";
@@ -59,26 +57,21 @@ int main()
     cerr << "------\n";
     Assert(got1 == want1);
 
-    try
-    {
+    try {
         cerr << "There should be errors following:\n";
-        string what =
-            Persist::evaluate_jsonnet_text("[ std.extVar(\"doesnoteexists\") ]");
+        string what = Persist::evaluate_jsonnet_text("[ std.extVar(\"doesnoteexists\") ]");
         cerr << what << endl;
     }
-    catch (Exception &e)
-    {
+    catch (Exception &e) {
         cerr << "Properly caught reference to nonexistent extVar\n";
     }
 
-    if (!std::getenv("WIRECELL_PATH"))
-    {
+    if (!std::getenv("WIRECELL_PATH")) {
         cerr << "test_jsonnet requires setting WIRECELL_PATH to point to where "
                 "'wirecell.jsonnet' exists\n";
         return 0;
     }
-    string text = Persist::evaluate_jsonnet_text(
-        "local wc = import \"wirecell.jsonnet\"; [ wc.pi ]");
+    string text = Persist::evaluate_jsonnet_text("local wc = import \"wirecell.jsonnet\"; [ wc.pi ]");
     // cerr << text << endl;
     auto res = Persist::loads(text);
 

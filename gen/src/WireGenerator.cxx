@@ -6,16 +6,13 @@
 #include <iostream>  // debugging
 #include <vector>
 
-WIRECELL_FACTORY(WireGenerator, WireCell::WireGenerator,
-                 WireCell::IWireGenerator)
+WIRECELL_FACTORY(WireGenerator, WireCell::WireGenerator, WireCell::IWireGenerator)
 
 using namespace WireCell;
 using namespace std;
 
-namespace WireCell
-{
-    class GenWire : public IWire
-    {
+namespace WireCell {
+    class GenWire : public IWire {
         WirePlaneId m_wpid;
         int m_index;
         Ray m_ray;
@@ -54,8 +51,7 @@ namespace WireCell
     };
 }  // namespace WireCell
 
-static GenWire *make_wire(int index, const Point &point, const Point &proto,
-                          const Ray &bounds)
+static GenWire *make_wire(int index, const Point &point, const Point &proto, const Ray &bounds)
 {
     const Point pt1 = point;
     const Point pt2 = pt1 + proto;
@@ -63,28 +59,21 @@ static GenWire *make_wire(int index, const Point &point, const Point &proto,
 
     Ray hits;
     int hitmask = box_intersection(bounds, wireray, hits);
-    if (3 != hitmask)
-    {
+    if (3 != hitmask) {
         return 0;
     }
     // ray should point generally towards +Y
-    if (hits.first.y() > hits.second.y())
-    {
+    if (hits.first.y() > hits.second.y()) {
         hits = Ray(hits.second, hits.first);
     }
     return new GenWire(WirePlaneId(kUnknownLayer), index, hits);
 }
 
-struct SortByIndex
-{
-    inline bool operator()(const GenWire *lhs, const GenWire *rhs)
-    {
-        return lhs->index() < rhs->index();
-    }
+struct SortByIndex {
+    inline bool operator()(const GenWire *lhs, const GenWire *rhs) { return lhs->index() < rhs->index(); }
 };
 
-static void make_one_plane(IWire::vector &returned_wires, WirePlaneId wpid,
-                           const Ray &bounds, const Ray &step)
+static void make_one_plane(IWire::vector &returned_wires, WirePlaneId wpid, const Ray &bounds, const Ray &step)
 {
     const Vector xaxis(1, 0, 0);
     const Point starting_point = step.first;
@@ -95,11 +84,9 @@ static void make_one_plane(IWire::vector &returned_wires, WirePlaneId wpid,
 
     int pos_index = 0;
     Point offset = starting_point;
-    while (true)
-    {  // go in positive pitch direction
+    while (true) {  // go in positive pitch direction
         GenWire *wire = make_wire(pos_index, offset, proto, bounds);
-        if (!wire)
-        {
+        if (!wire) {
             break;
         }
         these_wires.push_back(wire);
@@ -109,13 +96,10 @@ static void make_one_plane(IWire::vector &returned_wires, WirePlaneId wpid,
 
     int neg_index = -1;  // now go in negative pitch direction
     const Vector neg_pitch = -1.0 * pitch;
-    offset = these_wires[0]->center() +
-             neg_pitch;  // start one below first upward going one
-    while (true)
-    {  // go in negative pitch direction
+    offset = these_wires[0]->center() + neg_pitch;  // start one below first upward going one
+    while (true) {                                  // go in negative pitch direction
         GenWire *wire = make_wire(neg_index, offset, proto, bounds);
-        if (!wire)
-        {
+        if (!wire) {
             break;
         }
         these_wires.push_back(wire);
@@ -127,8 +111,7 @@ static void make_one_plane(IWire::vector &returned_wires, WirePlaneId wpid,
     std::sort(these_wires.begin(), these_wires.end(), SortByIndex());
 
     // load in to store and fix up index and plane
-    for (size_t ind = 0; ind < these_wires.size(); ++ind)
-    {
+    for (size_t ind = 0; ind < these_wires.size(); ++ind) {
         GenWire *pwire = these_wires[ind];
         pwire->set_index(ind);
         pwire->set_planeid(wpid);
@@ -142,8 +125,7 @@ static void make_one_plane(IWire::vector &returned_wires, WirePlaneId wpid,
 
 bool WireGenerator::operator()(const input_pointer &wp, output_pointer &wires)
 {
-    if (!wp)
-    {
+    if (!wp) {
         wires = nullptr;
         return true;
     }

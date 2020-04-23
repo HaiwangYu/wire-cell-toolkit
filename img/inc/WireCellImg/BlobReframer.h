@@ -14,12 +14,9 @@
 #include "WireCellIface/IConfigurable.h"
 #include "WireCellUtil/Logging.h"
 
-namespace WireCell
-{
-    namespace Img
-    {
-        class BlobReframer : public IClusterFramer, public IConfigurable
-        {
+namespace WireCell {
+    namespace Img {
+        class BlobReframer : public IClusterFramer, public IConfigurable {
            public:
             BlobReframer(const std::string &frame_tag = "reframe");
             virtual ~BlobReframer();

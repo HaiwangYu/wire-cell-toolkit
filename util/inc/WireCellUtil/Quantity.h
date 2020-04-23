@@ -4,17 +4,15 @@
 #include <cmath>
 #include <ostream>
 
-namespace WireCell
-{
+namespace WireCell {
     // This is heavily cribbed from Boost's units/example/measurement.hpp
 
     /** Provide a quantity with a value and an uncertainty and all the
- * little math operators.
- *
- *  Beware this assumes all quantities are uncorrelated!
- */
-    class Quantity
-    {
+     * little math operators.
+     *
+     *  Beware this assumes all quantities are uncorrelated!
+     */
+    class Quantity {
        public:
         Quantity()
           : m_mean(0.0)
@@ -46,8 +44,7 @@ namespace WireCell
 
         Quantity &operator=(const Quantity &other)
         {
-            if (this == &other)
-                return *this;
+            if (this == &other) return *this;
             m_mean = other.m_mean;
             m_sigma = other.m_sigma;
             return *this;
@@ -123,14 +120,8 @@ namespace WireCell
 
         bool operator<(const Quantity &other) const { return m_mean < other.m_mean; }
         bool operator>(const Quantity &other) const { return m_mean > other.m_mean; }
-        bool operator==(const Quantity &other) const
-        {
-            return m_mean == other.m_mean;
-        }
-        bool operator!=(const Quantity &other) const
-        {
-            return m_mean != other.m_mean;
-        }
+        bool operator==(const Quantity &other) const { return m_mean == other.m_mean; }
+        bool operator!=(const Quantity &other) const { return m_mean != other.m_mean; }
 
        private:
         double m_mean, m_sigma;
@@ -147,29 +138,25 @@ namespace WireCell
         return WireCell::Quantity(-1 * other.mean(), other.sigma());
     }
 
-    inline WireCell::Quantity operator*(const WireCell::Quantity &lhs,
-                                        const WireCell::Quantity &rhs)
+    inline WireCell::Quantity operator*(const WireCell::Quantity &lhs, const WireCell::Quantity &rhs)
     {
         WireCell::Quantity res = lhs;
         res *= rhs;
         return res;
     }
-    inline WireCell::Quantity operator/(const WireCell::Quantity &lhs,
-                                        const WireCell::Quantity &rhs)
+    inline WireCell::Quantity operator/(const WireCell::Quantity &lhs, const WireCell::Quantity &rhs)
     {
         WireCell::Quantity res = lhs;
         res /= rhs;
         return res;
     }
-    inline WireCell::Quantity operator+(const WireCell::Quantity &lhs,
-                                        const WireCell::Quantity &rhs)
+    inline WireCell::Quantity operator+(const WireCell::Quantity &lhs, const WireCell::Quantity &rhs)
     {
         WireCell::Quantity res = lhs;
         res += rhs;
         return res;
     }
-    inline WireCell::Quantity operator-(const WireCell::Quantity &lhs,
-                                        const WireCell::Quantity &rhs)
+    inline WireCell::Quantity operator-(const WireCell::Quantity &lhs, const WireCell::Quantity &rhs)
     {
         WireCell::Quantity res = lhs;
         res -= rhs;
@@ -179,45 +166,21 @@ namespace WireCell
     // some comparisons with other, scalar types
 
     // fixme: *should* this be true:  should exact values be considered equal?
-    inline bool operator==(const WireCell::Quantity &lhs, const double &scalar)
-    {
-        return lhs.mean() == scalar;
-    }
+    inline bool operator==(const WireCell::Quantity &lhs, const double &scalar) { return lhs.mean() == scalar; }
 
-    inline bool operator!=(const WireCell::Quantity &lhs, const double &scalar)
-    {
-        return lhs.mean() != scalar;
-    }
+    inline bool operator!=(const WireCell::Quantity &lhs, const double &scalar) { return lhs.mean() != scalar; }
 
-    inline bool operator<(const WireCell::Quantity &lhs, const double &scalar)
-    {
-        return lhs.mean() < scalar;
-    }
+    inline bool operator<(const WireCell::Quantity &lhs, const double &scalar) { return lhs.mean() < scalar; }
 
-    inline bool operator>(const WireCell::Quantity &lhs, const double &scalar)
-    {
-        return lhs.mean() > scalar;
-    }
+    inline bool operator>(const WireCell::Quantity &lhs, const double &scalar) { return lhs.mean() > scalar; }
 
-    inline bool operator==(const double &scalar, const WireCell::Quantity &rhs)
-    {
-        return scalar == rhs.mean();
-    }
+    inline bool operator==(const double &scalar, const WireCell::Quantity &rhs) { return scalar == rhs.mean(); }
 
-    inline bool operator!=(const double &scalar, const WireCell::Quantity &rhs)
-    {
-        return scalar != rhs.mean();
-    }
+    inline bool operator!=(const double &scalar, const WireCell::Quantity &rhs) { return scalar != rhs.mean(); }
 
-    inline bool operator<(const double &scalar, const WireCell::Quantity &rhs)
-    {
-        return scalar < rhs.mean();
-    }
+    inline bool operator<(const double &scalar, const WireCell::Quantity &rhs) { return scalar < rhs.mean(); }
 
-    inline bool operator>(const double &scalar, const WireCell::Quantity &rhs)
-    {
-        return scalar > rhs.mean();
-    }
+    inline bool operator>(const double &scalar, const WireCell::Quantity &rhs) { return scalar > rhs.mean(); }
 
 }  // namespace WireCell
 

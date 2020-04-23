@@ -38,8 +38,7 @@ int main(int argc, char *argv[])
     // The algorithm works in chunks of 20
     Assert((end - beg) % 20 == 0);
 
-    for (int ind = beg; ind < end; ++ind)
-    {
+    for (int ind = beg; ind < end; ++ind) {
         Assert(hfilt[ind] == 0);
     }
 

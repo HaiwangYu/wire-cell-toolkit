@@ -12,10 +12,8 @@ typedef std::chrono::high_resolution_clock Clock;
 
 using namespace WireCell;
 
-namespace
-{
-    ITensorSet::pointer gen_tensorset(const unsigned int nrow = 6000,
-                                      const unsigned int ncol = 800)
+namespace {
+    ITensorSet::pointer gen_tensorset(const unsigned int nrow = 6000, const unsigned int ncol = 800)
     {
         Array::array_xxf iarr = Array::array_xxf::Random(nrow, ncol);
         auto oiten = Aux::eigen_array_to_itensor<std::complex<float>>(iarr);
@@ -23,8 +21,7 @@ namespace
         itv->push_back(ITensor::pointer(oiten));
         int seqno = 0;
         Configuration md;
-        return std::make_shared<Aux::SimpleTensorSet>(seqno, md,
-                                                      ITensor::shared_vector(itv));
+        return std::make_shared<Aux::SimpleTensorSet>(seqno, md, ITensor::shared_vector(itv));
     }
 
     void print(const ITensorSet::pointer itens)
@@ -48,16 +45,13 @@ int main()
     auto cfg = node->default_configuration();
 
     auto t1 = Clock::now();
-    for (int i = 0; i < nloop; ++i)
-    {
+    for (int i = 0; i < nloop; ++i) {
         (*node)(iitens, oitens);
     }
     auto t2 = Clock::now();
     std::cout << "Decon2DResponse: "
-              << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1)
-                         .count() /
-                     (float) nloop
-              << " ms/loop" << std::endl;
+              << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count() / (float) nloop << " ms/loop"
+              << std::endl;
 
     return 0;
 }

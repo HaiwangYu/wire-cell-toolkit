@@ -7,10 +7,8 @@
 #include "WireCellUtil/DfpGraph.h"
 #include "WireCellUtil/Logging.h"
 
-namespace WireCellTbb
-{
-    class TbbFlow : public WireCell::IApplication, public WireCell::IConfigurable
-    {
+namespace WireCellTbb {
+    class TbbFlow : public WireCell::IApplication, public WireCell::IConfigurable {
         WireCell::IDataFlowGraph::pointer m_dfp;
         WireCell::DfpGraph m_dfpgraph;
 

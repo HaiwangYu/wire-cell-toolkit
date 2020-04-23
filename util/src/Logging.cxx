@@ -12,13 +12,11 @@ static Log::logptr_t wct_base_logger()
 {
     const std::string name = "wct";
     static Log::logptr_t base_logger = nullptr;
-    if (base_logger)
-    {
+    if (base_logger) {
         return base_logger;
     }
     base_logger = spdlog::get(name);
-    if (base_logger)
-    {
+    if (base_logger) {
         return base_logger;
     }
 
@@ -33,8 +31,7 @@ static Log::logptr_t wct_base_logger()
 
 void Log::add_sink(Log::sinkptr_t sink, std::string level)
 {
-    if (!level.empty())
-    {
+    if (!level.empty()) {
         sink->set_level(spdlog::level::from_str(level));
     }
     wct_base_logger()->sinks().push_back(sink);
@@ -47,26 +44,22 @@ void Log::add_file(std::string filename, std::string level)
 
 void Log::add_stdout(bool color, std::string level)
 {
-    if (color)
-    {
+    if (color) {
         auto s = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
         Log::add_sink(s, level);
     }
-    else
-    {
+    else {
         auto s = std::make_shared<spdlog::sinks::stdout_sink_mt>();
         Log::add_sink(s, level);
     }
 }
 void Log::add_stderr(bool color, std::string level)
 {
-    if (color)
-    {
+    if (color) {
         auto s = std::make_shared<spdlog::sinks::stderr_color_sink_mt>();
         Log::add_sink(s, level);
     }
-    else
-    {
+    else {
         auto s = std::make_shared<spdlog::sinks::stderr_sink_mt>();
         Log::add_sink(s, level);
     }
@@ -76,16 +69,14 @@ Log::logptr_t Log::logger(std::string name)
 {
     wct_base_logger();  // make sure base logger is installed.
     auto l = spdlog::get(name);
-    if (!l)
-    {
+    if (!l) {
         auto &sinks = wct_base_logger()->sinks();
         l = std::make_shared<spdlog::logger>(name, sinks.begin(), sinks.end());
 
         // peak under the hood of spdlog.  We want shared loggers to
         // get configured with the default level.
         spdlog::details::registry::instance().initialize_logger(l);
-        if (!spdlog::get(name))
-        {
+        if (!spdlog::get(name)) {
             spdlog::register_logger(l);
         }
     }
@@ -97,8 +88,7 @@ void Log::set_level(std::string level, std::string which)
 {
     auto lvl = spdlog::level::from_str(level);
 
-    if (which.empty())
-    {
+    if (which.empty()) {
         spdlog::set_level(lvl);
         return;
     }
@@ -106,8 +96,7 @@ void Log::set_level(std::string level, std::string which)
 }
 void Log::set_pattern(std::string pattern, std::string which)
 {
-    if (which.empty())
-    {
+    if (which.empty()) {
         spdlog::set_pattern(pattern);
         return;
     }

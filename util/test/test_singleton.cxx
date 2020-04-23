@@ -4,8 +4,7 @@
 
 using spdlog::info;
 
-class Foo
-{
+class Foo {
    public:
     Foo() { info("Foo() at {:p}", (void *) this); }
     virtual ~Foo() { info("~Foo() at {:p}", (void *) this); }

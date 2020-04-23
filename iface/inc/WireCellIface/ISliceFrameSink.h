@@ -4,10 +4,8 @@
 #include "WireCellIface/ISinkNode.h"
 #include "WireCellIface/ISliceFrame.h"
 
-namespace WireCell
-{
-    class ISliceFrameSink : public ISinkNode<ISliceFrame>
-    {
+namespace WireCell {
+    class ISliceFrameSink : public ISinkNode<ISliceFrame> {
        public:
         typedef std::shared_ptr<ISliceFrameSink> pointer;
 

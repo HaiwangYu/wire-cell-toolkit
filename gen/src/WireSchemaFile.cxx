@@ -3,8 +3,7 @@
 #include "WireCellUtil/Exceptions.h"
 #include "WireCellUtil/NamedFactory.h"
 
-WIRECELL_FACTORY(WireSchemaFile, WireCell::Gen::WireSchemaFile,
-                 WireCell::IWireSchema, WireCell::IConfigurable)
+WIRECELL_FACTORY(WireSchemaFile, WireCell::Gen::WireSchemaFile, WireCell::IWireSchema, WireCell::IConfigurable)
 
 using namespace WireCell;
 
@@ -18,8 +17,7 @@ Gen::WireSchemaFile::~WireSchemaFile() {}
 void Gen::WireSchemaFile::configure(const WireCell::Configuration &cfg)
 {
     m_fname = get(cfg, "filename", m_fname);
-    if (m_fname.empty())
-    {
+    if (m_fname.empty()) {
         THROW(ValueError() << errmsg{"must give a wire schema filename"});
     }
     m_store = WireSchema::load(m_fname.c_str());
@@ -32,7 +30,4 @@ WireCell::Configuration Gen::WireSchemaFile::default_configuration() const
     return cfg;
 }
 
-const WireSchema::Store &Gen::WireSchemaFile::wire_schema_store() const
-{
-    return m_store;
-}
+const WireSchema::Store &Gen::WireSchemaFile::wire_schema_store() const { return m_store; }

@@ -5,14 +5,12 @@
 #include <deque>
 #include <map>
 
-namespace WireCell
-{
+namespace WireCell {
     /** A fanout which takes in Data from a connected slot and buffers it
- * into set of addressable queues.
- */
+     * into set of addressable queues.
+     */
     template <typename Data, typename Address = int>
-    class Fanout
-    {
+    class Fanout {
        public:
         // The fanout is held as a map from address to queue
         typedef Data result_type;
@@ -37,11 +35,9 @@ namespace WireCell
         result_type operator()(const address_type &addr)
         {
             data_queue &dq = m_fan[addr];
-            if (!dq.size())
-            {
+            if (!dq.size()) {
                 result_type dat = *m_signal();
-                for (auto it = m_fan.begin(); it != m_fan.end(); ++it)
-                {
+                for (auto it = m_fan.begin(); it != m_fan.end(); ++it) {
                     it->second.push_back(dat);
                 }
             }
@@ -56,12 +52,11 @@ namespace WireCell
     };
 
     /** If you have a slot to connect to a Fanout which doesn't
- * inherently care about the address to which it is attached, use
- * the AddressedShunt as a go-between.
- */
+     * inherently care about the address to which it is attached, use
+     * the AddressedShunt as a go-between.
+     */
     template <typename Data, typename Address = int>
-    class Addresser
-    {
+    class Addresser {
        public:
         typedef Data value_type;
         typedef Address address_type;
@@ -88,24 +83,23 @@ namespace WireCell
     };
 
     /** Fan-in concept is inherent in boost::signals2, but does
- * require some "combiner" to enact whatever fan-in policy is
- * desired.  This most obvious one is one which synchronizes all
- * input into a simple collection.  A signal like this will return
- * a vector of its inputs.
- *
- *    // a generator returning one higher count each time called
- *    Counter c1(10),c2(20),c3(30);
- *
- *    boost::signals2::signal< int (), Fanin< std::vector<int> > > sig;
- *    sig.connect(c1);
- *    sig.connect(c2);
- *    sig.connect(c3);
- *
- *    sig(); // --> vector(10,20,30)
- */
+     * require some "combiner" to enact whatever fan-in policy is
+     * desired.  This most obvious one is one which synchronizes all
+     * input into a simple collection.  A signal like this will return
+     * a vector of its inputs.
+     *
+     *    // a generator returning one higher count each time called
+     *    Counter c1(10),c2(20),c3(30);
+     *
+     *    boost::signals2::signal< int (), Fanin< std::vector<int> > > sig;
+     *    sig.connect(c1);
+     *    sig.connect(c2);
+     *    sig.connect(c3);
+     *
+     *    sig(); // --> vector(10,20,30)
+     */
     template <typename Collection>
-    struct Fanin
-    {
+    struct Fanin {
         // result_type required for boost::signals2 combiners
         typedef Collection result_type;
         // typedef typename Collection::value_type value_type;
@@ -114,8 +108,7 @@ namespace WireCell
         result_type operator()(InputIterator first, InputIterator last) const
         {
             result_type ret;
-            while (first != last)
-            {
+            while (first != last) {
                 ret.push_back(*first);
                 ++first;
             }

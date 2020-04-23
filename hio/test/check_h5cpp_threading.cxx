@@ -13,8 +13,7 @@
 std::mutex g_h5cpp_mutex;
 
 template <class T>
-using Matrix =
-    Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor>;
+using Matrix = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor>;
 
 void hello(int &threadid)
 {
@@ -22,21 +21,18 @@ void hello(int &threadid)
     return;
 }
 
-namespace
-{
+namespace {
     h5::fd_t h5open(const int &threadid, const std::string &fname)
     {
         // comment the lock off to check thread safety
         std::lock_guard<std::mutex> guard(g_h5cpp_mutex);
 
         h5::fd_t fd;
-        try
-        {
+        try {
             fd = h5::open(fname, H5F_ACC_RDONLY);  // H5F_ACC_RDONLY
             std::cout << "h5::open " << fname << std::endl;
         }
-        catch (...)
-        {
+        catch (...) {
             std::cout << "Can't open " << fname << std::endl;
             throw;
         }
@@ -50,18 +46,15 @@ namespace
 
         // comment the lock off to check thread safety
         std::lock_guard<std::mutex> guard(g_h5cpp_mutex);
-        for (int sequence = 0; sequence < sequence_max; ++sequence)
-        {
+        for (int sequence = 0; sequence < sequence_max; ++sequence) {
             auto key = WireCell::String::format("/%d/frame_%s%d", sequence, tag, apa);
             std::cout << "loading: " << key << std::endl;
 
             Eigen::MatrixXf d;
-            try
-            {
+            try {
                 d = h5::read<Eigen::MatrixXf>(fd, key);
             }
-            catch (...)
-            {
+            catch (...) {
                 std::cout << "Can't load " << key << std::endl;
                 throw;
             }
@@ -76,12 +69,10 @@ int main(int argc, const char *argv[])
     //   nthreads\n"; return -1;
     // }
 
-    std::vector<std::string> fnames = {"orig-0.h5", "orig-1.h5", "orig-2.h5",
-                                       "orig-3.h5"};
+    std::vector<std::string> fnames = {"orig-0.h5", "orig-1.h5", "orig-2.h5", "orig-3.h5"};
 
     std::vector<h5::fd_t> fds;
-    for (auto fn : fnames)
-    {
+    for (auto fn : fnames) {
         fds.push_back(h5open(0, fn));
     }
 
@@ -90,14 +81,12 @@ int main(int argc, const char *argv[])
     std::cout << "test_h5cpp_threading\n";
 
     std::vector<std::thread> threads;
-    for (int i = 0; i < nthreads; i++)
-    {
+    for (int i = 0; i < nthreads; i++) {
         std::cout << "main() : creating thread, " << i << std::endl;
         // threads.push_back(std::thread(h5open, i, std::ref(fnames[i])));
         threads.push_back(std::thread(h5read, i, std::ref(fds[i])));
     }
-    for (int i = 0; i < nthreads; i++)
-    {
+    for (int i = 0; i < nthreads; i++) {
         threads[i].join();
     }
 

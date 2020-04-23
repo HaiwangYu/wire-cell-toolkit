@@ -15,10 +15,8 @@
 #include "WireCellUtil/IComponent.h"
 #include "WireCellUtil/Waveform.h"
 
-namespace WireCell
-{
-    class IImpactResponse : public IComponent<IImpactResponse>
-    {
+namespace WireCell {
+    class IImpactResponse : public IComponent<IImpactResponse> {
        public:
         virtual ~IImpactResponse();
 
@@ -41,11 +39,9 @@ namespace WireCell
     };
 
     // A pair of IRs
-    typedef std::pair<IImpactResponse::pointer, IImpactResponse::pointer>
-        TwoImpactResponses;
+    typedef std::pair<IImpactResponse::pointer, IImpactResponse::pointer> TwoImpactResponses;
 
-    class IPlaneImpactResponse : public IComponent<IPlaneImpactResponse>
-    {
+    class IPlaneImpactResponse : public IComponent<IPlaneImpactResponse> {
        public:
         virtual ~IPlaneImpactResponse();
 

@@ -5,8 +5,7 @@ using namespace std;
 
 using namespace WireCell;
 
-int WireCell::hit_square(int axis0, const Ray &bounds, const Point &point,
-                         const Vector &dir, Ray &hits)
+int WireCell::hit_square(int axis0, const Ray &bounds, const Point &point, const Vector &dir, Ray &hits)
 {
     const Point &bmin = bounds.first;
     const Point &bmax = bounds.second;
@@ -14,8 +13,7 @@ int WireCell::hit_square(int axis0, const Ray &bounds, const Point &point,
     double hit1[3] = {0}, hit2[3] = {0};
 
     int hitmask = 0;
-    if (0 == dir[axis0])
-    {
+    if (0 == dir[axis0]) {
         return hitmask;
     }
 
@@ -29,9 +27,7 @@ int WireCell::hit_square(int axis0, const Ray &bounds, const Point &point,
         double one = point[axis1] + scale * dir[axis1];
         double two = point[axis2] + scale * dir[axis2];
 
-        if (bmin[axis1] <= one && one <= bmax[axis1] && bmin[axis2] <= two &&
-            two <= bmax[axis2])
-        {
+        if (bmin[axis1] <= one && one <= bmax[axis1] && bmin[axis2] <= two && two <= bmax[axis2]) {
             hitmask |= 1;
             hit1[axis0] = intercept;
             hit1[axis1] = one;
@@ -46,9 +42,7 @@ int WireCell::hit_square(int axis0, const Ray &bounds, const Point &point,
         double one = point[axis1] + scale * dir[axis1];
         double two = point[axis2] + scale * dir[axis2];
 
-        if (bmin[axis1] <= one && one <= bmax[axis1] && bmin[axis2] <= two &&
-            two <= bmax[axis2])
-        {
+        if (bmin[axis1] <= one && one <= bmax[axis1] && bmin[axis2] <= two && two <= bmax[axis2]) {
             hitmask |= 2;
             hit2[axis0] = intercept;
             hit2[axis1] = one;
@@ -67,42 +61,35 @@ int WireCell::box_intersection(const Ray &bounds, const Ray &ray, Ray &hits)
     const Point dir = (ray.second - ray.first).norm();
 
     // check each projection
-    for (int axis = 0; axis < 3; ++axis)
-    {
+    for (int axis = 0; axis < 3; ++axis) {
         Ray res;
         int got = hit_square(axis, bounds, point, dir, res);
 
-        if (got & 1)
-        {
+        if (got & 1) {
             // pair<PointSet::iterator, bool> what =
             results.insert(res.first);
         }
-        if (got & 2)
-        {
+        if (got & 2) {
             // pair<PointSet::iterator, bool> what =
             results.insert(res.second);
         }
     }
 
-    if (results.size() > 2)
-    {
+    if (results.size() > 2) {
         return -1;
     }
 
     int hitmask = 0;
-    for (auto hitit = results.begin(); hitit != results.end(); ++hitit)
-    {
+    for (auto hitit = results.begin(); hitit != results.end(); ++hitit) {
         const Point &hit = *hitit;
         Vector hitdir = hit - point;
         double dot = hitdir.norm().dot(dir);
 
-        if (dot > 0)
-        {  // actually should be closer to +/-1 w/in tolerance
+        if (dot > 0) {  // actually should be closer to +/-1 w/in tolerance
             hits.first = hit;
             hitmask |= 1;
         }
-        else
-        {
+        else {
             hits.second = hit;
             hitmask |= 2;
         }

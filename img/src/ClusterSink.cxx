@@ -10,8 +10,7 @@
 #include <sstream>
 #include <unordered_set>
 
-WIRECELL_FACTORY(ClusterSink, WireCell::Img::ClusterSink,
-                 WireCell::IClusterSink, WireCell::IConfigurable)
+WIRECELL_FACTORY(ClusterSink, WireCell::Img::ClusterSink, WireCell::IClusterSink, WireCell::IConfigurable)
 
 using namespace WireCell;
 
@@ -41,8 +40,7 @@ WireCell::Configuration Img::ClusterSink::default_configuration() const
     return cfg;
 }
 
-typedef std::vector<std::function<std::string(const cluster_node_t &ptr)>>
-    stringers_t;
+typedef std::vector<std::function<std::string(const cluster_node_t &ptr)>> stringers_t;
 
 static std::string size_stringer(const cluster_node_t &n)
 {
@@ -63,8 +61,7 @@ std::string scalar_stringer(const cluster_node_t &n)
 template <typename Type>
 std::string vector_stringer(const cluster_node_t &n)
 {
-    typename Type::shared_vector sv =
-        std::get<typename Type::shared_vector>(n.ptr);
+    typename Type::shared_vector sv = std::get<typename Type::shared_vector>(n.ptr);
     std::stringstream ss;
     ss << n.code() << "#" << sv->size();
     return ss.str();
@@ -73,15 +70,13 @@ std::string vector_stringer(const cluster_node_t &n)
 static std::string asstring(const cluster_node_t &n)
 {
     // cwbsm
-    stringers_t ss{size_stringer, scalar_stringer<IChannel>,
-                   scalar_stringer<IWire>, scalar_stringer<IBlob>,
-                   scalar_stringer<ISlice>, vector_stringer<IChannel>};
+    stringers_t ss{size_stringer,          scalar_stringer<IChannel>, scalar_stringer<IWire>,
+                   scalar_stringer<IBlob>, scalar_stringer<ISlice>,   vector_stringer<IChannel>};
     const size_t ind = n.ptr.index();
     return ss[ind](n);
 }
 
-struct label_writer_t
-{
+struct label_writer_t {
     const cluster_graph_t &g;
     template <class vdesc_t>
     void operator()(std::ostream &out, const vdesc_t v) const
@@ -92,19 +87,16 @@ struct label_writer_t
 
 bool Img::ClusterSink::operator()(const ICluster::pointer &cluster)
 {
-    if (!cluster)
-    {
+    if (!cluster) {
         return true;
     }
 
     std::string fname = m_filename;
-    if (fname.empty())
-    {
+    if (fname.empty()) {
         return true;
     }
 
-    if (m_filename.find("%") != std::string::npos)
-    {
+    if (m_filename.find("%") != std::string::npos) {
         fname = String::format(m_filename, cluster->ident());
     }
     std::ofstream out(fname.c_str());
@@ -116,20 +108,16 @@ bool Img::ClusterSink::operator()(const ICluster::pointer &cluster)
     const cluster_graph_t &gr = cluster->graph();
     cluster_indexed_graph_t grind;
 
-    for (const auto &v : boost::make_iterator_range(boost::vertices(gr)))
-    {
+    for (const auto &v : boost::make_iterator_range(boost::vertices(gr))) {
         const auto &vobj = gr[v];
-        if (!keep.count(vobj.code()))
-        {
+        if (!keep.count(vobj.code())) {
             continue;
         }
         grind.vertex(vobj);
-        for (auto edge : boost::make_iterator_range(boost::out_edges(v, gr)))
-        {
+        for (auto edge : boost::make_iterator_range(boost::out_edges(v, gr))) {
             auto v2 = boost::target(edge, gr);
             const auto &vobj2 = gr[v2];
-            if (keep.count(vobj2.code()))
-            {
+            if (keep.count(vobj2.code())) {
                 grind.edge(vobj, vobj2);
             }
         }

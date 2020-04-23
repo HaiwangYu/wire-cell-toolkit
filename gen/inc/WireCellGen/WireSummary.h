@@ -3,12 +3,10 @@
 
 #include "WireCellIface/IWireSummary.h"
 
-namespace WireCell
-{
+namespace WireCell {
     /** Default WireSummary which is also a wire sink and a wire sequence.
- */
-    class WireSummary : public IWireSummary
-    {
+     */
+    class WireSummary : public IWireSummary {
        public:
         WireSummary(const IWire::vector &wires);
         virtual ~WireSummary();

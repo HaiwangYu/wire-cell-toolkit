@@ -8,8 +8,7 @@
 #include "WireCellUtil/Persist.h"
 #include "WireCellUtil/Point.h"
 
-WIRECELL_FACTORY(BeeDepoSource, WireCell::Sio::BeeDepoSource,
-                 WireCell::IDepoSource, WireCell::IConfigurable)
+WIRECELL_FACTORY(BeeDepoSource, WireCell::Sio::BeeDepoSource, WireCell::IDepoSource, WireCell::IConfigurable)
 
 #include <iostream>
 #include <locale>  // for std::tolower
@@ -28,44 +27,37 @@ bool Sio::BeeDepoSource::operator()(IDepo::pointer &out)
 {
     out = nullptr;
 
-    if (m_depos.size() > 0)
-    {
+    if (m_depos.size() > 0) {
         out = m_depos.back();
         m_depos.pop_back();
         return true;
     }
 
     // refill
-    while (!m_filenames.empty())
-    {
+    while (!m_filenames.empty()) {
         std::string fname = m_filenames.back();
         m_filenames.pop_back();
         Json::Value jdat = Persist::load(fname);
         int ndepos = jdat["x"].size();
-        if (!ndepos)
-        {
+        if (!ndepos) {
             continue;
         }
 
         m_depos.resize(ndepos, nullptr);
-        for (int idepo = 0; idepo < ndepos; ++idepo)
-        {
+        for (int idepo = 0; idepo < ndepos; ++idepo) {
             m_depos[idepo] = std::make_shared<SimpleDepo>(
                 jdat["t"][idepo].asDouble(),
-                Point(jdat["x"][idepo].asDouble(), jdat["y"][idepo].asDouble(),
-                      jdat["z"][idepo].asDouble()),
+                Point(jdat["x"][idepo].asDouble(), jdat["y"][idepo].asDouble(), jdat["z"][idepo].asDouble()),
                 jdat["q"][idepo].asDouble());
         }
-        if (m_policy != "stream")
-        {
+        if (m_policy != "stream") {
             m_depos.push_back(nullptr);  // chunk by file
         }
         std::reverse(m_depos.begin(), m_depos.end());
         break;
     }
 
-    if (m_depos.empty())
-    {
+    if (m_depos.empty()) {
         return false;
     }
 
@@ -77,10 +69,9 @@ bool Sio::BeeDepoSource::operator()(IDepo::pointer &out)
 WireCell::Configuration Sio::BeeDepoSource::default_configuration() const
 {
     Configuration cfg;
-    cfg["filelist"] =
-        Json::arrayValue;  // list of input files, empties are skipped
-    cfg["policy"] = "";    // set to "stream" to avoid sending EOS after each file's
-                           // worth of depos.
+    cfg["filelist"] = Json::arrayValue;  // list of input files, empties are skipped
+    cfg["policy"] = "";                  // set to "stream" to avoid sending EOS after each file's
+                                         // worth of depos.
     return cfg;
 }
 

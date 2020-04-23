@@ -14,15 +14,13 @@
 
 using namespace WireCell;
 
-namespace
-{
+namespace {
     std::string dump(const zio::Message &msg)
     {
         std::stringstream ss;
         ss << "zio.Message: ";
         ss << "ZIO" << msg.level() << msg.form() << msg.label();
-        ss << " + [0x" << msg.origin() << "," << msg.granule() << "," << msg.seqno()
-           << "]";
+        ss << " + [0x" << msg.origin() << "," << msg.granule() << "," << msg.seqno() << "]";
         ss << " + [" << msg.payload().str() << "]";
         return ss.str();
     }

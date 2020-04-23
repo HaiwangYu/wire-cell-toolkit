@@ -10,12 +10,9 @@
 
 #include <string>
 
-namespace WireCell
-{
-    namespace Gen
-    {
-        class WireSchemaFile : public IWireSchema, public IConfigurable
-        {
+namespace WireCell {
+    namespace Gen {
+        class WireSchemaFile : public IWireSchema, public IConfigurable {
            public:
             WireSchemaFile(const char *frfilename = "");
             virtual ~WireSchemaFile();

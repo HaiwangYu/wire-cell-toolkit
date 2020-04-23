@@ -5,13 +5,10 @@
 #include "WireCellIface/IDepoSetFanout.h"
 #include "WireCellUtil/Logging.h"
 
-namespace WireCell
-{
-    namespace Gen
-    {
+namespace WireCell {
+    namespace Gen {
         // Fan out 1 deposet to N set at construction or configuration time.
-        class DepoSetFanout : public IDepoSetFanout, public IConfigurable
-        {
+        class DepoSetFanout : public IDepoSetFanout, public IConfigurable {
            public:
             DepoSetFanout(size_t multiplicity = 0);
             virtual ~DepoSetFanout();

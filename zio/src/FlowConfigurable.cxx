@@ -9,8 +9,7 @@
 
 using namespace WireCell;
 
-Zio::FlowConfigurable::FlowConfigurable(const std::string &direction,
-                                        const std::string &nodename)
+Zio::FlowConfigurable::FlowConfigurable(const std::string &direction, const std::string &nodename)
   : m_direction(direction)
   , m_node(nodename, (zio::origin_t) this)
   , l(Log::logger("zio"))
@@ -57,19 +56,15 @@ void Zio::FlowConfigurable::configure(const WireCell::Configuration &cfg)
     m_credit = get<int>(cfg, "credit", m_credit);
     m_level = (zio::level::MessageLevel) get<int>(cfg, "level", (int) m_level);
     m_stype = get<int>(cfg, "stype", m_stype);
-    if (!(m_stype == ZMQ_CLIENT or m_stype == ZMQ_SERVER))
-    {
-        l->error("node {}: may only use CLIENT or SERVER stype, got {}", nick,
-                 m_stype);
+    if (!(m_stype == ZMQ_CLIENT or m_stype == ZMQ_SERVER)) {
+        l->error("node {}: may only use CLIENT or SERVER stype, got {}", nick, m_stype);
         THROW(RuntimeError() << errmsg{"unsupported socket type"});
     }
 
     int verbose = 0;
-    if (!cfg["verbose"].empty())
-    {
+    if (!cfg["verbose"].empty()) {
         verbose = cfg["verbose"].asInt();
-        if (verbose)
-        {
+        if (verbose) {
             l->debug("node {}: verbose", nick);
             zsys_init();
             m_node.set_verbose(verbose);
@@ -80,30 +75,24 @@ void Zio::FlowConfigurable::configure(const WireCell::Configuration &cfg)
 
     auto binds = cfg["binds"];
     auto connects = cfg["connects"];
-    if (binds.empty() and connects.empty())
-    {
+    if (binds.empty() and connects.empty()) {
         l->info("node {}: binding {} to ephemeral", nick, m_portname);
         port->bind();  // default: ephemeral bind
     }
-    else
-    {
-        for (auto bind : binds)
-        {
+    else {
+        for (auto bind : binds) {
             l->debug("node {}: bind: {}", nick, bind);
-            if (bind.empty())
-            {
+            if (bind.empty()) {
                 l->info("node {}: bind to ephemeral", nick);
                 port->bind();
                 continue;
             }
-            if (bind.isString())
-            {
+            if (bind.isString()) {
                 l->info("node {}: bind to {}", nick, bind);
                 port->bind(bind.asString());
                 continue;
             }
-            if (bind.isObject())
-            {
+            if (bind.isObject()) {
                 l->info("node {}: bind to {}", nick, bind);
                 port->bind(bind["host"].asString(), bind["tcpportnum"].asInt());
                 continue;
@@ -111,16 +100,13 @@ void Zio::FlowConfigurable::configure(const WireCell::Configuration &cfg)
             l->error("node {}: unknown bind type {}", nick, bind);
             THROW(RuntimeError() << errmsg{"unknown bind type"});
         }
-        for (auto conn : connects)
-        {
+        for (auto conn : connects) {
             l->debug("node {}: connect: {}", nick, conn);
-            if (conn.isString())
-            {
+            if (conn.isString()) {
                 port->connect(conn.asString());
                 continue;
             }
-            if (conn.isObject())
-            {
+            if (conn.isObject()) {
                 port->connect(conn["nodename"].asString(), conn["portname"].asString());
                 continue;
             }
@@ -130,46 +116,37 @@ void Zio::FlowConfigurable::configure(const WireCell::Configuration &cfg)
     }
 
     m_headers["ZPB-Type"] = m_type_name;
-    for (auto key : cfg["headers"].getMemberNames())
-    {
+    for (auto key : cfg["headers"].getMemberNames()) {
         auto val = cfg["headers"][key];
         m_headers[key] = val.asString();
     }
 
-    zio::json fobj = {{"flow", "BOT"},
-                      {"direction", m_direction},
-                      {"credit", m_credit},
-                      {"dtype", m_type_name}};
-    for (auto key : cfg["attributes"].getMemberNames())
-    {
+    zio::json fobj = {{"flow", "BOT"}, {"direction", m_direction}, {"credit", m_credit}, {"dtype", m_type_name}};
+    for (auto key : cfg["attributes"].getMemberNames()) {
         auto val = cfg["attributes"][key];
         fobj[key] = val.asString();
     }
     m_bot_label = fobj.dump();
 
     m_flow = std::make_unique<zio::flow::Flow>(port);
-    if (!m_flow)
-    {
+    if (!m_flow) {
         THROW(RuntimeError() << errmsg{"failed to make flow"});
     }
 
     bool ok = user_configure(cfg);
-    if (!ok)
-    {
+    if (!ok) {
         l->critical("node {}: configuration failed", nick);
         THROW(ValueError() << errmsg{"configuration failed"});
     }
 
     l->debug("{}: going online with headers:", nick);
-    for (const auto &hh : m_headers)
-    {
+    for (const auto &hh : m_headers) {
         l->debug("\t{} = {}", hh.first, hh.second);
     }
     m_node.online(m_headers);
 
     ok = user_online();
-    if (!ok)
-    {
+    if (!ok) {
         l->critical("node {}: failed to go online", nick);
         THROW(ValueError() << errmsg{"online failed"});
     }
@@ -177,8 +154,7 @@ void Zio::FlowConfigurable::configure(const WireCell::Configuration &cfg)
 
 bool Zio::FlowConfigurable::pre_flow()
 {
-    if (m_did_bot)
-    {
+    if (m_did_bot) {
         return true;
     }
     m_did_bot = true;  // call once
@@ -188,15 +164,13 @@ bool Zio::FlowConfigurable::pre_flow()
     zio::Message msg("FLOW");
     msg.set_label(m_bot_label);
 
-    if (m_stype == ZMQ_SERVER)
-    {
+    if (m_stype == ZMQ_SERVER) {
         // This strains the flow protocol a bit to pretend to be a
         // server.  It'll fall over if multiple clients try to
         // connect.  But it allows some testing with a simpler graph.
         l->debug("node {}: serverish BOT recv", nick);
         bool ok = m_flow->recv_bot(msg, m_timeout);
-        if (!ok)
-        {
+        if (!ok) {
             l->warn("node {}: serverish BOT recv timeout ({})", nick, m_timeout);
             m_flow = nullptr;
             return false;
@@ -204,27 +178,23 @@ bool Zio::FlowConfigurable::pre_flow()
         l->debug("node {}: serverish BOT send", nick);
         m_flow->send_bot(msg);
     }
-    else
-    {  // client
+    else {  // client
         l->debug("node {}: clientish BOT send", nick);
         m_flow->send_bot(msg);
         l->debug("node {}: clientish BOT recv", nick);
         bool ok = m_flow->recv_bot(msg, m_timeout);
-        if (!ok)
-        {
+        if (!ok) {
             l->warn("node {}: clientish BOT recv timeout ({})", nick, m_timeout);
             m_flow = nullptr;
             return false;
         }
     }
 
-    if (m_direction == "extract")
-    {
+    if (m_direction == "extract") {
         l->debug("node {}: slurp pay for {}", nick, m_direction);
         m_flow->slurp_pay(0);
     }
-    else
-    {  // inject
+    else {  // inject
         l->debug("node {}: flush pay for {}", nick, m_direction);
         m_flow->flush_pay();
     }
@@ -254,8 +224,7 @@ zio::Message Zio::FlowConfigurable::pack(const ITensorSet::pointer &itens)
     Json::FastWriter jwriter;
     msg.set_label(jwriter.write(label));
 
-    for (auto ten : *(itens->tensors()))
-    {
+    for (auto ten : *(itens->tensors())) {
         zio::tens::append(msg, (const float *) ten->data(), ten->shape());
     }
 
@@ -268,14 +237,12 @@ ITensorSet::pointer Zio::FlowConfigurable::unpack(const zio::Message &zmsg)
 
     auto label = zmsg.label_object();
     int ind = 0;
-    for (auto jten : label[zio::tens::form]["tensors"])
-    {
+    for (auto jten : label[zio::tens::form]["tensors"]) {
         std::vector<size_t> shape = jten["shape"];
         // TODO need to figure out type from dtyp
         Aux::SimpleTensor<float> *st = new Aux::SimpleTensor<float>(shape);
         size_t nbyte = jten["word"];
-        for (auto n : shape)
-            nbyte *= n;
+        for (auto n : shape) nbyte *= n;
         auto data = (float *) st->data();
         memcpy(data, zio::tens::at<float>(zmsg, ind), nbyte);
         itv->push_back(ITensor::pointer(st));
@@ -287,16 +254,14 @@ ITensorSet::pointer Zio::FlowConfigurable::unpack(const zio::Message &zmsg)
     Json::Reader reader;
     reader.parse(label[zio::tens::form]["metadata"].dump(), md);
 
-    return std::make_shared<Aux::SimpleTensorSet>(seqno, md,
-                                                  ITensor::shared_vector(itv));
+    return std::make_shared<Aux::SimpleTensorSet>(seqno, md, ITensor::shared_vector(itv));
 }
 
 void Zio::FlowConfigurable::finalize()
 {
     const std::string nick = m_node.nick();
     l->debug("node {}: FINALIZE", nick);
-    if (m_flow)
-    {
+    if (m_flow) {
         zio::Message msg;
         l->debug("node {}: send EOT", nick);
         m_flow->send_eot(msg);

@@ -8,17 +8,13 @@
 
 using namespace Eigen;
 
-double uvalue(double x, double low, double high)
-{
-    return (x - low) / (high - low);
-}
+double uvalue(double x, double low, double high) { return (x - low) / (high - low); }
 
 VectorXd uvalues(VectorXd xvals)
 {
     const double low = xvals.minCoeff();
     const double high = xvals.maxCoeff();
-    for (int i = 0; i < xvals.size(); ++i)
-    {
+    for (int i = 0; i < xvals.size(); ++i) {
         xvals(i) = uvalue(xvals(i), low, high);
     }
     return xvals;
@@ -30,15 +26,12 @@ int main(int argc, char *argv[])
 
     const VectorXd xvals = (VectorXd(5) << 1, 2, 3, 4, 6).finished();
     const VectorXd yvals = xvals.array().square();
-    const Spline2d spline = SplineFitting<Spline2d>::Interpolate(
-        yvals.transpose(), 3, uvalues(xvals).transpose());
+    const Spline2d spline = SplineFitting<Spline2d>::Interpolate(yvals.transpose(), 3, uvalues(xvals).transpose());
 
     const double step = 0.1;
-    for (double x = 1; x < 6 + 0.5 * step; x += step)
-    {
+    for (double x = 1; x < 6 + 0.5 * step; x += step) {
         const double uv = uvalue(x, xvals.minCoeff(), xvals.maxCoeff());
-        std::cout << "(" << x << "," << spline(uv).transpose() << ","
-                  << spline.derivatives<1>(uv) << ")\n";
+        std::cout << "(" << x << "," << spline(uv).transpose() << "," << spline.derivatives<1>(uv) << ")\n";
     }
     std::cout << std::endl;
 }

@@ -20,8 +20,7 @@ int main(int argc, char *argv[])
     const int N_WIRE = int(N_CELL * 0.5);
 
     VectorXd C = VectorXd::Zero(N_CELL);
-    for (int i = 0; i < N_NZERO; i++)
-    {
+    for (int i = 0; i < N_NZERO; i++) {
         int index = int(N_CELL / 2 * (VectorXd::Random(1)(0) + 1));
         // cout << index << endl;
         C(index) = VectorXd::Random(1)(0) * 50 + 150;
@@ -81,8 +80,7 @@ void print_results(WireCell::LinearModel &m, VectorXd &C)
     // cout << "predicted charge on each wire: Lasso" << endl;
     // cout << m.Predict().transpose() << endl << endl;
 
-    cout << "average residual charge difference per wire: " << m.name << ": "
-         << m.MeanResidual() << endl;
+    cout << "average residual charge difference per wire: " << m.name << ": " << m.MeanResidual() << endl;
 
     int nbeta = beta.size();
 
@@ -90,14 +88,10 @@ void print_results(WireCell::LinearModel &m, VectorXd &C)
     int n_zero_beta = 0;
     int n_zero_correct = 0;
 
-    for (int i = 0; i < nbeta; i++)
-    {
-        if (fabs(C(i)) < 0.1)
-            n_zero_true++;
-        if (fabs(beta(i)) < 5)
-            n_zero_beta++;
-        if (fabs(C(i)) < 0.1 && (fabs(C(i) - beta(i)) < 10))
-            n_zero_correct++;
+    for (int i = 0; i < nbeta; i++) {
+        if (fabs(C(i)) < 0.1) n_zero_true++;
+        if (fabs(beta(i)) < 5) n_zero_beta++;
+        if (fabs(C(i)) < 0.1 && (fabs(C(i) - beta(i)) < 10)) n_zero_correct++;
     }
     cout << "true zeros: " << n_zero_true << endl;
     cout << "fitted zeros: " << n_zero_beta << endl;

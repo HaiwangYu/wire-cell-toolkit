@@ -13,8 +13,7 @@
 
 #include <fstream>
 
-WIRECELL_FACTORY(JsonClusterTap, WireCell::Img::JsonClusterTap,
-                 WireCell::IClusterFilter, WireCell::IConfigurable)
+WIRECELL_FACTORY(JsonClusterTap, WireCell::Img::JsonClusterTap, WireCell::IClusterFilter, WireCell::IConfigurable)
 
 using namespace WireCell;
 
@@ -44,16 +43,12 @@ WireCell::Configuration Img::JsonClusterTap::default_configuration() const
     return cfg;
 }
 
-static Json::Value size_stringer(const cluster_node_t &n)
-{
-    return Json::nullValue;
-}
+static Json::Value size_stringer(const cluster_node_t &n) { return Json::nullValue; }
 
 static Json::Value jpoint(const Point &p)
 {
     Json::Value ret;
-    for (int ind = 0; ind < 3; ++ind)
-    {
+    for (int ind = 0; ind < 3; ++ind) {
         ret[ind] = p[ind];
     }
     return ret;
@@ -85,8 +80,7 @@ static Json::Value wire_jsoner(const cluster_node_t &n)
 }
 
 // this one needs extra info
-struct blob_jsoner
-{
+struct blob_jsoner {
     double drift_speed;
 
     blob_jsoner(double ds)
@@ -109,8 +103,7 @@ struct blob_jsoner
         ISlice::pointer islice = iblob->slice();
         // set X based on time with knowledge of local drift
         // direction as given by the face.
-        double x0 = xplane + xsign * (islice->start() - 250.0 * units::us) *
-                                 drift_speed;  // FIXME: -250us hardcoded
+        double x0 = xplane + xsign * (islice->start() - 250.0 * units::us) * drift_speed;  // FIXME: -250us hardcoded
 
         const auto &coords = iface->raygrid();
 
@@ -123,8 +116,7 @@ struct blob_jsoner
         ret["sliceid"] = iblob->slice()->ident();
         Json::Value jcorners = Json::arrayValue;
         const auto &blob = iblob->shape();
-        for (const auto &c : blob.corners())
-        {
+        for (const auto &c : blob.corners()) {
             Json::Value j = jpoint(coords.ray_crossing(c.first, c.second));
             j[0] = x0;
             jcorners.append(j);
@@ -166,8 +158,7 @@ Json::Value slice_jsoner(const cluster_node_t &n)
     ret["start"] = islice->start();
     ret["span"] = islice->span();
     Json::Value jact = Json::objectValue;
-    for (const auto &it : islice->activity())
-    {
+    for (const auto &it : islice->activity()) {
         jact[String::format("%d", it.first->ident())] = it.second;
     }
     ret["activity"] = jact;
@@ -179,54 +170,44 @@ Json::Value measurement_jsoner(const cluster_node_t &n)
     IChannel::shared_vector ichv = std::get<IChannel::shared_vector>(n.ptr);
     Json::Value ret = Json::objectValue;
     Json::Value j = Json::arrayValue;
-    for (auto ich : *ichv)
-    {
+    for (auto ich : *ichv) {
         j.append(ich->ident());
-        ret["wpid"] =
-            ich->planeid()
-                .ident();  // last one wins, but they should all be the same
+        ret["wpid"] = ich->planeid().ident();  // last one wins, but they should all be the same
     }
     ret["chids"] = j;
     return ret;
 }
 
-bool Img::JsonClusterTap::operator()(const input_pointer &in,
-                                     output_pointer &out)
+bool Img::JsonClusterTap::operator()(const input_pointer &in, output_pointer &out)
 {
     out = in;
-    if (!in)
-    {
+    if (!in) {
         return true;
     }
 
     std::vector<std::function<Json::Value(const cluster_node_t &ptr)>> jsoners{
-        size_stringer, channel_jsoner, wire_jsoner, blob_jsoner(m_drift_speed),
-        slice_jsoner, measurement_jsoner};
-    auto asjson = [&](const cluster_node_t &n) {
-        return jsoners[n.ptr.index()](n);
-    };
+        size_stringer, channel_jsoner, wire_jsoner, blob_jsoner(m_drift_speed), slice_jsoner, measurement_jsoner};
+    auto asjson = [&](const cluster_node_t &n) { return jsoners[n.ptr.index()](n); };
 
     /*
-   * - vertices :: a list of graph vertices
-   * - edges :: a list of graph edges
-   *
-   * A vertex is represented as a JSON object with the following attributes
-   * - ident :: an indexable ID number for the node, and referred to in "edges"
-   * - type :: the letter "code" used in ICluster: one in "sbcwm"
-   * - data :: an object holding information about the corresponding vertex
-   * object
-   *
-   * An edge is a pair of vertex ident numbers.
-   *
-   */
+     * - vertices :: a list of graph vertices
+     * - edges :: a list of graph edges
+     *
+     * A vertex is represented as a JSON object with the following attributes
+     * - ident :: an indexable ID number for the node, and referred to in "edges"
+     * - type :: the letter "code" used in ICluster: one in "sbcwm"
+     * - data :: an object holding information about the corresponding vertex
+     * object
+     *
+     * An edge is a pair of vertex ident numbers.
+     *
+     */
     const auto &gr = in->graph();
 
     Json::Value jvertices = Json::arrayValue;
-    for (auto vtx : boost::make_iterator_range(boost::vertices(gr)))
-    {
+    for (auto vtx : boost::make_iterator_range(boost::vertices(gr))) {
         const auto &vobj = gr[vtx];
-        if (!vobj.ptr.index())
-        {
+        if (!vobj.ptr.index()) {
             // warn?
             continue;
         }
@@ -239,8 +220,7 @@ bool Img::JsonClusterTap::operator()(const input_pointer &in,
     }
 
     Json::Value jedges = Json::arrayValue;
-    for (auto eit : boost::make_iterator_range(boost::edges(gr)))
-    {
+    for (auto eit : boost::make_iterator_range(boost::edges(gr))) {
         Json::Value jedge = Json::arrayValue;
         jedge[0] = (int) boost::source(eit, gr);
         jedge[1] = (int) boost::target(eit, gr);
@@ -252,14 +232,12 @@ bool Img::JsonClusterTap::operator()(const input_pointer &in,
     top["edges"] = jedges;
 
     std::string fname = m_filename;
-    if (m_filename.find("%") != std::string::npos)
-    {
+    if (m_filename.find("%") != std::string::npos) {
         fname = String::format(m_filename, in->ident());
         log->debug("JsonClusterTap: {} -> {}", m_filename, fname);
     }
     std::ofstream fstr(fname);
-    if (!fstr)
-    {
+    if (!fstr) {
         log->error("JsonClusterTap failed to open for writing: {}", fname);
         return false;
     }

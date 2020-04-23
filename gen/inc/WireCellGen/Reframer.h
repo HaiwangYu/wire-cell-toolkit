@@ -38,12 +38,9 @@
 #include <string>
 #include <vector>
 
-namespace WireCell
-{
-    namespace Gen
-    {
-        class Reframer : public IFrameFilter, public IConfigurable
-        {
+namespace WireCell {
+    namespace Gen {
+        class Reframer : public IFrameFilter, public IConfigurable {
            public:
             Reframer();
             virtual ~Reframer();
@@ -51,8 +48,7 @@ namespace WireCell
             virtual void configure(const WireCell::Configuration &config);
             virtual WireCell::Configuration default_configuration() const;
 
-            virtual bool operator()(const input_pointer &inframe,
-                                    output_pointer &outframe);
+            virtual bool operator()(const input_pointer &inframe, output_pointer &outframe);
 
            private:
             IAnodePlane::pointer m_anode;

@@ -10,10 +10,8 @@
 
 #include <vector>
 
-namespace WireCell
-{
-    class IWaveform : IData<IWaveform>
-    {
+namespace WireCell {
+    class IWaveform : IData<IWaveform> {
        public:
         typedef std::vector<float> sequence_type;
 

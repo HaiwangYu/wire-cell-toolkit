@@ -17,8 +17,7 @@ using namespace std;
 using namespace WireCell;
 
 // This is the base/interface data type that will be iterated over.
-struct IMyClass
-{
+struct IMyClass {
     virtual ~IMyClass() {}
     virtual int get_i() const = 0;
     virtual float get_f() const = 0;
@@ -26,8 +25,7 @@ struct IMyClass
 
 // This is a concrete imp of that interface and may reside deep inside
 // some private scope.
-struct MyClass : public IMyClass
-{
+struct MyClass : public IMyClass {
     int m_i;
     float m_f;
 
@@ -63,14 +61,12 @@ typedef vector<MyClass *> MyStoreType;
 // Since the above store is really just an STL vector the
 // implementation need not explicitly write matching concrete
 // iterator, but can use the STL adapter.
-typedef IteratorAdapter<MyStoreType::iterator, my_base_iterator>
-    my_adapted_iterator;
+typedef IteratorAdapter<MyStoreType::iterator, my_base_iterator> my_adapted_iterator;
 
 // Selectors
 typedef boost::function<bool(const IMyClass *)> my_selector;
 
-struct SelectInt
-{
+struct SelectInt {
     int target;
     SelectInt(int want)
       : target(want)
@@ -79,18 +75,14 @@ struct SelectInt
     bool operator()(const IMyClass *obj) { return obj->get_i() == target; }
 };
 
-struct SelectInRange
-{
+struct SelectInRange {
     float minval, maxval;
     SelectInRange(float min, float max)
       : minval(min)
       , maxval(max)
     {
     }
-    bool operator()(const IMyClass *obj)
-    {
-        return minval <= obj->get_f() && obj->get_f() < maxval;
-    }
+    bool operator()(const IMyClass *obj) { return minval <= obj->get_f() && obj->get_f() < maxval; }
 };
 
 SelectInt get1 = SelectInt(1);
@@ -99,8 +91,7 @@ SelectInRange just_right = SelectInRange(5, 10);
 
 my_range get_data(MyStoreType &store)
 {
-    return my_range(my_adapted_iterator(store.begin()),
-                    my_adapted_iterator(store.end()));
+    return my_range(my_adapted_iterator(store.begin()), my_adapted_iterator(store.end()));
 }
 
 int main()
@@ -124,8 +115,7 @@ int main()
     // Finally, here is some client of the interface using the data
     // born deep inside the custom class and accessing it only via
     // interfaces.
-    for (my_iterator it = boost::begin(r); it != boost::end(r); ++it)
-    {
+    for (my_iterator it = boost::begin(r); it != boost::end(r); ++it) {
         // make a temp for syntactic convenience/clarity
         const IMyClass *myptr = *it;
         const IMyClass &myobj = *myptr;
@@ -153,8 +143,7 @@ int main()
     copy_if(boost::begin(r), boost::end(r), back_inserter(res), just_right);
     AssertMsg(1 == res.size(), "Failed to get just_right");
     cerr << "Got: " << res[0]->get_i() << " " << res[0]->get_f() << endl;
-    AssertMsg(res[0]->get_i() == 2 && fabs(res[0]->get_f() - 6.9) < 1e-6,
-              "Got just_wrong value");
+    AssertMsg(res[0]->get_i() == 2 && fabs(res[0]->get_f() - 6.9) < 1e-6, "Got just_wrong value");
     res.clear();
 
     return 0;

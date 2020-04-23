@@ -6,8 +6,7 @@
 using namespace std;
 
 using namespace WireCell;
-Gen::ImpactTransform::ImpactTransform(IPlaneImpactResponse::pointer pir,
-                                      BinnedDiffusion_transform &bd)
+Gen::ImpactTransform::ImpactTransform(IPlaneImpactResponse::pointer pir, BinnedDiffusion_transform &bd)
   : m_pir(pir)
   , m_bd(bd)
   , log(Log::logger("sim"))
@@ -30,30 +29,24 @@ Gen::ImpactTransform::ImpactTransform(IPlaneImpactResponse::pointer pir,
     //
 
     // std::cout << m_num_group << " " << m_num_pad_wire << std::endl;
-    for (int i = 0; i != m_num_group; i++)
-    {
+    for (int i = 0; i != m_num_group; i++) {
         double rel_cen_imp_pos;
-        if (i != m_num_group - 1)
-        {
+        if (i != m_num_group - 1) {
             rel_cen_imp_pos = -m_pir->pitch() / 2. + m_pir->impact() * i + 1e-9;
         }
-        else
-        {
+        else {
             rel_cen_imp_pos = -m_pir->pitch() / 2. + m_pir->impact() * i - 1e-9;
         }
         m_vec_impact.push_back(std::round(rel_cen_imp_pos / m_pir->impact()));
         std::map<int, IImpactResponse::pointer> map_resp;  // already in freq domain
 
-        for (int j = 0; j != m_pir->nwires(); j++)
-        {
-            map_resp[j - m_num_pad_wire] = m_pir->closest(
-                rel_cen_imp_pos - (j - m_num_pad_wire) * m_pir->pitch());
-            Waveform::compseq_t response_spectrum =
-                map_resp[j - m_num_pad_wire]->spectrum();
+        for (int j = 0; j != m_pir->nwires(); j++) {
+            map_resp[j - m_num_pad_wire] = m_pir->closest(rel_cen_imp_pos - (j - m_num_pad_wire) * m_pir->pitch());
+            Waveform::compseq_t response_spectrum = map_resp[j - m_num_pad_wire]->spectrum();
 
             //	std::cout << i << " " << j << " " << rel_cen_imp_pos -
             //(j-m_num_pad_wire)*m_pir->pitch()<< " " << response_spectrum.size() <<
-            //std::endl;
+            // std::endl;
         }
         // std::cout << m_vec_impact.back() << std::endl;
         // std::cout << rel_cen_imp_pos << std::endl;
@@ -94,20 +87,17 @@ Gen::ImpactTransform::ImpactTransform(IPlaneImpactResponse::pointer pir,
 
     int start_ch = std::floor(impact_range.first * 1.0 / (m_num_group - 1)) - 1;
     int end_ch = std::ceil(impact_range.second * 1.0 / (m_num_group - 1)) + 2;
-    if ((end_ch - start_ch) % 2 == 1)
-        end_ch += 1;
+    if ((end_ch - start_ch) % 2 == 1) end_ch += 1;
     int start_tick = time_range.first - 1;
     int end_tick = time_range.second + 2;
-    if ((end_tick - start_tick) % 2 == 1)
-        end_tick += 1;
+    if ((end_tick - start_tick) % 2 == 1) end_tick += 1;
 
     //  m_decon_data = Array::array_xxf::Zero(nwires+2*m_num_pad_wire,nsamples);
     // for saving the accumulated wire data in the time frequency domain ...
     // adding no padding now, it make the FFT slower, need some other methods ...
 
     int npad_wire = 0;
-    const size_t ntotal_wires =
-        fft_best_length(end_ch - start_ch + 2 * m_num_pad_wire, 1);
+    const size_t ntotal_wires = fft_best_length(end_ch - start_ch + 2 * m_num_pad_wire, 1);
 
     //   pow(2,std::ceil(log(end_ch - start_ch + 2 * m_num_pad_wire)/log(2)));
     //  if (nwires == 2400){
@@ -126,8 +116,7 @@ Gen::ImpactTransform::ImpactTransform(IPlaneImpactResponse::pointer pir,
     // std::endl;
 
     int npad_time = m_pir->closest(0)->waveform_pad();
-    const size_t ntotal_ticks =
-        fft_best_length(end_tick - start_tick + npad_time);
+    const size_t ntotal_ticks = fft_best_length(end_tick - start_tick + npad_time);
 
     // pow(2,std::ceil(log(end_tick - start_tick + npad_time)/log(2)));
     // if (ntotal_ticks >9800 && nsamples <9800 && nsamples >9550)
@@ -147,23 +136,20 @@ Gen::ImpactTransform::ImpactTransform(IPlaneImpactResponse::pointer pir,
     // m_start_tick = 0;
     // m_end_tick = ntotal_ticks;
 
-    Array::array_xxc acc_data_f_w = Array::array_xxc::Zero(
-        end_ch - start_ch + 2 * npad_wire, m_end_tick - m_start_tick);
+    Array::array_xxc acc_data_f_w =
+        Array::array_xxc::Zero(end_ch - start_ch + 2 * npad_wire, m_end_tick - m_start_tick);
 
     int num_double = (m_vec_vec_charge.size() - 1) / 2;
     // int num_double = (m_vec_spmatrix.size()-1)/2;
 
     // speed up version , first five
-    for (int i = 0; i != num_double; i++)
-    {
+    for (int i = 0; i != num_double; i++) {
         // if (i!=0) continue;
         // std::cout << i << std::endl;
-        Array::array_xxc c_data = Array::array_xxc::Zero(
-            end_ch - start_ch + 2 * npad_wire, m_end_tick - m_start_tick);
+        Array::array_xxc c_data = Array::array_xxc::Zero(end_ch - start_ch + 2 * npad_wire, m_end_tick - m_start_tick);
 
         // fill normal order
-        for (size_t j = 0; j != m_vec_vec_charge.at(i).size(); j++)
-        {
+        for (size_t j = 0; j != m_vec_vec_charge.at(i).size(); j++) {
             c_data(std::get<0>(m_vec_vec_charge.at(i).at(j)) + npad_wire - start_ch,
                    std::get<1>(m_vec_vec_charge.at(i).at(j)) - m_start_tick) +=
                 std::get<2>(m_vec_vec_charge.at(i).at(j));
@@ -184,10 +170,8 @@ Gen::ImpactTransform::ImpactTransform(IPlaneImpactResponse::pointer pir,
 
         // fill reverse order
         int ii = num_double * 2 - i;
-        for (size_t j = 0; j != m_vec_vec_charge.at(ii).size(); j++)
-        {
-            c_data(end_ch + npad_wire - 1 -
-                       std::get<0>(m_vec_vec_charge.at(ii).at(j)),
+        for (size_t j = 0; j != m_vec_vec_charge.at(ii).size(); j++) {
+            c_data(end_ch + npad_wire - 1 - std::get<0>(m_vec_vec_charge.at(ii).at(j)),
                    std::get<1>(m_vec_vec_charge.at(ii).at(j)) - m_start_tick) +=
                 std::complex<float>(0, std::get<2>(m_vec_vec_charge.at(ii).at(j)));
         }
@@ -210,64 +194,53 @@ Gen::ImpactTransform::ImpactTransform(IPlaneImpactResponse::pointer pir,
 
         // std::cout << i << std::endl;
         {
-            Array::array_xxc resp_f_w = Array::array_xxc::Zero(
-                end_ch - start_ch + 2 * npad_wire, m_end_tick - m_start_tick);
+            Array::array_xxc resp_f_w =
+                Array::array_xxc::Zero(end_ch - start_ch + 2 * npad_wire, m_end_tick - m_start_tick);
             {
                 Waveform::compseq_t rs1 = m_vec_map_resp.at(i)[0]->spectrum();
                 // do a inverse FFT
                 Waveform::realseq_t rs1_t = Waveform::idft(rs1);
                 // pick the first xxx ticks
                 Waveform::realseq_t rs1_reduced(m_end_tick - m_start_tick, 0);
-                for (int icol = 0; icol != m_end_tick - m_start_tick; icol++)
-                {
-                    if (icol >= int(rs1_t.size()))
-                        break;
+                for (int icol = 0; icol != m_end_tick - m_start_tick; icol++) {
+                    if (icol >= int(rs1_t.size())) break;
                     rs1_reduced.at(icol) = rs1_t[icol];
                 }
                 // do a FFT
                 rs1 = Waveform::dft(rs1_reduced);
 
-                for (int icol = 0; icol != m_end_tick - m_start_tick; icol++)
-                {
+                for (int icol = 0; icol != m_end_tick - m_start_tick; icol++) {
                     resp_f_w(0, icol) = rs1[icol];
                 }
             }
 
-            for (int irow = 0; irow != m_num_pad_wire; irow++)
-            {
+            for (int irow = 0; irow != m_num_pad_wire; irow++) {
                 Waveform::compseq_t rs1 = m_vec_map_resp.at(i)[irow + 1]->spectrum();
                 Waveform::realseq_t rs1_t = Waveform::idft(rs1);
                 Waveform::realseq_t rs1_reduced(m_end_tick - m_start_tick, 0);
-                for (int icol = 0; icol != m_end_tick - m_start_tick; icol++)
-                {
-                    if (icol >= int(rs1_t.size()))
-                        break;
+                for (int icol = 0; icol != m_end_tick - m_start_tick; icol++) {
+                    if (icol >= int(rs1_t.size())) break;
                     rs1_reduced.at(icol) = rs1_t[icol];
                 }
                 rs1 = Waveform::dft(rs1_reduced);
                 Waveform::compseq_t rs2 = m_vec_map_resp.at(i)[-irow - 1]->spectrum();
                 Waveform::realseq_t rs2_t = Waveform::idft(rs2);
                 Waveform::realseq_t rs2_reduced(m_end_tick - m_start_tick, 0);
-                for (int icol = 0; icol != m_end_tick - m_start_tick; icol++)
-                {
-                    if (icol >= int(rs2_t.size()))
-                        break;
+                for (int icol = 0; icol != m_end_tick - m_start_tick; icol++) {
+                    if (icol >= int(rs2_t.size())) break;
                     rs2_reduced.at(icol) = rs2_t[icol];
                 }
                 rs2 = Waveform::dft(rs2_reduced);
-                for (int icol = 0; icol != m_end_tick - m_start_tick; icol++)
-                {
+                for (int icol = 0; icol != m_end_tick - m_start_tick; icol++) {
                     resp_f_w(irow + 1, icol) = rs1[icol];
-                    resp_f_w(end_ch - start_ch - 1 - irow + 2 * npad_wire, icol) =
-                        rs2[icol];
+                    resp_f_w(end_ch - start_ch - 1 - irow + 2 * npad_wire, icol) = rs2[icol];
                 }
             }
             // std::cout << i << std::endl;
 
             // Do FFT on wire for response // slight larger
-            resp_f_w = Array::dft_cc(
-                resp_f_w,
-                1);  // Now becomes the f and f in both time and wire domain ...
+            resp_f_w = Array::dft_cc(resp_f_w,
+                                     1);  // Now becomes the f and f in both time and wire domain ...
             // multiply them together
             c_data = c_data * resp_f_w;
         }
@@ -288,13 +261,11 @@ Gen::ImpactTransform::ImpactTransform(IPlaneImpactResponse::pointer pir,
 
         Array::array_xxc data_f_w;
         {
-            Array::array_xxf data_t_w = Array::array_xxf::Zero(
-                end_ch - start_ch + 2 * npad_wire, m_end_tick - m_start_tick);
+            Array::array_xxf data_t_w =
+                Array::array_xxf::Zero(end_ch - start_ch + 2 * npad_wire, m_end_tick - m_start_tick);
             // fill charge array in time-wire domain // slightly larger
-            for (size_t j = 0; j != m_vec_vec_charge.at(i).size(); j++)
-            {
-                data_t_w(std::get<0>(m_vec_vec_charge.at(i).at(j)) + npad_wire -
-                             start_ch,
+            for (size_t j = 0; j != m_vec_vec_charge.at(i).size(); j++) {
+                data_t_w(std::get<0>(m_vec_vec_charge.at(i).at(j)) + npad_wire - start_ch,
                          std::get<1>(m_vec_vec_charge.at(i).at(j)) - m_start_tick) +=
                     std::get<2>(m_vec_vec_charge.at(i).at(j));
                 // std::cout << std::get<1>(m_vec_vec_charge.at(i).at(j)) << std::endl;
@@ -320,8 +291,8 @@ Gen::ImpactTransform::ImpactTransform(IPlaneImpactResponse::pointer pir,
         }
 
         {
-            Array::array_xxc resp_f_w = Array::array_xxc::Zero(
-                end_ch - start_ch + 2 * npad_wire, m_end_tick - m_start_tick);
+            Array::array_xxc resp_f_w =
+                Array::array_xxc::Zero(end_ch - start_ch + 2 * npad_wire, m_end_tick - m_start_tick);
 
             {
                 Waveform::compseq_t rs1 = m_vec_map_resp.at(i)[0]->spectrum();
@@ -340,50 +311,40 @@ Gen::ImpactTransform::ImpactTransform(IPlaneImpactResponse::pointer pir,
                 Waveform::realseq_t rs1_reduced(m_end_tick - m_start_tick, 0);
                 // std::cout << rs1.size() << " " << nsamples << " " << m_end_tick << "
                 // " <<  m_start_tick << std::endl;
-                for (int icol = 0; icol != m_end_tick - m_start_tick; icol++)
-                {
-                    if (icol >= int(rs1_t.size()))
-                        break;
+                for (int icol = 0; icol != m_end_tick - m_start_tick; icol++) {
+                    if (icol >= int(rs1_t.size())) break;
                     rs1_reduced.at(icol) = rs1_t[icol];
                     //  std::cout << icol << " " << rs1_t[icol] << std::endl;
                 }
                 // do a FFT
                 rs1 = Waveform::dft(rs1_reduced);
 
-                for (int icol = 0; icol != m_end_tick - m_start_tick; icol++)
-                {
+                for (int icol = 0; icol != m_end_tick - m_start_tick; icol++) {
                     //   std::cout << icol << " " << rs1[icol] << " " <<
                     //   temp_resp_f_w(0,icol) << std::endl;
                     resp_f_w(0, icol) = rs1[icol];
                 }
             }
-            for (int irow = 0; irow != m_num_pad_wire; irow++)
-            {
+            for (int irow = 0; irow != m_num_pad_wire; irow++) {
                 Waveform::compseq_t rs1 = m_vec_map_resp.at(i)[irow + 1]->spectrum();
                 Waveform::realseq_t rs1_t = Waveform::idft(rs1);
                 Waveform::realseq_t rs1_reduced(m_end_tick - m_start_tick, 0);
-                for (int icol = 0; icol != m_end_tick - m_start_tick; icol++)
-                {
-                    if (icol >= int(rs1_t.size()))
-                        break;
+                for (int icol = 0; icol != m_end_tick - m_start_tick; icol++) {
+                    if (icol >= int(rs1_t.size())) break;
                     rs1_reduced.at(icol) = rs1_t[icol];
                 }
                 rs1 = Waveform::dft(rs1_reduced);
                 Waveform::compseq_t rs2 = m_vec_map_resp.at(i)[-irow - 1]->spectrum();
                 Waveform::realseq_t rs2_t = Waveform::idft(rs2);
                 Waveform::realseq_t rs2_reduced(m_end_tick - m_start_tick, 0);
-                for (int icol = 0; icol != m_end_tick - m_start_tick; icol++)
-                {
-                    if (icol >= int(rs2_t.size()))
-                        break;
+                for (int icol = 0; icol != m_end_tick - m_start_tick; icol++) {
+                    if (icol >= int(rs2_t.size())) break;
                     rs2_reduced.at(icol) = rs2_t[icol];
                 }
                 rs2 = Waveform::dft(rs2_reduced);
-                for (int icol = 0; icol != m_end_tick - m_start_tick; icol++)
-                {
+                for (int icol = 0; icol != m_end_tick - m_start_tick; icol++) {
                     resp_f_w(irow + 1, icol) = rs1[icol];
-                    resp_f_w(end_ch - start_ch - 1 - irow + 2 * npad_wire, icol) =
-                        rs2[icol];
+                    resp_f_w(end_ch - start_ch - 1 - irow + 2 * npad_wire, icol) = rs2[icol];
                 }
                 // for (int icol = 0; icol != nsamples; icol++){
                 //   resp_f_w(irow+1,icol) = rs1[icol];
@@ -391,9 +352,8 @@ Gen::ImpactTransform::ImpactTransform(IPlaneImpactResponse::pointer pir,
                 // }
             }
             // Do FFT on wire for response // slight larger
-            resp_f_w = Array::dft_cc(
-                resp_f_w,
-                1);  // Now becomes the f and f in both time and wire domain ...
+            resp_f_w = Array::dft_cc(resp_f_w,
+                                     1);  // Now becomes the f and f in both time and wire domain ...
             // multiply them together
             data_f_w = data_f_w * resp_f_w;
         }
@@ -407,8 +367,7 @@ Gen::ImpactTransform::ImpactTransform(IPlaneImpactResponse::pointer pir,
 
     // m_decon_data = Array::array_xxc::Zero(nwires,nsamples);
     //    if (npad_wire!=0){
-    acc_data_f_w =
-        Array::idft_cc(acc_data_f_w, 0);  //.block(npad_wire,0,nwires,nsamples);
+    acc_data_f_w = Array::idft_cc(acc_data_f_w, 0);  //.block(npad_wire,0,nwires,nsamples);
     Array::array_xxf real_m_decon_data = acc_data_f_w.real();
     Array::array_xxf img_m_decon_data = acc_data_f_w.imag().colwise().reverse();
     m_decon_data = real_m_decon_data + img_m_decon_data;
@@ -497,8 +456,7 @@ Gen::ImpactTransform::ImpactTransform(IPlaneImpactResponse::pointer pir,
 
     // int nrows = resp_f_w.rows();
     // int ncols = resp_f_w.cols();
-    log->debug("ImpactTransform: # of channels: {} # of ticks: {}",
-               m_decon_data.rows(), m_decon_data.cols());
+    log->debug("ImpactTransform: # of channels: {} # of ticks: {}", m_decon_data.rows(), m_decon_data.cols());
 
 }  // constructor
 
@@ -507,32 +465,25 @@ Gen::ImpactTransform::~ImpactTransform() {}
 Waveform::realseq_t Gen::ImpactTransform::waveform(int iwire) const
 {
     const int nsamples = m_bd.tbins().nbins();
-    if (iwire < m_start_ch || iwire >= m_end_ch)
-    {
+    if (iwire < m_start_ch || iwire >= m_end_ch) {
         return Waveform::realseq_t(nsamples, 0.0);
     }
-    else
-    {
+    else {
         Waveform::realseq_t wf(nsamples, 0.0);
-        for (int i = 0; i != nsamples; i++)
-        {
-            if (i >= m_start_tick && i < m_end_tick)
-            {
+        for (int i = 0; i != nsamples; i++) {
+            if (i >= m_start_tick && i < m_end_tick) {
                 wf.at(i) = m_decon_data(iwire - m_start_ch, i - m_start_tick);
             }
-            else
-            {
+            else {
                 // wf.at(i) = 1e-25;
             }
             // std::cout << m_decon_data(iwire-m_start_ch,i-m_start_tick) <<
             // std::endl;
         }
 
-        if (m_pir->closest(0)->long_aux_waveform().size() > 0)
-        {
+        if (m_pir->closest(0)->long_aux_waveform().size() > 0) {
             // now convolute with the long-range response ...
-            const size_t nlength = fft_best_length(
-                nsamples + m_pir->closest(0)->long_aux_waveform_pad());
+            const size_t nlength = fft_best_length(nsamples + m_pir->closest(0)->long_aux_waveform_pad());
 
             // nlength = nsamples;
 
@@ -544,8 +495,7 @@ Waveform::realseq_t Gen::ImpactTransform::waveform(int iwire) const
             long_resp.resize(nlength, 0);
             Waveform::compseq_t spec = Waveform::dft(wf);
             Waveform::compseq_t long_spec = Waveform::dft(long_resp);
-            for (size_t i = 0; i != nlength; i++)
-            {
+            for (size_t i = 0; i != nlength; i++) {
                 spec.at(i) *= long_spec.at(i);
             }
             wf = Waveform::idft(spec);

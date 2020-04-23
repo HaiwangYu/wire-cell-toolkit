@@ -9,13 +9,10 @@
 #include "WireCellIface/ISlice.h"
 #include "WireCellUtil/RayGrid.h"
 
-namespace WireCell
-{
-    class SimpleBlob : public IBlob
-    {
+namespace WireCell {
+    class SimpleBlob : public IBlob {
        public:
-        SimpleBlob(int ident, float value, float uncertainty,
-                   const RayGrid::Blob &shape, ISlice::pointer slice,
+        SimpleBlob(int ident, float value, float uncertainty, const RayGrid::Blob &shape, ISlice::pointer slice,
                    IAnodeFace::pointer face)
           : m_ident(ident)
           , m_value(value)
@@ -48,8 +45,7 @@ namespace WireCell
         IAnodeFace::pointer m_face;
     };
 
-    class SimpleBlobSet : public IBlobSet
-    {
+    class SimpleBlobSet : public IBlobSet {
        public:
         SimpleBlobSet(int ident, const ISlice::pointer &slice)
           : m_ident(ident)

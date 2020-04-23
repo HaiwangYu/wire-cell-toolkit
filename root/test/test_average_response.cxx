@@ -16,8 +16,7 @@ using namespace WireCell;
 using namespace WireCell::Test;
 using namespace std;
 
-void plot_plane_2d(MultiPdf &mpdf, const Response::Schema::FieldResponse &fr,
-                   int planeind, bool isavg)
+void plot_plane_2d(MultiPdf &mpdf, const Response::Schema::FieldResponse &fr, int planeind, bool isavg)
 {
     const char *uvw = "UVW";
 
@@ -29,39 +28,34 @@ void plot_plane_2d(MultiPdf &mpdf, const Response::Schema::FieldResponse &fr,
     const double pitch = pr.pitch;
 
     const char *type = "Fine";
-    if (isavg)
-    {
+    if (isavg) {
         type = "Average";
     }
 
     int minregion = 999, maxregion = -999;
     std::vector<double> impacts;
-    for (auto path : pr.paths)
-    {
+    for (auto path : pr.paths) {
         const int region = round((path.pitchpos - 0.001) / pitch);
         const double impact = path.pitchpos - region * pitch;
         // cerr << "region=" << region << " impact=" << impact <<" pitchpos=" <<
         // path.pitchpos << endl;
         minregion = std::min(minregion, region);
         maxregion = std::max(maxregion, region);
-        if (region == 0)
-        {
+        if (region == 0) {
             impacts.push_back(impact);
         }
     }
     sort(impacts.begin(), impacts.end());
     double dimpact = impacts[1] - impacts[0];
     double maximpact = impacts[impacts.size() - 1];
-    if (isavg)
-    {
+    if (isavg) {
         maximpact = dimpact = 0.0;
     }
 
     int npitchbins = pr.paths.size();
     double minpitch = -npitchbins / 2;
     double maxpitch = +npitchbins / 2;
-    if (!isavg)
-    {
+    if (!isavg) {
         maxpitch = maxregion * pitch + maximpact;
         minpitch = minregion * pitch - maximpact;
         npitchbins = (maxpitch - minpitch) / dimpact;
@@ -84,25 +78,21 @@ void plot_plane_2d(MultiPdf &mpdf, const Response::Schema::FieldResponse &fr,
        << endl;
   */
 
-    TH2F h("h", Form("%s %c-plane", type, uvw[pr.planeid]), ntbins, tstart,
-           tstart + ntbins * period, npitchbins, minpitch, maxpitch);
+    TH2F h("h", Form("%s %c-plane", type, uvw[pr.planeid]), ntbins, tstart, tstart + ntbins * period, npitchbins,
+           minpitch, maxpitch);
     h.SetXTitle("time [us]");
     h.SetYTitle("wire region");
     h.SetStats(false);
     // h.GetXaxis()->SetRangeUser(0, 100);
-    for (auto path : pr.paths)
-    {
+    for (auto path : pr.paths) {
         const Waveform::realseq_t &response = path.current;
-        for (int ind = 0; ind < ntbins; ++ind)
-        {
+        for (int ind = 0; ind < ntbins; ++ind) {
             double value = response[ind];
             const double t = tstart + period * ind;
-            if (isavg)
-            {
+            if (isavg) {
                 h.Fill(t, path.pitchpos / pitch, value);
             }
-            else
-            {
+            else {
                 h.Fill(t, path.pitchpos + 0.5 * dimpact, value);
             }
         }
@@ -112,8 +102,7 @@ void plot_plane_2d(MultiPdf &mpdf, const Response::Schema::FieldResponse &fr,
     mpdf();
 }
 
-void plot_all_impact(MultiPdf &mpdf, const Response::Schema::FieldResponse &fr,
-                     bool isavg)
+void plot_all_impact(MultiPdf &mpdf, const Response::Schema::FieldResponse &fr, bool isavg)
 {
     // plot Nregion X Nimpact
 
@@ -127,16 +116,13 @@ void plot_all_impact(MultiPdf &mpdf, const Response::Schema::FieldResponse &fr,
     // figure out what impacts and regions there are
     std::vector<double> impacts;
     std::vector<int> regions;
-    for (auto path : p0r.paths)
-    {
+    for (auto path : p0r.paths) {
         const int region = round((path.pitchpos - 0.001) / pitch);
         const double impact = path.pitchpos - region * pitch;
-        if (region == 0)
-        {
+        if (region == 0) {
             impacts.push_back(impact);
         }
-        if (std::abs(impact) < 0.001)
-        {
+        if (std::abs(impact) < 0.001) {
             regions.push_back(region);
         }
     }
@@ -148,66 +134,52 @@ void plot_all_impact(MultiPdf &mpdf, const Response::Schema::FieldResponse &fr,
     int nimpacts = impacts.size();
     int nregions = regions.size();
     std::vector<TH1F *> hists[3];
-    for (int iplane = 0; iplane < 3; ++iplane)
-    {
+    for (int iplane = 0; iplane < 3; ++iplane) {
         hists[iplane].resize(nimpacts * nregions);
-        for (int imp = 0; imp < nimpacts; ++imp)
-        {
-            for (int reg = 0; reg < nregions; ++reg)
-            {
+        for (int imp = 0; imp < nimpacts; ++imp) {
+            for (int reg = 0; reg < nregions; ++reg) {
                 int wire = reg - nregions / 2;
 
                 char sign = ' ';  // be a bit anal
-                if (wire > 0)
-                {
+                if (wire > 0) {
                     sign = '+';
                 }
-                if (wire < 0)
-                {
+                if (wire < 0) {
                     sign = '-';
                 }
 
                 std::string title;
-                if (isavg)
-                {
+                if (isavg) {
                     title = Form("Avg Response wire:%c%d", sign, std::abs(wire));
                 }
-                else
-                {
-                    title = Form("Fine Response wire:%c%d (impact=%.1f)", sign,
-                                 std::abs(wire), impacts[imp]);
+                else {
+                    title = Form("Fine Response wire:%c%d (impact=%.1f)", sign, std::abs(wire), impacts[imp]);
                 }
 
-                TH1F *h = new TH1F(Form("h_%d_%d_%d", iplane, imp, reg), title.c_str(),
-                                   ntbins, tstart, tstart + period * ntbins);
+                TH1F *h = new TH1F(Form("h_%d_%d_%d", iplane, imp, reg), title.c_str(), ntbins, tstart,
+                                   tstart + period * ntbins);
                 h->SetLineColor(plane_colors[iplane]);
                 hists[iplane][imp * nregions + reg] = h;
             }
         }
     }
 
-    for (auto plane : fr.planes)
-    {
+    for (auto plane : fr.planes) {
         int iplane = plane.planeid;
-        for (auto path : plane.paths)
-        {
+        for (auto path : plane.paths) {
             const Waveform::realseq_t &response = path.current;
             const int region = round((path.pitchpos - 0.001) / pitch);
             const double impact = path.pitchpos - region * pitch;
 
             int imp = -1, reg = -1;  // I hate C++
-            for (size_t ind = 0; ind < impacts.size(); ++ind)
-            {
-                if (std::abs(impact - impacts[ind]) < 0.001)
-                {
+            for (size_t ind = 0; ind < impacts.size(); ++ind) {
+                if (std::abs(impact - impacts[ind]) < 0.001) {
                     imp = ind;
                     break;
                 }
             }
-            for (size_t ind = 0; ind < regions.size(); ++ind)
-            {
-                if (std::abs(region - regions[ind]) < 0.001)
-                {
+            for (size_t ind = 0; ind < regions.size(); ++ind) {
+                if (std::abs(region - regions[ind]) < 0.001) {
                     reg = ind;
                     break;
                 }
@@ -215,40 +187,33 @@ void plot_all_impact(MultiPdf &mpdf, const Response::Schema::FieldResponse &fr,
             // cerr << "plane="<<iplane<<" imp="<<imp<<" impact="<<impact<<"
             // reg="<<reg<<" region="<<region<<endl;
             TH1F *hist = hists[iplane][imp * nregions + reg];
-            for (int ind = 0; ind < ntbins; ++ind)
-            {
+            for (int ind = 0; ind < ntbins; ++ind) {
                 double value = response[ind];
                 hist->SetBinContent(ind + 1, value);
             }
         }
     }
 
-    for (int reg = 0; reg < nregions; ++reg)
-    {
+    for (int reg = 0; reg < nregions; ++reg) {
         mpdf.canvas.Divide(1, nimpacts);
-        for (int imp = 0; imp < nimpacts; ++imp)
-        {
+        for (int imp = 0; imp < nimpacts; ++imp) {
             mpdf.canvas.cd(imp + 1);
             double minval = 999, maxval = -999;
-            for (int iplane = 0; iplane < 3; ++iplane)
-            {
+            for (int iplane = 0; iplane < 3; ++iplane) {
                 TH1F *hist = hists[iplane][imp * nregions + reg];
                 minval = min(minval, hist->GetMinimum());
                 maxval = max(maxval, hist->GetMaximum());
             }
             // cerr << "imp="<<imp<<" reg="<<reg<<endl;
             double extraval = 0.01 * (maxval - minval);
-            for (int iplane = 0; iplane < 3; ++iplane)
-            {
+            for (int iplane = 0; iplane < 3; ++iplane) {
                 TH1F *hist = hists[iplane][imp * nregions + reg];
                 hist->SetMinimum(minval - extraval);
                 hist->SetMaximum(maxval + extraval);
-                if (iplane)
-                {  // I hate root
+                if (iplane) {  // I hate root
                     hist->Draw("same");
                 }
-                else
-                {
+                else {
                     hist->Draw();
                 }
             }
@@ -256,12 +221,9 @@ void plot_all_impact(MultiPdf &mpdf, const Response::Schema::FieldResponse &fr,
         mpdf();
     }
 
-    for (int imp = 0; imp < nimpacts; ++imp)
-    {
-        for (int reg = 0; reg < nregions; ++reg)
-        {
-            for (int iplane = 0; iplane < 3; ++iplane)
-            {
+    for (int imp = 0; imp < nimpacts; ++imp) {
+        for (int reg = 0; reg < nregions; ++reg) {
+            for (int iplane = 0; iplane < 3; ++iplane) {
                 TH1F *hist = hists[iplane][imp * nregions + reg];
                 delete hist;
                 hists[iplane][imp * nregions + reg] = nullptr;
@@ -271,22 +233,18 @@ void plot_all_impact(MultiPdf &mpdf, const Response::Schema::FieldResponse &fr,
 }
 
 const std::vector<double> all_gains{4.7, 7.8, 14.0, 25.0};
-const std::vector<double> all_shapings{0.5 * units::us, 1.0 * units::us,
-                                       2.0 * units::us, 3.0 * units::us};
+const std::vector<double> all_shapings{0.5 * units::us, 1.0 * units::us, 2.0 * units::us, 3.0 * units::us};
 
 typedef std::pair<int, int> GainShape;
 typedef std::map<GainShape, Waveform::realseq_t> CerfMap;
 
-CerfMap make_cerf(double tmin = 0, double tmax = 100 * units::us,
-                  int ntbins = 1000);
+CerfMap make_cerf(double tmin = 0, double tmax = 100 * units::us, int ntbins = 1000);
 CerfMap make_cerf(double tmin, double tmax, int ntbins)
 {
     const Waveform::Domain dom(tmin, tmax);
     CerfMap ret;
-    for (int igain = 0; igain < 4; ++igain)
-    {
-        for (int ishap = 0; ishap < 4; ++ishap)
-        {
+    for (int igain = 0; igain < 4; ++igain) {
+        for (int ishap = 0; ishap < 4; ++ishap) {
             auto ele = Response::ColdElec(all_gains[igain], all_shapings[ishap]);
             auto rf = ele.generate(dom, ntbins);
             ret[GainShape(igain, ishap)] = rf;
@@ -295,10 +253,8 @@ CerfMap make_cerf(double tmin, double tmax, int ntbins)
     return ret;
 }
 
-void plot_cerf(MultiPdf &mpdf, CerfMap &cerf, double tmin = 0,
-               double tmax = 100 * units::us, int ntbins = 1000);
-void plot_cerf(MultiPdf &mpdf, CerfMap &cerf, double tmin, double tmax,
-               int ntbins)
+void plot_cerf(MultiPdf &mpdf, CerfMap &cerf, double tmin = 0, double tmax = 100 * units::us, int ntbins = 1000);
+void plot_cerf(MultiPdf &mpdf, CerfMap &cerf, double tmin, double tmax, int ntbins)
 {
     const double deltat = (tmax - tmin) / ntbins;
 
@@ -312,14 +268,11 @@ void plot_cerf(MultiPdf &mpdf, CerfMap &cerf, double tmin, double tmax,
     int colors[] = {1, 2, 4, 6};
 
     std::vector<TGraph *> garbage_collection;
-    for (int igain = 0; igain < 4; ++igain)
-    {
-        for (int ishap = 0; ishap < 4; ++ishap)
-        {
+    for (int igain = 0; igain < 4; ++igain) {
+        for (int ishap = 0; ishap < 4; ++ishap) {
             auto rf = cerf[GainShape(igain, ishap)];
             TGraph *g = new TGraph(ntbins);
-            for (int ind = 0; ind < ntbins; ++ind)
-            {
+            for (int ind = 0; ind < ntbins; ++ind) {
                 g->SetPoint(ind, (tmin + ind * deltat) / units::us, rf[ind]);
             }
             g->Draw("L");
@@ -328,18 +281,15 @@ void plot_cerf(MultiPdf &mpdf, CerfMap &cerf, double tmin, double tmax,
         }
     }
     mpdf();
-    for (auto g : garbage_collection)
-    {
+    for (auto g : garbage_collection) {
         delete g;
     }
 }
 
 int main(int argc, const char *argv[])
 {
-    if (argc < 2)
-    {
-        cerr << "This test requires an Wire Cell Field Response input file."
-             << endl;
+    if (argc < 2) {
+        cerr << "This test requires an Wire Cell Field Response input file." << endl;
         return 0;
     }
 
@@ -358,16 +308,14 @@ int main(int argc, const char *argv[])
 
         plot_cerf(mpdf, all_cerf);
 
-        for (int ind = 0; ind < 3; ++ind)
-        {
+        for (int ind = 0; ind < 3; ++ind) {
             em("plot_plane");
             plot_plane_2d(mpdf, fr, ind, false);
         }
         plot_all_impact(mpdf, fr, false);
         em("done with fine responses");
 
-        for (int ind = 0; ind < 3; ++ind)
-        {
+        for (int ind = 0; ind < 3; ++ind) {
             em("plot_plane avg");
             plot_plane_2d(mpdf, fravg, ind, true);
         }

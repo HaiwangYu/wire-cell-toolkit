@@ -6,12 +6,10 @@
 #include <boost/any.hpp>
 #include <vector>
 
-namespace WireCell
-{
+namespace WireCell {
     /** A node which acts as a sink.
- */
-    class ISinkNodeBase : public INode
-    {
+     */
+    class ISinkNodeBase : public INode {
        public:
         typedef std::shared_ptr<ISinkNodeBase> pointer;
 
@@ -23,8 +21,7 @@ namespace WireCell
     };
 
     template <typename InputType>
-    class ISinkNode : public ISinkNodeBase
-    {
+    class ISinkNode : public ISinkNodeBase {
        public:
         typedef InputType input_type;
         typedef std::shared_ptr<const InputType> input_pointer;
@@ -41,10 +38,7 @@ namespace WireCell
         virtual bool operator()(const input_pointer &in) = 0;
 
         // Return the names of the types this node takes as input.
-        virtual std::vector<std::string> input_types()
-        {
-            return std::vector<std::string>{typeid(input_type).name()};
-        }
+        virtual std::vector<std::string> input_types() { return std::vector<std::string>{typeid(input_type).name()}; }
     };
 
 }  // namespace WireCell

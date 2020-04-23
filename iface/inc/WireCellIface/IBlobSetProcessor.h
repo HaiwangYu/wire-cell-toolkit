@@ -6,10 +6,8 @@
 #include "WireCellIface/IBlobSet.h"
 #include "WireCellIface/IQueuedoutNode.h"
 
-namespace WireCell
-{
-    class IBlobSetProcessor : public IQueuedoutNode<IBlobSet, IBlobSet>
-    {
+namespace WireCell {
+    class IBlobSetProcessor : public IQueuedoutNode<IBlobSet, IBlobSet> {
        public:
         virtual ~IBlobSetProcessor();
         typedef std::shared_ptr<IBlobSetProcessor> pointer;

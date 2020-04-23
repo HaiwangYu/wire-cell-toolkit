@@ -4,21 +4,17 @@
 #include <boost/multi_array.hpp>
 #include "WireCellIface/ITensor.h"
 
-namespace WireCell
-{
-    namespace Aux
-    {
+namespace WireCell {
+    namespace Aux {
         template <typename ElementType>
-        class SimpleTensor : public WireCell::ITensor
-        {
+        class SimpleTensor : public WireCell::ITensor {
            public:
             typedef ElementType element_t;
 
             SimpleTensor(const shape_t &shape)
             {
                 size_t nbytes = element_size();
-                for (const auto &s : shape)
-                {
+                for (const auto &s : shape) {
                     nbytes *= s;
                 }
                 m_store.resize(nbytes);

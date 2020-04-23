@@ -19,16 +19,13 @@ void test_transform()
 
     Waveform::realseq_t wf1(nticks), wf2(nticks);
 
-    for (int ind = 0; ind < nticks; ++ind)
-    {
+    for (int ind = 0; ind < nticks; ++ind) {
         wf1[ind] = baseline + ind % period;
     }
 
-    transform(wf1.begin(), wf1.end(), wf2.begin(),
-              [](int x) -> int { return x - baseline; });
+    transform(wf1.begin(), wf1.end(), wf2.begin(), [](int x) -> int { return x - baseline; });
 
-    for (int ind = 0; ind < nticks; ++ind)
-    {
+    for (int ind = 0; ind < nticks; ++ind) {
         Assert(wf1[ind] - baseline == wf2[ind]);
     }
 }
@@ -47,19 +44,16 @@ void test_fft()
 {
     Waveform::realseq_t s;
     const int nbins = 360;
-    for (int ind = 0; ind < nbins; ++ind)
-    {
+    for (int ind = 0; ind < nbins; ++ind) {
         double phi = ind * 3.1415 / 180.0;
         Waveform::real_t val = sin(phi) + sin(11.0 / 7.0 * phi);
         s.push_back(val);
     }
 
     auto spec = Waveform::dft(s);
-    for (int ind = 0; ind < nbins; ++ind)
-    {
+    for (int ind = 0; ind < nbins; ++ind) {
         auto c = spec[ind];
-        cerr << ind << "\ts=" << s[ind] << "\tc=" << c << "\tmag=" << std::abs(c)
-             << "\tphi=" << std::arg(c) << endl;
+        cerr << ind << "\ts=" << s[ind] << "\tc=" << c << "\tmag=" << std::abs(c) << "\tphi=" << std::arg(c) << endl;
     }
     cerr << s.size() << " " << spec.size() << endl;
 }

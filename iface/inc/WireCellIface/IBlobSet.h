@@ -10,10 +10,8 @@
 #include "WireCellIface/IData.h"
 #include "WireCellIface/ISlice.h"
 
-namespace WireCell
-{
-    class IBlobSet : public IData<IBlobSet>
-    {
+namespace WireCell {
+    class IBlobSet : public IData<IBlobSet> {
        public:
         virtual ~IBlobSet();
 

@@ -7,8 +7,7 @@
 void set_palette(int pal = -1);
 void set_palette(int pal)
 {
-    if (pal > 0)
-    {
+    if (pal > 0) {
         gStyle->SetPalette(pal);
         return;
     }
@@ -22,12 +21,9 @@ void set_palette(int pal)
     double reds[npars] = {0.00, 0.00, 1.00, 1.00, 1.00, 1.00};
     double greens[npars] = {0.00, 0.81, 1.00, 1.00, 0.20, 0.00};
     double blues[npars] = {1.00, 1.00, 1.00, 1.00, 0.00, 0.00};
-    if (!initialized)
-    {
-        int FI = TColor::CreateGradientColorTable(npars, stops, reds, greens, blues,
-                                                  ncolors);
-        for (int ind = 0; ind < ncolors; ++ind)
-        {
+    if (!initialized) {
+        int FI = TColor::CreateGradientColorTable(npars, stops, reds, greens, blues, ncolors);
+        for (int ind = 0; ind < ncolors; ++ind) {
             colors[ind] = FI + ind;
         }
         initialized = true;

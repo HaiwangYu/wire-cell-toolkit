@@ -1,9 +1,7 @@
 #include <boost/graph/copy.hpp>
 #include "WireCellIface/ICluster.h"
-namespace WireCell
-{
-    class SimpleCluster : public ICluster
-    {
+namespace WireCell {
+    class SimpleCluster : public ICluster {
        public:
         SimpleCluster(const cluster_graph_t &g, int ident = 0)
           : m_ident(ident)

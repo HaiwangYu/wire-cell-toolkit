@@ -6,12 +6,10 @@
 
 #include "WireCellIface/ISlice.h"
 
-namespace WireCell
-{
+namespace WireCell {
     /** An interface to collection of slices.
- */
-    class ISliceFrame : public IData<ISliceFrame>
-    {
+     */
+    class ISliceFrame : public IData<ISliceFrame> {
        public:
         virtual ~ISliceFrame();
 

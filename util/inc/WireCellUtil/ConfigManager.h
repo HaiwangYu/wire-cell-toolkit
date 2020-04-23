@@ -3,22 +3,20 @@
 
 #include "WireCellUtil/Configuration.h"
 
-namespace WireCell
-{
+namespace WireCell {
     /** Bundle up some policy for handling configuration.
- *
- * Overall configuration object is a list of configuration
- * objects for each configurable instance.
- *
- * Each instance configuration is a dict with keys:
- *
- * - type gives the registered class name
- * - name gives an instance name, ("" by default if omitted)
- * - data gives a type-specific Configuration dictionary for the instance.
- *
- */
-    class ConfigManager
-    {
+     *
+     * Overall configuration object is a list of configuration
+     * objects for each configurable instance.
+     *
+     * Each instance configuration is a dict with keys:
+     *
+     * - type gives the registered class name
+     * - name gives an instance name, ("" by default if omitted)
+     * - data gives a type-specific Configuration dictionary for the instance.
+     *
+     */
+    class ConfigManager {
         Configuration m_top;
 
        public:
@@ -33,8 +31,7 @@ namespace WireCell
         int add(Configuration &cfg);
 
         // Add a configurable configuration by parts, return its index
-        int add(Configuration &data, const std::string &type,
-                const std::string &name = "");
+        int add(Configuration &data, const std::string &type, const std::string &name = "");
 
         /// Return top-level, aggregate configuration
         Configuration all() const { return m_top; }

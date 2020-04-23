@@ -4,12 +4,10 @@
 #include "WireCellIface/IDepo.h"
 #include "WireCellIface/ISourceNode.h"
 
-namespace WireCell
-{
+namespace WireCell {
     /** A depo source is a node that generates IDepo objects.
- */
-    class IDepoSource : public ISourceNode<IDepo>
-    {
+     */
+    class IDepoSource : public ISourceNode<IDepo> {
        public:
         typedef std::shared_ptr<IDepoSource> pointer;
 

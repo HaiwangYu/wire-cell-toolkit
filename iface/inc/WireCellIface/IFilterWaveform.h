@@ -7,10 +7,8 @@
 #include "WireCellUtil/IComponent.h"
 #include "WireCellUtil/Waveform.h"
 
-namespace WireCell
-{
-    class IFilterWaveform : public IComponent<IFilterWaveform>
-    {
+namespace WireCell {
+    class IFilterWaveform : public IComponent<IFilterWaveform> {
        public:
         virtual ~IFilterWaveform();
 

@@ -11,8 +11,7 @@ typedef IntSig::slot_type IntSlot;
 
 using namespace std;
 
-struct A
-{
+struct A {
     int x;
     double dd;
     A(int n, double d)
@@ -28,8 +27,7 @@ struct A
     }
 };
 
-struct B
-{
+struct B {
     int y;
     double s;
     IntSigPtr sig;
@@ -63,8 +61,7 @@ void test_simple()
     b3();
 }
 
-struct MyData
-{
+struct MyData {
     typedef std::shared_ptr<MyData> pointer;
     int x;
     MyData(int n = 0)
@@ -78,8 +75,7 @@ struct MyData
     typedef typename source_signal::slot_type source_slot;
 };
 
-struct SlotA
-{
+struct SlotA {
     MyData::pointer data;
     SlotA()
       : data(new MyData)
@@ -92,8 +88,7 @@ struct SlotA
     }
 };
 
-struct SigA
-{
+struct SigA {
     SigA() {}
 
     MyData::pointer operator()() { return *m_input(); }

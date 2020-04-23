@@ -11,13 +11,11 @@
 #include <boost/function.hpp>
 #include "WireCellIface/IWire.h"
 
-namespace WireCell
-{
+namespace WireCell {
     typedef boost::function<bool(IWire::pointer)> wire_selector;
 
     /// Select wires by plane (and apa/face)
-    struct WirePlaneSelector
-    {
+    struct WirePlaneSelector {
         int layers, face, apa;
 
         WirePlaneSelector(int layer_mask, int face = 0, int apa = 0)
@@ -31,16 +29,13 @@ namespace WireCell
         {
             WirePlaneId ident = wire->planeid();
 
-            if (layers && !(layers & ident.ilayer()))
-            {
+            if (layers && !(layers & ident.ilayer())) {
                 return false;
             }
-            if (apa >= 0 && ident.apa() != apa)
-            {
+            if (apa >= 0 && ident.apa() != apa) {
                 return false;
             }
-            if (face >= 0 && ident.face() != face)
-            {
+            if (face >= 0 && ident.face() != face) {
                 return false;
             }
 

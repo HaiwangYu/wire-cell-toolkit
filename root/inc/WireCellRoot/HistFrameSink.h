@@ -13,12 +13,9 @@
 
 #include <string>
 
-namespace WireCell
-{
-    namespace Root
-    {
-        class HistFrameSink : public IFrameSink, public IConfigurable
-        {
+namespace WireCell {
+    namespace Root {
+        class HistFrameSink : public IFrameSink, public IConfigurable {
            public:
             HistFrameSink();
             virtual ~HistFrameSink();

@@ -4,12 +4,9 @@
 #include "WireCellIface/IConfigurable.h"
 #include "WireCellIface/ISliceFrameSink.h"
 
-namespace WireCell
-{
-    namespace Img
-    {
-        class SlicesSink : public ISliceFrameSink, public IConfigurable
-        {
+namespace WireCell {
+    namespace Img {
+        class SlicesSink : public ISliceFrameSink, public IConfigurable {
            public:
             SlicesSink();
             virtual ~SlicesSink();

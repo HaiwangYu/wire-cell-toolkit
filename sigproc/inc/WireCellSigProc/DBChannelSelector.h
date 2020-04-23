@@ -14,12 +14,9 @@
 #include <string>
 #include <vector>
 
-namespace WireCell
-{
-    namespace SigProc
-    {
-        class DBChannelSelector : public ChannelSelector
-        {
+namespace WireCell {
+    namespace SigProc {
+        class DBChannelSelector : public ChannelSelector {
            public:
             DBChannelSelector();
             virtual ~DBChannelSelector();

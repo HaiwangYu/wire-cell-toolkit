@@ -51,8 +51,7 @@ int main(int argc, char *argv[])
     TFile *file = new TFile(Form("%s.root", argv[0]), "RECREATE");
     TGraph *g1 = new TGraph();
     TGraph *g2 = new TGraph();
-    for (size_t i = 0; i != wfs.size(); i++)
-    {
+    for (size_t i = 0; i != wfs.size(); i++) {
         g1->SetPoint(i, i, wfs.at(i));
         g2->SetPoint(i, i, wfs1.at(i));
     }

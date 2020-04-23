@@ -5,11 +5,9 @@
 #include "WireCellIface/IFunctionNode.h"
 #include "WireCellIface/ITensorSet.h"
 
-namespace WireCell
-{
+namespace WireCell {
     /*! Interface which converts from a set of tensors to a frame. */
-    class ITensorSetFrame : public IFunctionNode<ITensorSet, IFrame>
-    {
+    class ITensorSetFrame : public IFunctionNode<ITensorSet, IFrame> {
        public:
         typedef std::shared_ptr<ITensorSetFrame> pointer;
 

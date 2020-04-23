@@ -5,8 +5,7 @@
 #include "WireCellUtil/Point.h"
 #include "WireCellUtil/Units.h"
 
-namespace WireCell
-{
+namespace WireCell {
     /** \brief Pitch-Impact-Position.
 
     A Pimpos object encapsulates information and methods related
@@ -32,8 +31,7 @@ namespace WireCell
     axis2) the pitch direction is the cross product of axis0 X axis1.
 */
 
-    class Pimpos
-    {
+    class Pimpos {
        public:
         /** Create a Pimpos object for a particular plane.
 
@@ -69,10 +67,8 @@ namespace WireCell
       The pitch extents and the origin vector must be expressed
       in the WCT system of (length) units.
    */
-        Pimpos(int nwires, double minwirepitch, double maxwirepitch,
-               const Vector &wire = Vector(0, 1, 0),
-               const Vector &pitch = Vector(0, 0, 1),
-               const Point &origin = Point(0, 0, 0),
+        Pimpos(int nwires, double minwirepitch, double maxwirepitch, const Vector &wire = Vector(0, 1, 0),
+               const Vector &pitch = Vector(0, 0, 1), const Point &origin = Point(0, 0, 0),
                int nimpact_bins_per_wire_region = 10);
 
         /// Trivial accessor

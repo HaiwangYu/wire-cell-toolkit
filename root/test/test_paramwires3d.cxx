@@ -33,19 +33,16 @@ void test1()
     Assert(wires->size());
     int last_plane = -1;
     int last_index = -1;
-    for (auto wit = wires->begin(); wit != wires->end(); ++wit)
-    {
+    for (auto wit = wires->begin(); wit != wires->end(); ++wit) {
         IWire::pointer wire = *wit;
         int iplane = wire->planeid().index();
         int ident = (1 + iplane) * 100000 + wire->index();
         Assert(ident == wire->ident());
 
-        if (iplane == last_plane)
-        {
+        if (iplane == last_plane) {
             ++last_index;
         }
-        else
-        {
+        else {
             last_plane = iplane;
             last_index = 0;
         }
@@ -57,8 +54,7 @@ void test2()
 {
     double pitches[] = {10.0, 5.0, 3.0, -1};
     int want[] = {371, 747, 1243, 0};
-    for (int ind = 0; pitches[ind] > 0.0; ++ind)
-    {
+    for (int ind = 0; pitches[ind] > 0.0; ++ind) {
         WireParams *params = new WireParams;
         Configuration cfg = params->default_configuration();
         put(cfg, "pitch_mm.u", pitches[ind]);
@@ -73,8 +69,7 @@ void test2()
         Assert(wires);
 
         int nwires = wires->size();
-        cout << ind << ": pitch=" << pitches[ind] << " nwires=" << nwires
-             << " (want=" << want[ind] << ")" << endl;
+        cout << ind << ": pitch=" << pitches[ind] << " nwires=" << nwires << " (want=" << want[ind] << ")" << endl;
         AssertMsg(nwires == want[ind], "Wrong number of wires");
         AssertMsg(Persist::dumps(cfg).size(), "Failed to dump cfg");
     }
@@ -94,8 +89,7 @@ void test3D(MultiPdf &pdf, bool interactive)
     const Ray &bbox = params->bounds();
 
     TView *view = TView::CreateView(1);
-    view->SetRange(bbox.first.x(), bbox.first.y(), bbox.first.z(),
-                   bbox.second.x(), bbox.second.y(), bbox.second.z());
+    view->SetRange(bbox.first.x(), bbox.first.y(), bbox.first.z(), bbox.second.x(), bbox.second.y(), bbox.second.z());
     view->ShowAxis();
     int colors[3] = {2, 4, 1};
 
@@ -106,8 +100,7 @@ void test3D(MultiPdf &pdf, bool interactive)
     size_t n_wires[3] = {u_wires.size(), v_wires.size(), w_wires.size()};
 
     double max_width = 5;
-    for (auto wit = wires->begin(); wit != wires->end(); ++wit)
-    {
+    for (auto wit = wires->begin(); wit != wires->end(); ++wit) {
         IWire::pointer wire = *wit;
         int iplane = wire->planeid().index();
         int index = wire->index();

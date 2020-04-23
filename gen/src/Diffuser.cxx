@@ -10,16 +10,14 @@
 #include <iostream>
 #include <sstream>
 
-WIRECELL_FACTORY(Diffuser, WireCell::Diffuser, WireCell::IDiffuser,
-                 WireCell::IConfigurable)
+WIRECELL_FACTORY(Diffuser, WireCell::Diffuser, WireCell::IDiffuser, WireCell::IConfigurable)
 
 using namespace std;  // debugging
 using namespace WireCell;
 using boost::format;
 
-Diffuser::Diffuser(const Ray &pitch, double binsize_l, double time_offset,
-                   double origin_l, double DL, double DT, double drift_velocity,
-                   double max_sigma_l, double nsigma)
+Diffuser::Diffuser(const Ray &pitch, double binsize_l, double time_offset, double origin_l, double DL, double DT,
+                   double drift_velocity, double max_sigma_l, double nsigma)
   : m_pitch_origin(pitch.first)
   , m_pitch_direction(ray_unit(pitch))
   , m_time_offset(time_offset)
@@ -62,8 +60,7 @@ Configuration Diffuser::default_configuration() const
 void Diffuser::configure(const Configuration &cfg)
 {
     m_pitch_origin = get<Point>(cfg, "pitch_origin", m_pitch_origin);
-    m_pitch_direction =
-        get<Point>(cfg, "pitch_direction", m_pitch_direction).norm();
+    m_pitch_direction = get<Point>(cfg, "pitch_direction", m_pitch_direction).norm();
     m_time_offset = get<double>(cfg, "timeoffset", m_time_offset);
 
     m_origin_l = get<double>(cfg, "starttime", m_origin_l);
@@ -106,14 +103,11 @@ void Diffuser::dump(const std::string &msg)
 
 bool Diffuser::operator()(const input_pointer &depo, output_queue &outq)
 {
-    if (m_eos)
-    {
+    if (m_eos) {
         return false;
     }
-    if (!depo)
-    {  // EOS flush
-        for (auto diff : m_input)
-        {
+    if (!depo) {  // EOS flush
+        for (auto diff : m_input) {
             outq.push_back(diff);
         }
         outq.push_back(nullptr);
@@ -127,8 +121,7 @@ bool Diffuser::operator()(const input_pointer &depo, output_queue &outq)
 
     const double tmpcm2 = 2 * m_DL * drift_time / units::centimeter2;
     const double sigmaL = sqrt(tmpcm2) * units::centimeter / m_drift_velocity;
-    const double sigmaT =
-        sqrt(2 * m_DT * drift_time / units::centimeter2) * units::centimeter2;
+    const double sigmaT = sqrt(2 * m_DT * drift_time / units::centimeter2) * units::centimeter2;
 
     const Vector to_depo = depo->pos() - m_pitch_origin;
     const double pitch_distance = m_pitch_direction.dot(to_depo);
@@ -138,17 +131,14 @@ bool Diffuser::operator()(const input_pointer &depo, output_queue &outq)
          << " pitch distance = " << pitch_distance << endl;
 
     IDiffusion::pointer diff =
-        this->diffuse(m_time_offset + depo->time(), pitch_distance, sigmaL,
-                      sigmaT, depo->charge(), depo);
+        this->diffuse(m_time_offset + depo->time(), pitch_distance, sigmaL, sigmaT, depo->charge(), depo);
     m_input.insert(diff);
 
-    while (m_input.size() > 2)
-    {
+    while (m_input.size() > 2) {
         auto first = *m_input.begin();
         auto last = *m_input.rbegin();
         const double last_center = 0.5 * (last->lend() + last->lbegin());
-        if (last_center - first->lbegin() < m_max_sigma_l * m_nsigma)
-        {
+        if (last_center - first->lbegin() < m_max_sigma_l * m_nsigma) {
             break;  // new input with long diffusion may still take lead
         }
 
@@ -162,15 +152,13 @@ bool Diffuser::operator()(const input_pointer &depo, output_queue &outq)
     return true;
 }
 
-std::vector<double> Diffuser::oned(double mean, double sigma, double binsize,
-                                   const Diffuser::bounds_type &bounds)
+std::vector<double> Diffuser::oned(double mean, double sigma, double binsize, const Diffuser::bounds_type &bounds)
 {
     int nbins = round((bounds.second - bounds.first) / binsize);
 
     /// fragment between bin_edge_{low,high}
     std::vector<double> integral(nbins + 1, 0.0);
-    for (int ibin = 0; ibin <= nbins; ++ibin)
-    {
+    for (int ibin = 0; ibin <= nbins; ++ibin) {
         double absx = bounds.first + ibin * binsize;
         double t = 0.5 * (absx - mean) / sigma;
         double e = 0.5 * std::erf(t);
@@ -178,27 +166,22 @@ std::vector<double> Diffuser::oned(double mean, double sigma, double binsize,
     }
 
     std::vector<double> bins;
-    for (int ibin = 0; ibin < nbins; ++ibin)
-    {
+    for (int ibin = 0; ibin < nbins; ++ibin) {
         bins.push_back(integral[ibin + 1] - integral[ibin]);
     }
     return bins;
 }
 
-Diffuser::bounds_type Diffuser::bounds(double mean, double sigma,
-                                       double binsize, double origin)
+Diffuser::bounds_type Diffuser::bounds(double mean, double sigma, double binsize, double origin)
 {
-    double low =
-        floor((mean - m_nsigma * sigma - origin) / binsize) * binsize + origin;
-    double high =
-        ceil((mean + m_nsigma * sigma - origin) / binsize) * binsize + origin;
+    double low = floor((mean - m_nsigma * sigma - origin) / binsize) * binsize + origin;
+    double high = ceil((mean + m_nsigma * sigma - origin) / binsize) * binsize + origin;
 
     return std::make_pair(low, high);
 }
 
-IDiffusion::pointer Diffuser::diffuse(double mean_l, double mean_t,
-                                      double sigma_l, double sigma_t,
-                                      double weight, IDepo::pointer depo)
+IDiffusion::pointer Diffuser::diffuse(double mean_l, double mean_t, double sigma_l, double sigma_t, double weight,
+                                      IDepo::pointer depo)
 {
     bounds_type bounds_l = bounds(mean_l, sigma_l, m_binsize_l, m_origin_l);
     bounds_type bounds_t = bounds(mean_t, sigma_t, m_binsize_t, m_origin_t);
@@ -206,33 +189,26 @@ IDiffusion::pointer Diffuser::diffuse(double mean_l, double mean_t,
     std::vector<double> l_bins = oned(mean_l, sigma_l, m_binsize_l, bounds_l);
     std::vector<double> t_bins = oned(mean_t, sigma_t, m_binsize_t, bounds_t);
 
-    if (l_bins.empty() || t_bins.empty())
-    {
+    if (l_bins.empty() || t_bins.empty()) {
         return nullptr;
     }
 
     // get normalization
     double power = 0;
-    for (auto l : l_bins)
-    {
-        for (auto t : t_bins)
-        {
+    for (auto l : l_bins) {
+        for (auto t : t_bins) {
             power += l * t;
         }
     }
-    if (power == 0.0)
-    {
+    if (power == 0.0) {
         return nullptr;
     }
 
-    Diffusion *smear =
-        new Diffusion(depo, l_bins.size(), t_bins.size(), bounds_l.first,
-                      bounds_t.first, bounds_l.second, bounds_t.second);
+    Diffusion *smear = new Diffusion(depo, l_bins.size(), t_bins.size(), bounds_l.first, bounds_t.first,
+                                     bounds_l.second, bounds_t.second);
 
-    for (size_t ind_l = 0; ind_l < l_bins.size(); ++ind_l)
-    {
-        for (size_t ind_t = 0; ind_t < t_bins.size(); ++ind_t)
-        {
+    for (size_t ind_l = 0; ind_l < l_bins.size(); ++ind_l) {
+        for (size_t ind_t = 0; ind_t < t_bins.size(); ++ind_t) {
             double value = l_bins[ind_l] * t_bins[ind_t] / power * weight;
             smear->set(ind_l, ind_t, value);
         }

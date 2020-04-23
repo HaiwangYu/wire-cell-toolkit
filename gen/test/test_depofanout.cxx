@@ -27,23 +27,18 @@ int main()
     Assert(dfo->output_types().size() == multiplicity);
 
     const int ident = 42;
-    auto realdepo = std::make_shared<SimpleDepo>(0, Point(0, 0, 0), 1.0, nullptr,
-                                                 0, 0, ident);
+    auto realdepo = std::make_shared<SimpleDepo>(0, Point(0, 0, 0), 1.0, nullptr, 0, 0, ident);
 
-    for (auto depo : IDepo::vector({realdepo, nullptr}))
-    {
+    for (auto depo : IDepo::vector({realdepo, nullptr})) {
         IDepoFanout::output_vector outv;
         bool ok = (*dfo)(depo, outv);
         Assert(ok);  // should always be so
         Assert(outv.size() == multiplicity);
-        for (auto d : outv)
-        {
-            if (depo)
-            {
+        for (auto d : outv) {
+            if (depo) {
                 Assert(d->id() == ident);
             }
-            else
-            {
+            else {
                 Assert(d == nullptr);
             }
         }

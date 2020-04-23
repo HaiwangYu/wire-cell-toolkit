@@ -11,23 +11,20 @@
 #include <Eigen/Sparse>
 #include <deque>
 
-namespace WireCell
-{
-    namespace Gen
-    {
+namespace WireCell {
+    namespace Gen {
         /* struct GausDiffTimeCompare{ */
         /* 	bool operator()(const std::shared_ptr<Gen::GaussianDiffusion>& lhs,
- * const std::shared_ptr<Gen::GaussianDiffusion>& rhs) const; */
+         * const std::shared_ptr<Gen::GaussianDiffusion>& rhs) const; */
         /* }; */
         /**  A BinnedDiffusion_transform maintains an association between impact
- * positions along the pitch direction of a wire plane and
- * the diffused depositions that drift to them.
- *
- * It covers a fixed and discretely sampled time and pitch
- * domain.
- */
-        class BinnedDiffusion_transform
-        {
+         * positions along the pitch direction of a wire plane and
+         * the diffused depositions that drift to them.
+         *
+         * It covers a fixed and discretely sampled time and pitch
+         * domain.
+         */
+        class BinnedDiffusion_transform {
            public:
             /** Create a BinnedDiffusion_transform.
 
@@ -50,14 +47,9 @@ namespace WireCell
    */
 
             /// Useful to client code to mark a calculation strategy.
-            enum ImpactDataCalculationStrategy
-            {
-                constant = 1,
-                linear = 2
-            };
+            enum ImpactDataCalculationStrategy { constant = 1, linear = 2 };
 
-            BinnedDiffusion_transform(const Pimpos &pimpos, const Binning &tbins,
-                                      double nsigma = 3.0,
+            BinnedDiffusion_transform(const Pimpos &pimpos, const Binning &tbins, double nsigma = 3.0,
                                       IRandom::pointer fluctuate = nullptr,
                                       ImpactDataCalculationStrategy calcstrat = linear);
 
@@ -85,12 +77,10 @@ namespace WireCell
             // ImpactData::pointer impact_data(int bin) const;
 
             // test ...
-            void get_charge_vec(
-                std::vector<std::vector<std::tuple<int, int, double>>> &vec_vec_charge,
-                std::vector<int> &vec_impact);
-            void
-            get_charge_matrix(std::vector<Eigen::SparseMatrix<float> *> &vec_spmatrix,
-                              std::vector<int> &vec_impact);
+            void get_charge_vec(std::vector<std::vector<std::tuple<int, int, double>>> &vec_vec_charge,
+                                std::vector<int> &vec_impact);
+            void get_charge_matrix(std::vector<Eigen::SparseMatrix<float> *> &vec_spmatrix,
+                                   std::vector<int> &vec_impact);
 
             /// Return the range of pitch containing depos out to
             /// given nsigma and without bounds checking.

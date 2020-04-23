@@ -5,31 +5,23 @@
 #include "WireCellPgraph/Node.h"
 #include "WireCellUtil/Logging.h"
 
-namespace WireCell
-{
-    namespace Pgraph
-    {
+namespace WireCell {
+    namespace Pgraph {
         // Makers make an appropriate Pgraph::Node from an INode
-        struct Maker
-        {
+        struct Maker {
             virtual ~Maker() {}
             virtual Node *operator()(INode::pointer wcnode) = 0;
         };
         template <class Wrapper>
-        struct MakerT : public Maker
-        {
+        struct MakerT : public Maker {
             virtual ~MakerT() {}
-            virtual Node *operator()(INode::pointer wcnode)
-            {
-                return new Wrapper(wcnode);
-            }
+            virtual Node *operator()(INode::pointer wcnode) { return new Wrapper(wcnode); }
         };
 
         // This factory creates Pgraph::Nodes*'s from INode::pointers.
         // It only knows about the categories that have been hard
         // coded in the Factory constructor.
-        class Factory
-        {
+        class Factory {
            public:
             Factory();
 

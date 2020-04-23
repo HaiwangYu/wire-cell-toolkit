@@ -14,10 +14,8 @@
 
 #include "WireCellUtil/Configuration.h"
 
-namespace WireCell
-{
-    namespace Gen
-    {
+namespace WireCell {
+    namespace Gen {
         /**
 
    Fourdee is a Wire Cell Toolkit application class which
@@ -31,8 +29,7 @@ namespace WireCell
    the digitization output is provided.
 
 */
-        class Fourdee : public WireCell::IApplication, public WireCell::IConfigurable
-        {
+        class Fourdee : public WireCell::IApplication, public WireCell::IConfigurable {
            public:
             Fourdee();
             virtual ~Fourdee();

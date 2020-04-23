@@ -2,8 +2,7 @@
 #include "WireCellIface/SimpleDepoSet.h"
 
 #include "WireCellUtil/NamedFactory.h"
-WIRECELL_FACTORY(DepoBagger, WireCell::Gen::DepoBagger,
-                 WireCell::IDepoCollector, WireCell::IConfigurable)
+WIRECELL_FACTORY(DepoBagger, WireCell::Gen::DepoBagger, WireCell::IDepoCollector, WireCell::IConfigurable)
 using namespace std;
 using namespace WireCell;
 
@@ -28,15 +27,12 @@ WireCell::Configuration Gen::DepoBagger::default_configuration() const
 
 void Gen::DepoBagger::configure(const WireCell::Configuration &cfg)
 {
-    m_gate = std::pair<double, double>(cfg["gate"][0].asDouble(),
-                                       cfg["gate"][1].asDouble());
+    m_gate = std::pair<double, double>(cfg["gate"][0].asDouble(), cfg["gate"][1].asDouble());
 }
 
-bool Gen::DepoBagger::operator()(const input_pointer &depo,
-                                 output_queue &deposetqueue)
+bool Gen::DepoBagger::operator()(const input_pointer &depo, output_queue &deposetqueue)
 {
-    if (!depo)
-    {  // EOS
+    if (!depo) {  // EOS
         // even if empyt, must send out something to retain sync.
         auto out = std::make_shared<SimpleDepoSet>(m_count, m_depos);
         deposetqueue.push_back(out);
@@ -47,8 +43,7 @@ bool Gen::DepoBagger::operator()(const input_pointer &depo,
     }
 
     const double t = depo->time();
-    if (m_gate.first <= t and t < m_gate.second)
-    {
+    if (m_gate.first <= t and t < m_gate.second) {
         m_depos.push_back(depo);
     }
     return true;

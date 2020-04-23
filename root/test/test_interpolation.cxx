@@ -35,17 +35,14 @@ using namespace std;
 double WeightGaus(double x1, double x2, double mean, double sigma)
 {
     double val = 0;
-    if (!sigma)
-    {
+    if (!sigma) {
         val = mean - x2;
     }
-    else
-    {
+    else {
         Double_t sqrt2 = TMath::Sqrt(2);
         val = TMath::Gaus(x2, mean, sigma, 1) - TMath::Gaus(x1, mean, sigma, 1);
-        val *= -2. * sigma * sigma /
-               (TMath::Erf((x2 - mean) / sqrt2 / sigma) -
-                TMath::Erf((x1 - mean) / sqrt2 / sigma));
+        val *=
+            -2. * sigma * sigma / (TMath::Erf((x2 - mean) / sqrt2 / sigma) - TMath::Erf((x1 - mean) / sqrt2 / sigma));
         val += (mean - x2);
     }
     return val / (x1 - x2);
@@ -54,8 +51,7 @@ double WeightGaus(double x1, double x2, double mean, double sigma)
 int main(const int argc, char *argv[])
 {
     string out_basename = argv[0];
-    if (argc > 3)
-    {
+    if (argc > 3) {
         out_basename = argv[3];
     }
 
@@ -70,11 +66,9 @@ int main(const int argc, char *argv[])
     const Point start_vertex(1 * units::m, 0 * units::m, 0.1 * units::mm);
 
     // 6 points inbetween an impact pitch
-    for (int i = 0; i < 6; i++)
-    {
+    for (int i = 0; i < 6; i++) {
         const Point vertex = start_vertex + Vector(0, 0, i * 0.06 * units::mm);
-        tracks.add_track(event_time + i * 1 * units::us,
-                         Ray(vertex, vertex + Vector(0, 0, 0.1 * stepsize)),
+        tracks.add_track(event_time + i * 1 * units::us, Ray(vertex, vertex + Vector(0, 0, 0.1 * stepsize)),
                          -1.0 * units::eplus);
     }
 
@@ -126,10 +120,8 @@ int main(const int argc, char *argv[])
     int wcount = 0;
 
     auto depos = tracks.depos();
-    for (auto depo : depos)
-    {
-        auto drifted = std::make_shared<Gen::TransportedDepo>(
-            depo, field_origin.x(), drift_speed);
+    for (auto depo : depos) {
+        auto drifted = std::make_shared<Gen::TransportedDepo>(depo, field_origin.x(), drift_speed);
         double center_time = drifted->time();
         double center_pitch = drifted->pos().z();
         std::cerr << "depo:"
@@ -139,17 +131,12 @@ int main(const int argc, char *argv[])
 
         Gen::GausDesc tdesc(center_time, sigma_time);
         Gen::GausDesc pdesc(center_pitch, sigma_pitch);
-        if (!sigma_pitch)
-        {
-            charge[5 - pcount] = new TF1(Form("charge%d", 5 - pcount), "1",
-                                         center_pitch - 0.01, center_pitch + 0.01);
+        if (!sigma_pitch) {
+            charge[5 - pcount] = new TF1(Form("charge%d", 5 - pcount), "1", center_pitch - 0.01, center_pitch + 0.01);
             cout << "hahha" << endl;
         }
-        else
-        {
-            charge[5 - pcount] =
-                new TF1(Form("charge%d", 5 - pcount),
-                        "[0]*TMath::Gaus(x, [1], [2], 0)", -0.3, 0.9);
+        else {
+            charge[5 - pcount] = new TF1(Form("charge%d", 5 - pcount), "[0]*TMath::Gaus(x, [1], [2], 0)", -0.3, 0.9);
             charge[5 - pcount]->SetParameters(1, center_pitch, sigma_pitch);
             charge[5 - pcount]->SetNpx(1000);
         }
@@ -160,13 +147,10 @@ int main(const int argc, char *argv[])
         int offsetbin = gd.poffset_bin();
         cout << "Offset bin: " << offsetbin << std::endl;
         auto weight = gd.weights();
-        for (unsigned int i = 0; i < weight.size(); i++)
-        {
-            if (10 - offsetbin - i == 0)
-            {
+        for (unsigned int i = 0; i < weight.size(); i++) {
+            if (10 - offsetbin - i == 0) {
                 cout << "weight " << i << " : " << weight[i] << endl;
-                double check = WeightGaus(pbins.edge(10), pbins.edge(10) + p_sample,
-                                          center_pitch, sigma_pitch);
+                double check = WeightGaus(pbins.edge(10), pbins.edge(10) + p_sample, center_pitch, sigma_pitch);
                 cout << "weight " << check << endl;
                 y[5 - pcount] = weight[i];
                 x[5 - pcount] = center_pitch;
@@ -179,8 +163,7 @@ int main(const int argc, char *argv[])
     }
     cout << "Points: " << pcount << endl;
     cout << "Weights: " << wcount << endl;
-    for (int i = 0; i < pcount; i++)
-    {
+    for (int i = 0; i < pcount; i++) {
         cout << x[i] << ", " << y[i] << endl;
     }
 
@@ -202,8 +185,7 @@ int main(const int argc, char *argv[])
     bb.Draw("same");
 
     Int_t color[6] = {2, 4, 6, 8, 9, 1};
-    for (int i = 0; i < pcount; i++)
-    {
+    for (int i = 0; i < pcount; i++) {
         charge[i]->Draw("same");
         charge[i]->SetLineColor(color[i]);
         charge[i]->SetLineStyle(kDashed);

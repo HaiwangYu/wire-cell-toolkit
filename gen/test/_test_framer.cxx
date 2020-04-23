@@ -35,12 +35,10 @@ int main()
     Assert(!traces->empty());
     int ntraces = traces->size();
 
-    cerr << "test_framer: Frame: #" << frame->ident()
-         << " at t=" << frame->time() / units::microsecond << " usec"
+    cerr << "test_framer: Frame: #" << frame->ident() << " at t=" << frame->time() / units::microsecond << " usec"
          << " with " << ntraces << " traces" << endl;
 
-    for (auto trace : *traces)
-    {
+    for (auto trace : *traces) {
         cerr << "\ttrace ch:" << trace->channel() << " start tbin=" << trace->tbin()
              << " #time bins=" << trace->charge().size() << endl;
     }

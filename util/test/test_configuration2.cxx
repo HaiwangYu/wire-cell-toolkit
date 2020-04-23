@@ -73,14 +73,12 @@ int main()
 
     Configuration cfg = Persist::loads(json);
 
-    for (auto comp : cfg)
-    {
+    for (auto comp : cfg) {
         Assert(get<string>(comp, "type") == "TrackDepos");
         Configuration data = comp["data"];
         Assert(get<double>(data, "step_size") == 1.0);
         Configuration tracks = data["tracks"];
-        for (auto track : tracks)
-        {
+        for (auto track : tracks) {
             Assert(get<double>(track, "charge") < 0);
             Ray ray = get<Ray>(track, "ray");
             cerr << ray << endl;

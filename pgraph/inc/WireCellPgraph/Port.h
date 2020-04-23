@@ -10,10 +10,8 @@
 #include <string>
 #include <vector>
 
-namespace WireCell
-{
-    namespace Pgraph
-    {
+namespace WireCell {
+    namespace Pgraph {
         // The type of data passed in the graph.
         typedef boost::any Data;
         // A buffer of data.  It is a std::deque instead of a
@@ -27,17 +25,9 @@ namespace WireCell
 
         class Node;
 
-        class Port
-        {
+        class Port {
            public:
-            enum Type
-            {
-                tail = 0,
-                output = 0,
-                head = 1,
-                input = 1,
-                ntypes = 2
-            };
+            enum Type { tail = 0, output = 0, head = 1, input = 1, ntypes = 2 };
 
             Port(Node *node, Type type, std::string signature, std::string name = "");
 

@@ -2,15 +2,11 @@
 #include <iostream>
 #include <sstream>
 #include <thread>
-void msleep(int msec)
-{
-    std::this_thread::sleep_for(std::chrono::milliseconds(msec));
-}
+void msleep(int msec) { std::this_thread::sleep_for(std::chrono::milliseconds(msec)); }
 
 using namespace std;
 
-struct Fun
-{
+struct Fun {
     int n;
     Fun(int n)
       : n(n)
@@ -18,11 +14,9 @@ struct Fun
     }
     int operator()(int x, bool dec)
     {
-        while (x > 0)
-        {
+        while (x > 0) {
             int old_n = n;
-            if (dec)
-            {
+            if (dec) {
                 n = x;
             }
             stringstream msg;

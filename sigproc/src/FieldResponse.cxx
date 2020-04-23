@@ -3,8 +3,7 @@
 
 #include "WireCellUtil/NamedFactory.h"
 
-WIRECELL_FACTORY(FieldResponse, WireCell::SigProc::FieldResponse,
-                 WireCell::IFieldResponse, WireCell::IConfigurable)
+WIRECELL_FACTORY(FieldResponse, WireCell::SigProc::FieldResponse, WireCell::IFieldResponse, WireCell::IConfigurable)
 
 using namespace WireCell;
 
@@ -25,15 +24,10 @@ WireCell::Configuration SigProc::FieldResponse::default_configuration() const
 void SigProc::FieldResponse::configure(const WireCell::Configuration &cfg)
 {
     m_fname = get(cfg, "filename", m_fname);
-    if (m_fname.empty())
-    {
+    if (m_fname.empty()) {
         THROW(ValueError() << errmsg{"must give field response filename"});
     }
     m_fr = Response::Schema::load(m_fname.c_str());
 }
 
-const Response::Schema::FieldResponse &
-SigProc::FieldResponse::field_response() const
-{
-    return m_fr;
-}
+const Response::Schema::FieldResponse &SigProc::FieldResponse::field_response() const { return m_fr; }

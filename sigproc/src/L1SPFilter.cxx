@@ -14,15 +14,13 @@
 #include <iostream>
 #include <numeric>
 
-WIRECELL_FACTORY(L1SPFilter, WireCell::SigProc::L1SPFilter,
-                 WireCell::IFrameFilter, WireCell::IConfigurable)
+WIRECELL_FACTORY(L1SPFilter, WireCell::SigProc::L1SPFilter, WireCell::IFrameFilter, WireCell::IConfigurable)
 
 using namespace Eigen;
 using namespace WireCell;
 using namespace WireCell::SigProc;
 
-L1SPFilter::L1SPFilter(double gain, double shaping, double postgain,
-                       double ADC_mV, double fine_time_offset,
+L1SPFilter::L1SPFilter(double gain, double shaping, double postgain, double ADC_mV, double fine_time_offset,
                        double coarse_time_offset)
   : m_gain(gain)
   , m_shaping(shaping)
@@ -43,11 +41,9 @@ L1SPFilter::~L1SPFilter()
 
 void L1SPFilter::init_resp()
 {
-    if (lin_V == 0 && lin_W == 0)
-    {
+    if (lin_V == 0 && lin_W == 0) {
         // get field response ...
-        auto ifr = Factory::find_tn<IFieldResponse>(
-            get<std::string>(m_cfg, "fields", "FieldResponse"));
+        auto ifr = Factory::find_tn<IFieldResponse>(get<std::string>(m_cfg, "fields", "FieldResponse"));
         Response::Schema::FieldResponse fr = ifr->field_response();
         // Make a new data set which is the average FR, make an average for V and Y
         // planes ...
@@ -56,8 +52,7 @@ void L1SPFilter::init_resp()
         // get electronics response
         WireCell::Waveform::compseq_t elec;
         WireCell::Binning tbins(Response::as_array(fravg.planes[0]).cols(), 0,
-                                Response::as_array(fravg.planes[0]).cols() *
-                                    fravg.period);
+                                Response::as_array(fravg.planes[0]).cols() * fravg.period);
         Response::ColdElec ce(m_gain, m_shaping);
         auto ewave = ce.generate(tbins);
         Waveform::scale(ewave, m_postgain * m_ADC_mV * (-1));  // ADC to electron ...
@@ -88,8 +83,7 @@ void L1SPFilter::init_resp()
         // m_coarse_time_offset << " " << m_gain << " " << 14.0 * units::mV/units::fC
         // << " " << m_shaping << " " << fravg.period << std::endl;
 
-        double x0 =
-            (-intrinsic_time_offset - m_coarse_time_offset + m_fine_time_offset);
+        double x0 = (-intrinsic_time_offset - m_coarse_time_offset + m_fine_time_offset);
         double xstep = fravg.period;
 
         // boost::math::cubic_b_spline<double> spline_v(resp_V.begin(),
@@ -182,8 +176,7 @@ void L1SPFilter::configure(const WireCell::Configuration &cfg)
 bool L1SPFilter::operator()(const input_pointer &in, output_pointer &out)
 {
     out = nullptr;
-    if (!in)
-    {
+    if (!in) {
         return true;  // eos
     }
 
@@ -199,8 +192,7 @@ bool L1SPFilter::operator()(const input_pointer &in, output_pointer &out)
     raw_pad = get(m_cfg, "raw_pad", raw_pad);
 
     double raw_ROI_th_nsigma = get(m_cfg, "raw_ROI_th_nsigma", raw_ROI_th_nsigma);
-    double raw_ROI_th_adclimit =
-        get(m_cfg, "raw_ROI_th_adclimit", raw_ROI_th_adclimit);
+    double raw_ROI_th_adclimit = get(m_cfg, "raw_ROI_th_adclimit", raw_ROI_th_adclimit);
 
     // std::cout << "Xin: " << raw_ROI_th_nsigma << " " << raw_ROI_th_adclimit <<
     // " " << overall_time_offset << " " << collect_time_offset << " " << roi_pad
@@ -229,11 +221,9 @@ bool L1SPFilter::operator()(const input_pointer &in, output_pointer &out)
     auto adctraces = FrameTools::tagged_traces(in, adctag);
     auto sigtraces = FrameTools::tagged_traces(in, sigtag);
 
-    if (adctraces.empty() or sigtraces.empty() or
-        adctraces.size() != sigtraces.size())
-    {
-        std::cerr << "L1SPFilter got unexpected input: " << adctraces.size()
-                  << " ADC traces and " << sigtraces.size() << " signal traces\n";
+    if (adctraces.empty() or sigtraces.empty() or adctraces.size() != sigtraces.size()) {
+        std::cerr << "L1SPFilter got unexpected input: " << adctraces.size() << " ADC traces and " << sigtraces.size()
+                  << " signal traces\n";
         THROW(RuntimeError() << errmsg{"L1SPFilter: unexpected input"});
     }
 
@@ -247,18 +237,15 @@ bool L1SPFilter::operator()(const input_pointer &in, output_pointer &out)
 
     std::map<int, std::set<int>> init_map;
     // do ROI from the decon signal
-    for (auto trace : sigtraces)
-    {
+    for (auto trace : sigtraces) {
         int ch = trace->channel();
         int tbin = trace->tbin();
         auto const &charges = trace->charge();
         const int ntbins = charges.size();
         std::set<int> time_ticks;
 
-        for (int qi = 0; qi < ntbins; qi++)
-        {
-            if (charges[qi] > 0)
-            {
+        for (int qi = 0; qi < ntbins; qi++) {
+            if (charges[qi] > 0) {
                 time_ticks.insert(tbin + qi);
             }
         }
@@ -274,8 +261,7 @@ bool L1SPFilter::operator()(const input_pointer &in, output_pointer &out)
 
     std::map<int, std::shared_ptr<const WireCell::ITrace>> adctrace_ch_map;
 
-    for (auto trace : adctraces)
-    {
+    for (auto trace : adctraces) {
         int ch = trace->channel();
 
         adctrace_ch_map[ch] = trace;
@@ -285,30 +271,22 @@ bool L1SPFilter::operator()(const input_pointer &in, output_pointer &out)
         const int ntbins = charges.size();
         std::set<int> &time_ticks = init_map[ch];
 
-        if (ntot_ticks < ntbins)
-            ntot_ticks = ntbins;
+        if (ntot_ticks < ntbins) ntot_ticks = ntbins;
 
         Waveform::realseq_t tmp_charge = charges;
         double mean = Waveform::percentile(tmp_charge, 0.5);
         double mean_p1sig = Waveform::percentile(tmp_charge, 0.5 + 0.34);
         double mean_n1sig = Waveform::percentile(tmp_charge, 0.5 - 0.34);
-        double cut =
-            raw_ROI_th_nsigma *
-            sqrt((pow(mean_p1sig - mean, 2) + pow(mean_n1sig - mean, 2)) / 2.);
-        if (cut < raw_ROI_th_adclimit)
-            cut = raw_ROI_th_adclimit;
+        double cut = raw_ROI_th_nsigma * sqrt((pow(mean_p1sig - mean, 2) + pow(mean_n1sig - mean, 2)) / 2.);
+        if (cut < raw_ROI_th_adclimit) cut = raw_ROI_th_adclimit;
 
         // if (ch==4090)
         // 	std::cout << cut << " " << raw_pad << std::endl;
 
-        for (int qi = 0; qi < ntbins; qi++)
-        {
-            if (fabs(charges[qi]) > cut)
-            {
-                for (int qii = -raw_pad; qii != raw_pad + 1; qii++)
-                {
-                    if (tbin + qi + qii >= 0 && tbin + qi + qii < ntot_ticks)
-                        time_ticks.insert(tbin + qi + qii);
+        for (int qi = 0; qi < ntbins; qi++) {
+            if (fabs(charges[qi]) > cut) {
+                for (int qii = -raw_pad; qii != raw_pad + 1; qii++) {
+                    if (tbin + qi + qii >= 0 && tbin + qi + qii < ntot_ticks) time_ticks.insert(tbin + qi + qii);
                 }
             }
         }
@@ -320,65 +298,51 @@ bool L1SPFilter::operator()(const input_pointer &in, output_pointer &out)
     // create ROIs ...
     std::map<int, std::vector<std::pair<int, int>>> map_ch_rois;
 
-    for (auto it = init_map.begin(); it != init_map.end(); it++)
-    {
+    for (auto it = init_map.begin(); it != init_map.end(); it++) {
         int wire_index = it->first;
         std::set<int> &time_slices_set = it->second;
-        if (time_slices_set.size() == 0)
-            continue;
+        if (time_slices_set.size() == 0) continue;
         std::vector<int> time_slices;
-        std::copy(time_slices_set.begin(), time_slices_set.end(),
-                  std::back_inserter(time_slices));
+        std::copy(time_slices_set.begin(), time_slices_set.end(), std::back_inserter(time_slices));
 
         std::vector<std::pair<int, int>> rois;
         std::vector<std::pair<int, int>> rois_save;
 
         rois.push_back(std::make_pair(time_slices.front(), time_slices.front()));
-        for (size_t i = 1; i < time_slices.size(); i++)
-        {
-            if (time_slices.at(i) - rois.back().second <= roi_pad * 2)
-            {
+        for (size_t i = 1; i < time_slices.size(); i++) {
+            if (time_slices.at(i) - rois.back().second <= roi_pad * 2) {
                 rois.back().second = time_slices.at(i);
             }
-            else
-            {
+            else {
                 rois.push_back(std::make_pair(time_slices.at(i), time_slices.at(i)));
             }
         }
 
         // extend the rois to both side according to the bin content
-        for (auto it = rois.begin(); it != rois.end(); it++)
-        {
+        for (auto it = rois.begin(); it != rois.end(); it++) {
             int start_bin = it->first;
             int end_bin = it->second;
             start_bin = start_bin - roi_pad;
             end_bin = end_bin + roi_pad;
-            if (start_bin < 0)
-                start_bin = 0;
-            if (end_bin > ntot_ticks - 1)
-                end_bin = ntot_ticks - 1;
+            if (start_bin < 0) start_bin = 0;
+            if (end_bin > ntot_ticks - 1) end_bin = ntot_ticks - 1;
             it->first = start_bin;
             it->second = end_bin;
         }
 
-        for (auto it = rois.begin(); it != rois.end(); it++)
-        {
-            if (rois_save.size() == 0)
-            {
+        for (auto it = rois.begin(); it != rois.end(); it++) {
+            if (rois_save.size() == 0) {
                 rois_save.push_back(*it);
             }
-            else if (it->first <= rois_save.back().second)
-            {
+            else if (it->first <= rois_save.back().second) {
                 rois_save.back().second = it->second;
             }
-            else
-            {
+            else {
                 rois_save.push_back(*it);
             }
         }
 
-        if (rois_save.size() > 0)
-            map_ch_rois[wire_index] = rois_save;
+        if (rois_save.size() > 0) map_ch_rois[wire_index] = rois_save;
         // for (auto it = rois_save.begin(); it!=rois_save.end(); it++){
         // std::cout << wire_index << " " << it->first << " " << it->second +1 <<
         // std::endl;
@@ -387,31 +351,23 @@ bool L1SPFilter::operator()(const input_pointer &in, output_pointer &out)
 
     std::map<int, std::vector<int>> map_ch_flag_rois;
     // prepare for the output signal ...
-    for (auto trace : sigtraces)
-    {
-        auto newtrace = std::make_shared<SimpleTrace>(
-            trace->channel(), trace->tbin(), trace->charge());
+    for (auto trace : sigtraces) {
+        auto newtrace = std::make_shared<SimpleTrace>(trace->channel(), trace->tbin(), trace->charge());
         // How to access the sigtraces together ???
-        if (map_ch_rois.find(trace->channel()) != map_ch_rois.end())
-        {
-            std::vector<std::pair<int, int>> &rois_save =
-                map_ch_rois[trace->channel()];
+        if (map_ch_rois.find(trace->channel()) != map_ch_rois.end()) {
+            std::vector<std::pair<int, int>> &rois_save = map_ch_rois[trace->channel()];
             std::vector<int> flag_rois;
             map_ch_flag_rois[trace->channel()] = flag_rois;
 
             bool flag_shorted = false;
-            for (size_t i1 = 0; i1 != rois_save.size(); i1++)
-            {
+            for (size_t i1 = 0; i1 != rois_save.size(); i1++) {
                 //
 
-                int temp_flag = L1_fit(newtrace, adctrace_ch_map[trace->channel()],
-                                       rois_save.at(i1).first,
+                int temp_flag = L1_fit(newtrace, adctrace_ch_map[trace->channel()], rois_save.at(i1).first,
                                        rois_save.at(i1).second + 1, flag_shorted);
                 map_ch_flag_rois[trace->channel()].push_back(temp_flag);
 
-                for (int time_tick = rois_save.at(i1).first;
-                     time_tick != rois_save.at(i1).second + 1; time_tick++)
-                {
+                for (int time_tick = rois_save.at(i1).first; time_tick != rois_save.at(i1).second + 1; time_tick++) {
                     // temporary hack to reset the data ...
                     if (newtrace->charge().at(time_tick - trace->tbin()) < 0)
                         newtrace->charge().at(time_tick - trace->tbin()) = 0;
@@ -420,58 +376,42 @@ bool L1SPFilter::operator()(const input_pointer &in, output_pointer &out)
 
             flag_shorted = false;
             int prev_time_tick = -2000;
-            for (size_t i1 = 0; i1 != rois_save.size(); i1++)
-            {
-                if (rois_save.at(i1).first - prev_time_tick > 20)
-                    flag_shorted = false;
+            for (size_t i1 = 0; i1 != rois_save.size(); i1++) {
+                if (rois_save.at(i1).first - prev_time_tick > 20) flag_shorted = false;
 
-                if (map_ch_flag_rois[trace->channel()].at(i1) == 1)
-                {
+                if (map_ch_flag_rois[trace->channel()].at(i1) == 1) {
                     flag_shorted = true;
                 }
-                else if (map_ch_flag_rois[trace->channel()].at(i1) == 2)
-                {
-                    if (flag_shorted)
-                    {
-                        L1_fit(newtrace, adctrace_ch_map[trace->channel()],
-                               rois_save.at(i1).first, rois_save.at(i1).second + 1,
-                               flag_shorted);
+                else if (map_ch_flag_rois[trace->channel()].at(i1) == 2) {
+                    if (flag_shorted) {
+                        L1_fit(newtrace, adctrace_ch_map[trace->channel()], rois_save.at(i1).first,
+                               rois_save.at(i1).second + 1, flag_shorted);
                         map_ch_flag_rois[trace->channel()].at(i1) = 0;
                     }
                 }
-                else if (map_ch_flag_rois[trace->channel()].at(i1) == 0)
-                {
+                else if (map_ch_flag_rois[trace->channel()].at(i1) == 0) {
                     flag_shorted = false;
                 }
                 prev_time_tick = rois_save.at(i1).second;
             }
 
-            if (rois_save.size() > 0)
-            {
+            if (rois_save.size() > 0) {
                 prev_time_tick = rois_save.back().second + 2000;
 
-                for (size_t i1 = 0; i1 != rois_save.size(); i1++)
-                {
-                    if (prev_time_tick - rois_save.at(rois_save.size() - 1 - i1).second >
-                        20)
-                        flag_shorted = false;
+                for (size_t i1 = 0; i1 != rois_save.size(); i1++) {
+                    if (prev_time_tick - rois_save.at(rois_save.size() - 1 - i1).second > 20) flag_shorted = false;
 
-                    if (map_ch_flag_rois[trace->channel()].at(i1) == 1)
-                    {
+                    if (map_ch_flag_rois[trace->channel()].at(i1) == 1) {
                         flag_shorted = true;
                     }
-                    else if (map_ch_flag_rois[trace->channel()].at(i1) == 2)
-                    {
-                        if (flag_shorted)
-                        {
-                            L1_fit(newtrace, adctrace_ch_map[trace->channel()],
-                                   rois_save.at(i1).first, rois_save.at(i1).second + 1,
-                                   flag_shorted);
+                    else if (map_ch_flag_rois[trace->channel()].at(i1) == 2) {
+                        if (flag_shorted) {
+                            L1_fit(newtrace, adctrace_ch_map[trace->channel()], rois_save.at(i1).first,
+                                   rois_save.at(i1).second + 1, flag_shorted);
                             map_ch_flag_rois[trace->channel()].at(i1) = 0;
                         }
                     }
-                    else if (map_ch_flag_rois[trace->channel()].at(i1) == 0)
-                    {
+                    else if (map_ch_flag_rois[trace->channel()].at(i1) == 0) {
                         flag_shorted = false;
                     }
                     prev_time_tick = rois_save.at(i1).first;
@@ -483,62 +423,43 @@ bool L1SPFilter::operator()(const input_pointer &in, output_pointer &out)
         out_traces.push_back(newtrace);
     }
 
-    for (size_t i2 = 0; i2 != out_traces.size(); i2++)
-    {
-        auto new_trace = std::make_shared<SimpleTrace>(out_traces.at(i2)->channel(),
-                                                       out_traces.at(i2)->tbin(),
+    for (size_t i2 = 0; i2 != out_traces.size(); i2++) {
+        auto new_trace = std::make_shared<SimpleTrace>(out_traces.at(i2)->channel(), out_traces.at(i2)->tbin(),
                                                        out_traces.at(i2)->charge());
         int ch = out_traces.at(i2)->channel();
-        if (map_ch_rois.find(ch) != map_ch_rois.end())
-        {
+        if (map_ch_rois.find(ch) != map_ch_rois.end()) {
             std::vector<std::pair<int, int>> &rois_save = map_ch_rois[ch];
             std::vector<std::pair<int, int>> next_rois_save;
-            if (map_ch_rois.find(ch + 1) != map_ch_rois.end())
-                next_rois_save = map_ch_rois[ch + 1];
+            if (map_ch_rois.find(ch + 1) != map_ch_rois.end()) next_rois_save = map_ch_rois[ch + 1];
             std::vector<std::pair<int, int>> prev_rois_save;
-            if (map_ch_rois.find(ch - 1) != map_ch_rois.end())
-                prev_rois_save = map_ch_rois[ch - 1];
+            if (map_ch_rois.find(ch - 1) != map_ch_rois.end()) prev_rois_save = map_ch_rois[ch - 1];
 
-            for (size_t i1 = 0; i1 != rois_save.size(); i1++)
-            {
-                if (map_ch_flag_rois[ch].at(i1) == 2)
-                {
+            for (size_t i1 = 0; i1 != rois_save.size(); i1++) {
+                if (map_ch_flag_rois[ch].at(i1) == 2) {
                     bool flag_shorted = false;
                     // need to check now ...
-                    for (size_t i3 = 0; i3 != next_rois_save.size(); i3++)
-                    {
-                        if (map_ch_flag_rois[ch + 1].at(i3) == 1)
-                        {
-                            if (rois_save.at(i1).first - 3 <=
-                                    next_rois_save.at(i3).second + 3 &&
-                                rois_save.at(i1).second + 3 >=
-                                    next_rois_save.at(i3).first - 3)
-                            {
+                    for (size_t i3 = 0; i3 != next_rois_save.size(); i3++) {
+                        if (map_ch_flag_rois[ch + 1].at(i3) == 1) {
+                            if (rois_save.at(i1).first - 3 <= next_rois_save.at(i3).second + 3 &&
+                                rois_save.at(i1).second + 3 >= next_rois_save.at(i3).first - 3) {
                                 flag_shorted = true;
                                 break;
                             }
                         }
                     }
                     if (!flag_shorted)
-                        for (size_t i3 = 0; i3 != prev_rois_save.size(); i3++)
-                        {
-                            if (map_ch_flag_rois[ch - 1].at(i3) == 1)
-                            {
-                                if (rois_save.at(i1).first - 3 <=
-                                        prev_rois_save.at(i3).second + 3 &&
-                                    rois_save.at(i1).second + 3 >=
-                                        prev_rois_save.at(i3).first - 3)
-                                {
+                        for (size_t i3 = 0; i3 != prev_rois_save.size(); i3++) {
+                            if (map_ch_flag_rois[ch - 1].at(i3) == 1) {
+                                if (rois_save.at(i1).first - 3 <= prev_rois_save.at(i3).second + 3 &&
+                                    rois_save.at(i1).second + 3 >= prev_rois_save.at(i3).first - 3) {
                                     flag_shorted = true;
                                     break;
                                 }
                             }
                         }
-                    if (flag_shorted)
-                    {
-                        for (int time_tick = rois_save.at(i1).first;
-                             time_tick != rois_save.at(i1).second + 1; time_tick++)
-                        {
+                    if (flag_shorted) {
+                        for (int time_tick = rois_save.at(i1).first; time_tick != rois_save.at(i1).second + 1;
+                             time_tick++) {
                             new_trace->charge().at(time_tick - out_traces.at(i2)->tbin()) = 0;
                         }
                     }
@@ -548,9 +469,8 @@ bool L1SPFilter::operator()(const input_pointer &in, output_pointer &out)
         out_traces.at(i2) = new_trace;
     }
 
-    std::cerr << "L1SPFilter: frame: " << in->ident() << " " << adctag << "["
-              << adctraces.size() << "] + " << sigtag << "[" << sigtraces.size()
-              << "] --> " << outtag << "[" << out_traces.size() << "]\n";
+    std::cerr << "L1SPFilter: frame: " << in->ident() << " " << adctag << "[" << adctraces.size() << "] + " << sigtag
+              << "[" << sigtraces.size() << "] --> " << outtag << "[" << out_traces.size() << "]\n";
 
     // Finally, we save the traces to an output frame with tags.
 
@@ -565,20 +485,16 @@ bool L1SPFilter::operator()(const input_pointer &in, output_pointer &out)
 }
 
 int L1SPFilter::L1_fit(std::shared_ptr<WireCell::SimpleTrace> &newtrace,
-                       std::shared_ptr<const WireCell::ITrace> &adctrace,
-                       int start_tick, int end_tick, bool flag_shorted)
+                       std::shared_ptr<const WireCell::ITrace> &adctrace, int start_tick, int end_tick,
+                       bool flag_shorted)
 {
-    double overall_time_offset =
-        get(m_cfg, "overall_time_offset", overall_time_offset) * units::us;
-    double collect_time_offset =
-        get(m_cfg, "collect_time_offset", collect_time_offset) * units::us;
+    double overall_time_offset = get(m_cfg, "overall_time_offset", overall_time_offset) * units::us;
+    double collect_time_offset = get(m_cfg, "collect_time_offset", collect_time_offset) * units::us;
     double adc_l1_threshold = get(m_cfg, "adc_l1_threshold", adc_l1_threshold);
     double adc_sum_threshold = get(m_cfg, "adc_sum_threshold", adc_sum_threshold);
     double adc_sum_rescaling = get(m_cfg, "adc_sum_rescaling", adc_sum_rescaling);
-    double adc_sum_rescaling_limit =
-        get(m_cfg, "adc_sum_rescaling_limit", adc_sum_rescaling_limit);
-    double adc_ratio_threshold =
-        get(m_cfg, "adc_ratio_threshold", adc_ratio_threshold);
+    double adc_sum_rescaling_limit = get(m_cfg, "adc_sum_rescaling_limit", adc_sum_rescaling_limit);
+    double adc_ratio_threshold = get(m_cfg, "adc_ratio_threshold", adc_ratio_threshold);
 
     double l1_seg_length = get(m_cfg, "l1_seg_length", l1_seg_length);
     double l1_scaling_factor = get(m_cfg, "l1_scaling_factor", l1_scaling_factor);
@@ -609,18 +525,14 @@ int L1SPFilter::L1_fit(std::shared_ptr<WireCell::SimpleTrace> &newtrace,
     double temp2_sum = 0;
     double max_val = -1;
     double min_val = 1;
-    for (int i = 0; i != nbin_fit; i++)
-    {
+    for (int i = 0; i != nbin_fit; i++) {
         init_W(i) = adctrace->charge().at(i + start_tick - newtrace->tbin());
         init_beta(i) = newtrace->charge().at(i + start_tick - newtrace->tbin());
 
-        if (max_val < init_W(i))
-            max_val = init_W(i);
-        if (min_val > init_W(i))
-            min_val = init_W(i);
+        if (max_val < init_W(i)) max_val = init_W(i);
+        if (min_val > init_W(i)) min_val = init_W(i);
 
-        if (fabs(init_W(i)) > adc_l1_threshold)
-        {
+        if (fabs(init_W(i)) > adc_l1_threshold) {
             temp_sum += init_W(i);
             temp1_sum += fabs(init_W(i));
             temp2_sum += fabs(init_beta(i));
@@ -629,20 +541,14 @@ int L1SPFilter::L1_fit(std::shared_ptr<WireCell::SimpleTrace> &newtrace,
 
     int flag_l1 = 0;  // do nothing
     // 1 do L1
-    if (temp_sum / (temp1_sum * adc_sum_rescaling * 1.0 / nbin_fit) >
-            adc_ratio_threshold &&
-        temp1_sum > adc_sum_threshold)
-    {
+    if (temp_sum / (temp1_sum * adc_sum_rescaling * 1.0 / nbin_fit) > adc_ratio_threshold &&
+        temp1_sum > adc_sum_threshold) {
         flag_l1 = 1;  // do L1 ...
     }
-    else if (temp1_sum * adc_sum_rescaling * 1.0 / nbin_fit <
-             adc_sum_rescaling_limit)
-    {
+    else if (temp1_sum * adc_sum_rescaling * 1.0 / nbin_fit < adc_sum_rescaling_limit) {
         flag_l1 = 2;  // remove signal ...
     }
-    else if (temp2_sum > 30 * nbin_fit && temp1_sum < 2.0 * nbin_fit &&
-             max_val - min_val < 22)
-    {
+    else if (temp2_sum > 30 * nbin_fit && temp1_sum < 2.0 * nbin_fit && max_val - min_val < 22) {
         flag_l1 = 2;
     }
 
@@ -657,48 +563,39 @@ int L1SPFilter::L1_fit(std::shared_ptr<WireCell::SimpleTrace> &newtrace,
     // adc_ratio_threshold << " " << temp1_sum*adc_sum_rescaling*1.0/nbin_fit << "
     // " << flag_l1 << std::endl;
 
-    if (flag_l1 == 1)
-    {
+    if (flag_l1 == 1) {
         // do L1 fit ...
         int n_section = std::round(nbin_fit / l1_seg_length * 1.0);
-        if (n_section == 0)
-            n_section = 1;
+        if (n_section == 0) n_section = 1;
         std::vector<int> boundaries;
-        for (int i = 0; i != n_section; i++)
-        {
+        for (int i = 0; i != n_section; i++) {
             boundaries.push_back(int(i * nbin_fit / n_section));
         }
         boundaries.push_back(nbin_fit);
 
-        for (int i = 0; i != n_section; i++)
-        {
+        for (int i = 0; i != n_section; i++) {
             int temp_nbin_fit = boundaries.at(i + 1) - boundaries.at(i);
             VectorXd W = VectorXd::Zero(temp_nbin_fit);
-            for (int j = 0; j != temp_nbin_fit; j++)
-            {
+            for (int j = 0; j != temp_nbin_fit; j++) {
                 W(j) = init_W(boundaries.at(i) + j);
             }
 
             // for matrix G
             MatrixXd G = MatrixXd::Zero(temp_nbin_fit, temp_nbin_fit * 2);
 
-            for (int i = 0; i != temp_nbin_fit; i++)
-            {
+            for (int i = 0; i != temp_nbin_fit; i++) {
                 // X
                 double t1 = i / 2. * units::us;  // us, measured time
-                for (int j = 0; j != temp_nbin_fit; j++)
-                {
+                for (int j = 0; j != temp_nbin_fit; j++) {
                     // Y ...
                     double t2 = j / 2. * units::us;  // us, real signal time
                     double delta_t = t1 - t2;
                     if (delta_t > -15 * units::us - overall_time_offset &&
-                        delta_t < 10 * units::us - overall_time_offset)
-                    {
-                        G(i, j) =
-                            (*lin_W)(delta_t + overall_time_offset + collect_time_offset) *
-                            l1_scaling_factor * l1_resp_scale;
-                        G(i, temp_nbin_fit + j) = (*lin_V)(delta_t + overall_time_offset) *
-                                                  l1_scaling_factor * l1_resp_scale;
+                        delta_t < 10 * units::us - overall_time_offset) {
+                        G(i, j) = (*lin_W)(delta_t + overall_time_offset + collect_time_offset) * l1_scaling_factor *
+                                  l1_resp_scale;
+                        G(i, temp_nbin_fit + j) =
+                            (*lin_V)(delta_t + overall_time_offset) * l1_scaling_factor * l1_resp_scale;
                     }
                 }
             }
@@ -708,8 +605,7 @@ int L1SPFilter::L1_fit(std::shared_ptr<WireCell::SimpleTrace> &newtrace,
             m2.SetData(G, W);
             m2.Fit();
             VectorXd beta = m2.Getbeta();
-            for (int j = 0; j != temp_nbin_fit; j++)
-            {
+            for (int j = 0; j != temp_nbin_fit; j++) {
                 final_beta(boundaries.at(i) + j) = beta(j);
                 final_beta(nbin_fit + boundaries.at(i) + j) = beta(temp_nbin_fit + j);
             }
@@ -717,46 +613,34 @@ int L1SPFilter::L1_fit(std::shared_ptr<WireCell::SimpleTrace> &newtrace,
 
         double sum1 = 0;
         double sum2 = 0;
-        for (int i = 0; i != nbin_fit; i++)
-        {
+        for (int i = 0; i != nbin_fit; i++) {
             sum1 += final_beta(i);
             sum2 += final_beta(nbin_fit + i);
         }
 
-        if (sum1 > adc_l1_threshold)
-        {
+        if (sum1 > adc_l1_threshold) {
             Waveform::realseq_t l1_signal(nbin_fit, 0);
             Waveform::realseq_t l2_signal(nbin_fit, 0);
-            for (int j = 0; j != nbin_fit; j++)
-            {
-                l1_signal.at(j) = final_beta(j) * l1_col_scale +
-                                  final_beta(nbin_fit + j) * l1_ind_scale;
+            for (int j = 0; j != nbin_fit; j++) {
+                l1_signal.at(j) = final_beta(j) * l1_col_scale + final_beta(nbin_fit + j) * l1_ind_scale;
             }
             int mid_bin = (smearing_vec.size() - 1) / 2;
             // std::cout << smearing_vec.size() << " " << mid_bin << std::endl;
-            for (int j = 0; j != nbin_fit; j++)
-            {
+            for (int j = 0; j != nbin_fit; j++) {
                 double content = l1_signal.at(j);
-                if (content > 0)
-                {
-                    for (size_t k = 0; k != smearing_vec.size(); k++)
-                    {
+                if (content > 0) {
+                    for (size_t k = 0; k != smearing_vec.size(); k++) {
                         int bin = j + k - mid_bin;
-                        if (bin >= 0 && bin < nbin_fit)
-                            l2_signal.at(bin) += content * smearing_vec.at(k);
+                        if (bin >= 0 && bin < nbin_fit) l2_signal.at(bin) += content * smearing_vec.at(k);
                     }
                 }
             }
 
-            for (int j = 0; j != nbin_fit; j++)
-            {
-                if (l2_signal.at(j) <
-                    l1_decon_limit / l1_scaling_factor)
-                {  // 50 electrons
+            for (int j = 0; j != nbin_fit; j++) {
+                if (l2_signal.at(j) < l1_decon_limit / l1_scaling_factor) {  // 50 electrons
                     l1_signal.at(j) = 0;
                 }
-                else
-                {
+                else {
                     l1_signal.at(j) = l2_signal.at(j) * l1_scaling_factor;
                 }
             }
@@ -765,57 +649,43 @@ int L1SPFilter::L1_fit(std::shared_ptr<WireCell::SimpleTrace> &newtrace,
                 // go through the new data and clean the small peaks ...
                 std::vector<int> nonzero_bins;
                 std::vector<std::pair<int, int>> ROIs;
-                for (int j = 0; j != nbin_fit; j++)
-                {
-                    if (l1_signal.at(j) > 0)
-                        nonzero_bins.push_back(j);
+                for (int j = 0; j != nbin_fit; j++) {
+                    if (l1_signal.at(j) > 0) nonzero_bins.push_back(j);
                 }
 
                 bool flag_start = false;
                 int start_bin = -1, end_bin = -1;
-                for (size_t j = 0; j != nonzero_bins.size(); j++)
-                {
-                    if (!flag_start)
-                    {
+                for (size_t j = 0; j != nonzero_bins.size(); j++) {
+                    if (!flag_start) {
                         start_bin = nonzero_bins.at(j);
                         end_bin = nonzero_bins.at(j);
                         flag_start = true;
                     }
-                    else
-                    {
-                        if (nonzero_bins.at(j) - end_bin == 1)
-                        {
+                    else {
+                        if (nonzero_bins.at(j) - end_bin == 1) {
                             end_bin = nonzero_bins.at(j);
                         }
-                        else
-                        {
+                        else {
                             ROIs.push_back(std::make_pair(start_bin, end_bin));
                             start_bin = nonzero_bins.at(j);
                             end_bin = nonzero_bins.at(j);
                         }
                     }
                 }
-                if (start_bin >= 0)
-                    ROIs.push_back(std::make_pair(start_bin, end_bin));
+                if (start_bin >= 0) ROIs.push_back(std::make_pair(start_bin, end_bin));
 
-                for (size_t j = 0; j != ROIs.size(); j++)
-                {
+                for (size_t j = 0; j != ROIs.size(); j++) {
                     double max_val = -1;
                     double mean_val1 = 0;
                     double mean_val2 = 0;
-                    for (int k = ROIs.at(j).first; k <= ROIs.at(j).second; k++)
-                    {
-                        if (l1_signal.at(k) > max_val)
-                            max_val = l1_signal.at(k);
+                    for (int k = ROIs.at(j).first; k <= ROIs.at(j).second; k++) {
+                        if (l1_signal.at(k) > max_val) max_val = l1_signal.at(k);
                         mean_val1 += l1_signal.at(k);
                         mean_val2++;
                     }
-                    if (mean_val2 != 0)
-                        mean_val1 /= mean_val2;
-                    if (max_val < peak_threshold && mean_val1 < mean_threshold)
-                    {
-                        for (int k = ROIs.at(j).first; k <= ROIs.at(j).second; k++)
-                        {
+                    if (mean_val2 != 0) mean_val1 /= mean_val2;
+                    if (max_val < peak_threshold && mean_val1 < mean_threshold) {
+                        for (int k = ROIs.at(j).first; k <= ROIs.at(j).second; k++) {
                             l1_signal.at(k) = 0;
                         }
                     }
@@ -832,19 +702,14 @@ int L1SPFilter::L1_fit(std::shared_ptr<WireCell::SimpleTrace> &newtrace,
                 // finish cleaning ...
             }
 
-            for (int time_tick = start_tick; time_tick != end_tick; time_tick++)
-            {
-                newtrace->charge().at(time_tick - newtrace->tbin()) =
-                    l1_signal.at(time_tick - start_tick);
+            for (int time_tick = start_tick; time_tick != end_tick; time_tick++) {
+                newtrace->charge().at(time_tick - newtrace->tbin()) = l1_signal.at(time_tick - start_tick);
             }
         }
     }
-    else if (flag_l1 == 2)
-    {
-        if (flag_shorted)
-        {
-            for (int time_tick = start_tick; time_tick != end_tick; time_tick++)
-            {
+    else if (flag_l1 == 2) {
+        if (flag_shorted) {
+            for (int time_tick = start_tick; time_tick != end_tick; time_tick++) {
                 // temporary hack to reset the data ...
                 newtrace->charge().at(time_tick - newtrace->tbin()) = 0;
             }

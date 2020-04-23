@@ -4,8 +4,8 @@
 
 #include <cmath>
 
-WIRECELL_FACTORY(OmniChannelNoiseDB, WireCell::SigProc::OmniChannelNoiseDB,
-                 WireCell::IChannelNoiseDatabase, WireCell::IConfigurable)
+WIRECELL_FACTORY(OmniChannelNoiseDB, WireCell::SigProc::OmniChannelNoiseDB, WireCell::IChannelNoiseDatabase,
+                 WireCell::IConfigurable)
 
 using namespace WireCell;
 using namespace WireCell::SigProc;
@@ -88,25 +88,21 @@ WireCell::Configuration OmniChannelNoiseDB::default_configuration() const
   // all channels in a wire plane
   channels: { wpid: wc.WirePlaneId(wc.kWlayer) },
 */
-std::vector<int>
-OmniChannelNoiseDB::parse_channels(const Json::Value &jchannels)
+std::vector<int> OmniChannelNoiseDB::parse_channels(const Json::Value &jchannels)
 {
     std::vector<int> ret;
 
     // single channel
-    if (jchannels.isInt())
-    {
+    if (jchannels.isInt()) {
         ret.push_back(jchannels.asInt());
         return ret;
     }
 
     // array of explicit channels
-    if (jchannels.isArray())
-    {
+    if (jchannels.isArray()) {
         const int nch = jchannels.size();
         ret.resize(nch);
-        for (int ind = 0; ind < nch; ++ind)
-        {
+        for (int ind = 0; ind < nch; ++ind) {
             ret[ind] = jchannels[ind].asInt();
         }
         return ret;
@@ -115,27 +111,22 @@ OmniChannelNoiseDB::parse_channels(const Json::Value &jchannels)
     // else, assume an object
 
     // range
-    if (jchannels.isMember("first") && jchannels.isMember("last"))
-    {
+    if (jchannels.isMember("first") && jchannels.isMember("last")) {
         const int chf = jchannels["first"].asInt();
         const int chl = jchannels["last"].asInt();
         const int nch = chl - chf + 1;
         ret.resize(nch);
-        for (int ind = 0; ind < nch; ++ind)
-        {
+        for (int ind = 0; ind < nch; ++ind) {
             ret[ind] = chf + ind;
         }
         return ret;
     }
 
     // wire plane id
-    if (jchannels.isMember("wpid"))
-    {
+    if (jchannels.isMember("wpid")) {
         WirePlaneId wpid(jchannels["wpid"].asInt());
-        for (auto ch : m_anode->channels())
-        {
-            if (m_anode->resolve(ch) == wpid)
-            {
+        for (auto ch : m_anode->channels()) {
+            if (m_anode->resolve(ch) == wpid) {
                 ret.push_back(ch);
             }
         }
@@ -145,8 +136,7 @@ OmniChannelNoiseDB::parse_channels(const Json::Value &jchannels)
     return ret;
 }
 
-OmniChannelNoiseDB::shared_filter_t
-OmniChannelNoiseDB::make_filter(std::complex<float> defval)
+OmniChannelNoiseDB::shared_filter_t OmniChannelNoiseDB::make_filter(std::complex<float> defval)
 {
     return std::make_shared<filter_t>(m_nsamples, defval);
 }
@@ -156,50 +146,42 @@ OmniChannelNoiseDB::shared_filter_t OmniChannelNoiseDB::default_filter()
     return def;
 }
 
-OmniChannelNoiseDB::shared_filter_t
-OmniChannelNoiseDB::parse_freqmasks(Json::Value jfm)
+OmniChannelNoiseDB::shared_filter_t OmniChannelNoiseDB::parse_freqmasks(Json::Value jfm)
 {
-    if (jfm.isNull())
-    {
+    if (jfm.isNull()) {
         return default_filter();
     }
 
     auto spectrum = make_filter(std::complex<float>(1, 0));
-    for (auto jone : jfm)
-    {
+    for (auto jone : jfm) {
         double value = jone["value"].asDouble();
         int lo = std::max(jone["lobin"].asInt(), 0);
         int hi = std::min(jone["hibin"].asInt(), m_nsamples - 1);
         // std::cerr << "freqmasks: set [" << lo << "," << hi << "] to " << value <<
         // std::endl;
-        for (int ind = lo; ind <= hi; ++ind)
-        {  // inclusive
+        for (int ind = lo; ind <= hi; ++ind) {  // inclusive
             spectrum->at(ind) = value;
         }
     }
     return spectrum;
 }
 
-OmniChannelNoiseDB::shared_filter_t
-OmniChannelNoiseDB::parse_rcrc(Json::Value jrcrc, int nrc)
+OmniChannelNoiseDB::shared_filter_t OmniChannelNoiseDB::parse_rcrc(Json::Value jrcrc, int nrc)
 {
-    if (jrcrc.isNull())
-    {
+    if (jrcrc.isNull()) {
         return default_filter();
     }
     const double rcrc_val = jrcrc.asDouble();
     const int key = int(round(1000 * rcrc_val / units::ms));
     auto it = m_rcrc_cache.find(key);
-    if (it != m_rcrc_cache.end())
-    {
+    if (it != m_rcrc_cache.end()) {
         return it->second;
     }
 
     Response::SimpleRC rcres(rcrc_val, m_tick);
     // auto signal = rcres.generate(WireCell::Binning(m_nsamples, 0,
     // m_nsamples*m_tick));
-    auto signal = rcres.generate(
-        WireCell::Waveform::Domain(0, m_nsamples * m_tick), m_nsamples);
+    auto signal = rcres.generate(WireCell::Waveform::Domain(0, m_nsamples * m_tick), m_nsamples);
 
     Waveform::compseq_t spectrum = Waveform::dft(signal);
     // get the square of it because there are two RC filters
@@ -208,8 +190,7 @@ OmniChannelNoiseDB::parse_rcrc(Json::Value jrcrc, int nrc)
 
     // std::cerr << "[wgu] parse_rcrc nrc= " << nrc << std::endl;
     nrc--;
-    while (nrc > 0)
-    {
+    while (nrc > 0) {
         // std::cerr << "[wgu] more nrc= " << nrc << std::endl;
         Waveform::scale(spectrum2, spectrum);
         nrc--;
@@ -226,8 +207,7 @@ OmniChannelNoiseDB::parse_rcrc(Json::Value jrcrc, int nrc)
 
 double OmniChannelNoiseDB::parse_gain(Json::Value jreconfig)
 {
-    if (jreconfig.empty())
-    {
+    if (jreconfig.empty()) {
         return 1.0;
     }
 
@@ -236,11 +216,9 @@ double OmniChannelNoiseDB::parse_gain(Json::Value jreconfig)
     return to_gain / from_gain;
 }
 
-OmniChannelNoiseDB::shared_filter_t
-OmniChannelNoiseDB::parse_reconfig(Json::Value jreconfig)
+OmniChannelNoiseDB::shared_filter_t OmniChannelNoiseDB::parse_reconfig(Json::Value jreconfig)
 {
-    if (jreconfig.empty())
-    {
+    if (jreconfig.empty()) {
         return default_filter();
     }
 
@@ -251,15 +229,13 @@ OmniChannelNoiseDB::parse_reconfig(Json::Value jreconfig)
 
     return get_reconfig(from_gain, from_shaping, to_gain, to_shaping);
 }
-OmniChannelNoiseDB::shared_filter_t
-OmniChannelNoiseDB::get_reconfig(double from_gain, double from_shaping,
-                                 double to_gain, double to_shaping)
+OmniChannelNoiseDB::shared_filter_t OmniChannelNoiseDB::get_reconfig(double from_gain, double from_shaping,
+                                                                     double to_gain, double to_shaping)
 {
     // kind of evil.
     int key = int(round(10.0 * from_gain / (units::mV / units::fC))) << 24 |
               int(round(10.0 * from_shaping / units::us)) << 16 |
-              int(round(10.0 * to_gain / (units::mV / units::fC))) << 8 |
-              int(round(10.0 * to_shaping / units::us));
+              int(round(10.0 * to_gain / (units::mV / units::fC))) << 8 | int(round(10.0 * to_shaping / units::us));
 
     // std::cerr << "KEY:" << key
     //           << " fg="<<from_gain/(units::mV/units::fC) << " mV/fC,"
@@ -270,8 +246,7 @@ OmniChannelNoiseDB::get_reconfig(double from_gain, double from_shaping,
     //           << std::endl;
 
     auto it = m_reconfig_cache.find(key);
-    if (it != m_reconfig_cache.end())
-    {
+    if (it != m_reconfig_cache.end()) {
         return it->second;
     }
 
@@ -280,10 +255,8 @@ OmniChannelNoiseDB::get_reconfig(double from_gain, double from_shaping,
     // auto to_sig   =   to_ce.generate(WireCell::Binning(m_nsamples, 0,
     // m_nsamples*m_tick)); auto from_sig =
     // from_ce.generate(WireCell::Binning(m_nsamples, 0, m_nsamples*m_tick));
-    auto to_sig = to_ce.generate(
-        WireCell::Waveform::Domain(0, m_nsamples * m_tick), m_nsamples);
-    auto from_sig = from_ce.generate(
-        WireCell::Waveform::Domain(0, m_nsamples * m_tick), m_nsamples);
+    auto to_sig = to_ce.generate(WireCell::Waveform::Domain(0, m_nsamples * m_tick), m_nsamples);
+    auto from_sig = from_ce.generate(WireCell::Waveform::Domain(0, m_nsamples * m_tick), m_nsamples);
 
     auto to_filt = Waveform::dft(to_sig);
     auto from_filt = Waveform::dft(from_sig);
@@ -307,22 +280,17 @@ OmniChannelNoiseDB::get_reconfig(double from_gain, double from_shaping,
     m_reconfig_cache[key] = filt;
     return filt;
 }
-void OmniChannelNoiseDB::set_misconfigured(const std::vector<int> &channels,
-                                           double from_gain,
-                                           double from_shaping, double to_gain,
-                                           double to_shaping, bool reset)
+void OmniChannelNoiseDB::set_misconfigured(const std::vector<int> &channels, double from_gain, double from_shaping,
+                                           double to_gain, double to_shaping, bool reset)
 {
-    if (reset)
-    {
+    if (reset) {
         auto def = default_filter();
-        for (auto &it : m_db)
-        {
+        for (auto &it : m_db) {
             it.second.config = def;
         }
     }
     auto val = get_reconfig(from_gain, from_shaping, to_gain, to_shaping);
-    for (int ch : channels)
-    {
+    for (int ch : channels) {
         // m_db.at(ch).config = val;
         // dbget(ch).config = val;
         get_ci(ch).config = val;
@@ -330,15 +298,12 @@ void OmniChannelNoiseDB::set_misconfigured(const std::vector<int> &channels,
     }
 }
 
-OmniChannelNoiseDB::shared_filter_t
-OmniChannelNoiseDB::parse_response(Json::Value jfilt)
+OmniChannelNoiseDB::shared_filter_t OmniChannelNoiseDB::parse_response(Json::Value jfilt)
 {
-    if (jfilt.isMember("wpid"))
-    {
+    if (jfilt.isMember("wpid")) {
         WirePlaneId wpid(jfilt["wpid"].asInt());
         auto it = m_response_cache.find(wpid.ident());
-        if (it != m_response_cache.end())
-        {
+        if (it != m_response_cache.end()) {
             return it->second;
         }
         auto const &fr = m_fr->field_response();
@@ -347,12 +312,10 @@ OmniChannelNoiseDB::parse_response(Json::Value jfilt)
 
         // full length waveform
         std::vector<float> waveform(m_nsamples, 0.0);
-        for (auto const &path : pr.paths)
-        {
+        for (auto const &path : pr.paths) {
             auto const &current = path.current;
             const size_t nsamp = std::min(m_nsamples, (int) current.size());
-            for (size_t ind = 0; ind < nsamp; ++ind)
-            {
+            for (size_t ind = 0; ind < nsamp; ++ind) {
                 waveform[ind] += current[ind];
             }
         }
@@ -362,12 +325,10 @@ OmniChannelNoiseDB::parse_response(Json::Value jfilt)
         return ret;
     }
 
-    if (jfilt.isMember("waveform") && jfilt.isMember("waveformid"))
-    {
+    if (jfilt.isMember("waveform") && jfilt.isMember("waveformid")) {
         int id = jfilt["waveformid"].asInt();
         auto it = m_waveform_cache.find(id);
-        if (it != m_waveform_cache.end())
-        {
+        if (it != m_waveform_cache.end()) {
             return it->second;
         }
 
@@ -376,8 +337,7 @@ OmniChannelNoiseDB::parse_response(Json::Value jfilt)
 
         // Explicitly given waveform
         std::vector<float> waveform(m_nsamples, 0.0);
-        for (int ind = 0; ind < nsamp; ++ind)
-        {
+        for (int ind = 0; ind < nsamp; ++ind) {
             waveform[ind] = jwave[ind].asFloat();
         }
 
@@ -396,10 +356,8 @@ OmniChannelNoiseDB::parse_response(Json::Value jfilt)
 OmniChannelNoiseDB::ChannelInfo &OmniChannelNoiseDB::get_ci(int chid)
 {
     auto it = m_db.find(chid);
-    if (it == m_db.end())
-    {
-        THROW(KeyError() << errmsg{
-                  String::format("no db info for channel %d", chid)});
+    if (it == m_db.end()) {
+        THROW(KeyError() << errmsg{String::format("no db info for channel %d", chid)});
     }
     return it->second;
     // return m_db.at(chid);
@@ -418,23 +376,19 @@ void OmniChannelNoiseDB::update_channels(Json::Value cfg)
 {
     auto chans = parse_channels(cfg["channels"]);
 
-    if (cfg.isMember("nominal_baseline"))
-    {
+    if (cfg.isMember("nominal_baseline")) {
         double val = cfg["nominal_baseline"].asDouble();
         dump_cfg("baseline", chans, val);
-        for (int ch : chans)
-        {
+        for (int ch : chans) {
             // m_db.at(ch).nominal_baseline = val;
             // dbget(ch).nominal_baseline = val;
             get_ci(ch).nominal_baseline = val;
         }
     }
-    if (cfg.isMember("gain_correction"))
-    {
+    if (cfg.isMember("gain_correction")) {
         double val = cfg["gain_correction"].asDouble();
         dump_cfg("gain", chans, val);
-        for (int ch : chans)
-        {
+        for (int ch : chans) {
             // m_db.at(ch).gain_correction = val;
             // dbget(ch).gain_correction = val;
             get_ci(ch).gain_correction = val;
@@ -443,12 +397,10 @@ void OmniChannelNoiseDB::update_channels(Json::Value cfg)
     // fixme: why have two ways to set the same thing?
     {
         auto jfilt = cfg["reconfig"];
-        if (!jfilt.isNull())
-        {
+        if (!jfilt.isNull()) {
             auto val = parse_gain(jfilt);
             dump_cfg("gain", chans, val);
-            for (int ch : chans)
-            {
+            for (int ch : chans) {
                 // m_db.at(ch).gain_correction = val;
                 // dbget(ch).gain_correction = val;
                 get_ci(ch).gain_correction = val;
@@ -456,151 +408,124 @@ void OmniChannelNoiseDB::update_channels(Json::Value cfg)
         }
     }
 
-    if (cfg.isMember("response_offset"))
-    {
+    if (cfg.isMember("response_offset")) {
         double val = cfg["response_offset"].asDouble();
         dump_cfg("offset", chans, val);
-        for (int ch : chans)
-        {
+        for (int ch : chans) {
             // m_db.at(ch).response_offset = val;
             // dbget(ch).response_offset = val;
             get_ci(ch).response_offset = val;
         }
     }
-    if (cfg.isMember("min_rms_cut"))
-    {
+    if (cfg.isMember("min_rms_cut")) {
         double val = cfg["min_rms_cut"].asDouble();
         dump_cfg("minrms", chans, val);
-        for (int ch : chans)
-        {
+        for (int ch : chans) {
             // m_db.at(ch).min_rms_cut = val;
             // dbget(ch).min_rms_cut = val;
             get_ci(ch).min_rms_cut = val;
         }
     }
-    if (cfg.isMember("max_rms_cut"))
-    {
+    if (cfg.isMember("max_rms_cut")) {
         double val = cfg["max_rms_cut"].asDouble();
         dump_cfg("maxrms", chans, val);
-        for (int ch : chans)
-        {
+        for (int ch : chans) {
             // m_db.at(ch).max_rms_cut = val;
             // dbget(ch).max_rms_cut = val;
             get_ci(ch).max_rms_cut = val;
         }
     }
-    if (cfg.isMember("pad_window_front"))
-    {
+    if (cfg.isMember("pad_window_front")) {
         int val = cfg["pad_window_front"].asDouble();
         dump_cfg("padfront", chans, val);
-        for (int ch : chans)
-        {
+        for (int ch : chans) {
             // m_db.at(ch).pad_window_front = val;
             // dbget(ch).pad_window_front = val;
             get_ci(ch).pad_window_front = val;
         }
     }
-    if (cfg.isMember("pad_window_back"))
-    {
+    if (cfg.isMember("pad_window_back")) {
         int val = cfg["pad_window_back"].asDouble();
         dump_cfg("padback", chans, val);
-        for (int ch : chans)
-        {
+        for (int ch : chans) {
             // m_db.at(ch).pad_window_back = val;
             // dbget(ch).pad_window_back = val;
             get_ci(ch).pad_window_back = val;
         }
     }
 
-    if (cfg.isMember("decon_limit"))
-    {
+    if (cfg.isMember("decon_limit")) {
         float val = cfg["decon_limit"].asDouble();
         dump_cfg("deconlimit", chans, val);
-        for (int ch : chans)
-        {
+        for (int ch : chans) {
             // m_db.at(ch).decon_limit = val;
             // dbget(ch).decon_limit = val;
             get_ci(ch).decon_limit = val;
         }
     }
 
-    if (cfg.isMember("decon_lf_cutoff"))
-    {
+    if (cfg.isMember("decon_lf_cutoff")) {
         float val = cfg["decon_lf_cutoff"].asDouble();
         dump_cfg("deconlfcutoff", chans, val);
-        for (int ch : chans)
-        {
+        for (int ch : chans) {
             // m_db.at(ch).decon_limit = val;
             // dbget(ch).decon_limit = val;
             get_ci(ch).decon_lf_cutoff = val;
         }
     }
 
-    if (cfg.isMember("decon_limit1"))
-    {
+    if (cfg.isMember("decon_limit1")) {
         float val = cfg["decon_limit1"].asDouble();
         dump_cfg("deconlimit1", chans, val);
-        for (int ch : chans)
-        {
+        for (int ch : chans) {
             // m_db.at(ch).decon_limit1 = val;
             // dbget(ch).decon_limit1 = val;
             get_ci(ch).decon_limit1 = val;
         }
     }
-    if (cfg.isMember("adc_limit"))
-    {
+    if (cfg.isMember("adc_limit")) {
         float val = cfg["adc_limit"].asDouble();
         dump_cfg("adclimit", chans, val);
-        for (int ch : chans)
-        {
+        for (int ch : chans) {
             // m_db.at(ch).adc_limit = val;
             // dbget(ch).adc_limit = val;
             get_ci(ch).adc_limit = val;
         }
     }
-    if (cfg.isMember("protection_factor"))
-    {
+    if (cfg.isMember("protection_factor")) {
         float val = cfg["protection_factor"].asDouble();
         dump_cfg("protectionfactor", chans, val);
-        for (int ch : chans)
-        {
+        for (int ch : chans) {
             get_ci(ch).protection_factor = val;
         }
     }
-    if (cfg.isMember("min_adc_limit"))
-    {
+    if (cfg.isMember("min_adc_limit")) {
         float val = cfg["min_adc_limit"].asDouble();
         dump_cfg("minadclimit", chans, val);
-        for (int ch : chans)
-        {
+        for (int ch : chans) {
             // m_db.at(ch).adc_limit = val;
             // dbget(ch).adc_limit = val;
             get_ci(ch).min_adc_limit = val;
         }
     }
-    if (cfg.isMember("roi_min_max_ratio"))
-    {
+    if (cfg.isMember("roi_min_max_ratio")) {
         float val = cfg["roi_min_max_ratio"].asDouble();
         dump_cfg("roiminmaxratio", chans, val);
-        for (int ch : chans)
-        {
+        for (int ch : chans) {
             get_ci(ch).roi_min_max_ratio = val;
         }
     }
 
     {
         auto jfilt = cfg["rcrc"];
-        if (!jfilt.isNull())
-        {
-            if (cfg.isMember("rc_layers"))
-            {
+        if (!jfilt.isNull()) {
+            if (cfg.isMember("rc_layers")) {
                 m_rc_layers = cfg["rc_layers"].asInt();
             }
             // std::cerr << "rc_layers = " << m_rc_layers << std::endl;
             auto val = parse_rcrc(jfilt, m_rc_layers);
             dump_cfg("rcrc", chans, Waveform::sum(*val));
-            for (int ch : chans)
-            {
+            for (int ch : chans) {
                 // m_db.at(ch).rcrc = val;
                 // dbget(ch).rcrc = val;
                 get_ci(ch).rcrc = val;
@@ -609,31 +534,26 @@ void OmniChannelNoiseDB::update_channels(Json::Value cfg)
     }
     {
         auto jfilt = cfg["reconfig"];
-        if (!jfilt.isNull())
-        {
+        if (!jfilt.isNull()) {
             auto val = parse_reconfig(jfilt);
             dump_cfg("reconfig", chans, Waveform::sum(*val));
-            for (int ch : chans)
-            {
+            for (int ch : chans) {
                 // m_db.at(ch).config = val;
                 // dbget(ch).config = val;
                 get_ci(ch).config = val;
                 // fill in misconfgured channels
                 // std::cout <<" miscfg_channels fill: "<< ch <<"\n"
-                if (!jfilt.empty())
-                    m_miscfg_channels.push_back(ch);
+                if (!jfilt.empty()) m_miscfg_channels.push_back(ch);
             }
         }
     }
     {
         auto jfilt = cfg["freqmasks"];
-        if (!jfilt.isNull())
-        {
+        if (!jfilt.isNull()) {
             auto val = parse_freqmasks(jfilt);
             dump_cfg("freqmasks", chans, Waveform::sum(*val));
             // std::cerr << jfilt << std::endl;
-            for (int ch : chans)
-            {
+            for (int ch : chans) {
                 // m_db.at(ch).noise = val;
                 // dbget(ch).noise = val;
                 get_ci(ch).noise = val;
@@ -642,12 +562,10 @@ void OmniChannelNoiseDB::update_channels(Json::Value cfg)
     }
     {
         auto jfilt = cfg["response"];
-        if (!jfilt.isNull())
-        {
+        if (!jfilt.isNull()) {
             auto val = parse_response(jfilt);
             dump_cfg("response", chans, Waveform::sum(*val));
-            for (int ch : chans)
-            {
+            for (int ch : chans) {
                 // m_db.at(ch).response = val;
                 // dbget(ch).response = val;
                 get_ci(ch).response = val;
@@ -675,157 +593,100 @@ void OmniChannelNoiseDB::configure(const WireCell::Configuration &cfg)
     //    delete it->second;
     // }
     // m_db.clear();
-    for (auto ch : m_anode->channels())
-    {
+    for (auto ch : m_anode->channels()) {
         // m_db.insert(std::make_pair(ch, new ChannelInfo));
         m_db[ch] = ChannelInfo();
     }
 
     m_channel_groups.clear();
     auto jgroups = cfg["groups"];
-    for (auto jgroup : jgroups)
-    {
+    for (auto jgroup : jgroups) {
         std::vector<int> channel_group;
-        for (auto jch : jgroup)
-        {
+        for (auto jch : jgroup) {
             channel_group.push_back(jch.asInt());
         }
         m_channel_groups.push_back(channel_group);
     }
     m_bad_channels.clear();
-    for (auto jch : cfg["bad"])
-    {
+    for (auto jch : cfg["bad"]) {
         m_bad_channels.push_back(jch.asInt());
     }
     std::sort(m_bad_channels.begin(), m_bad_channels.end());
-    if (m_bad_channels.size())
-    {
-        log->debug("OmniChannelNoiseDB: setting {}:[{},{}] bad channels",
-                   m_bad_channels.size(), m_bad_channels.front(),
+    if (m_bad_channels.size()) {
+        log->debug("OmniChannelNoiseDB: setting {}:[{},{}] bad channels", m_bad_channels.size(), m_bad_channels.front(),
                    m_bad_channels.back());
     }
 
     m_miscfg_channels.clear();
-    for (auto jci : cfg["channel_info"])
-    {
+    for (auto jci : cfg["channel_info"]) {
         update_channels(jci);
     }
 }
 
 double OmniChannelNoiseDB::sample_time() const { return m_tick; }
 
-double OmniChannelNoiseDB::nominal_baseline(int channel) const
-{
-    return dbget(channel).nominal_baseline;
-}
+double OmniChannelNoiseDB::nominal_baseline(int channel) const { return dbget(channel).nominal_baseline; }
 
-double OmniChannelNoiseDB::gain_correction(int channel) const
-{
-    return dbget(channel).gain_correction;
-}
+double OmniChannelNoiseDB::gain_correction(int channel) const { return dbget(channel).gain_correction; }
 
-double OmniChannelNoiseDB::response_offset(int channel) const
-{
-    return dbget(channel).response_offset;
-}
+double OmniChannelNoiseDB::response_offset(int channel) const { return dbget(channel).response_offset; }
 
-double OmniChannelNoiseDB::min_rms_cut(int channel) const
-{
-    return dbget(channel).min_rms_cut;
-}
+double OmniChannelNoiseDB::min_rms_cut(int channel) const { return dbget(channel).min_rms_cut; }
 
-double OmniChannelNoiseDB::max_rms_cut(int channel) const
-{
-    return dbget(channel).max_rms_cut;
-}
+double OmniChannelNoiseDB::max_rms_cut(int channel) const { return dbget(channel).max_rms_cut; }
 
-int OmniChannelNoiseDB::pad_window_front(int channel) const
-{
-    return dbget(channel).pad_window_front;
-}
+int OmniChannelNoiseDB::pad_window_front(int channel) const { return dbget(channel).pad_window_front; }
 
-int OmniChannelNoiseDB::pad_window_back(int channel) const
-{
-    return dbget(channel).pad_window_back;
-}
+int OmniChannelNoiseDB::pad_window_back(int channel) const { return dbget(channel).pad_window_back; }
 
-float OmniChannelNoiseDB::coherent_nf_decon_limit(int channel) const
-{
-    return dbget(channel).decon_limit;
-}
+float OmniChannelNoiseDB::coherent_nf_decon_limit(int channel) const { return dbget(channel).decon_limit; }
 
-float OmniChannelNoiseDB::coherent_nf_decon_lf_cutoff(int channel) const
-{
-    return dbget(channel).decon_lf_cutoff;
-}
+float OmniChannelNoiseDB::coherent_nf_decon_lf_cutoff(int channel) const { return dbget(channel).decon_lf_cutoff; }
 
-float OmniChannelNoiseDB::coherent_nf_decon_limit1(int channel) const
-{
-    return dbget(channel).decon_limit1;
-}
+float OmniChannelNoiseDB::coherent_nf_decon_limit1(int channel) const { return dbget(channel).decon_limit1; }
 
-float OmniChannelNoiseDB::coherent_nf_adc_limit(int channel) const
-{
-    return dbget(channel).adc_limit;
-}
+float OmniChannelNoiseDB::coherent_nf_adc_limit(int channel) const { return dbget(channel).adc_limit; }
 
-float OmniChannelNoiseDB::coherent_nf_protection_factor(int channel) const
-{
-    return dbget(channel).protection_factor;
-}
+float OmniChannelNoiseDB::coherent_nf_protection_factor(int channel) const { return dbget(channel).protection_factor; }
 
-float OmniChannelNoiseDB::coherent_nf_min_adc_limit(int channel) const
-{
-    return dbget(channel).min_adc_limit;
-}
+float OmniChannelNoiseDB::coherent_nf_min_adc_limit(int channel) const { return dbget(channel).min_adc_limit; }
 
-float OmniChannelNoiseDB::coherent_nf_roi_min_max_ratio(int channel) const
-{
-    return dbget(channel).roi_min_max_ratio;
-}
+float OmniChannelNoiseDB::coherent_nf_roi_min_max_ratio(int channel) const { return dbget(channel).roi_min_max_ratio; }
 
-const IChannelNoiseDatabase::filter_t &
-OmniChannelNoiseDB::rcrc(int channel) const
+const IChannelNoiseDatabase::filter_t &OmniChannelNoiseDB::rcrc(int channel) const
 {
     auto filt = dbget(channel).rcrc;
-    if (filt)
-    {
+    if (filt) {
         return *filt;
     }
     static filter_t dummy;
     return dummy;
 }
 
-const IChannelNoiseDatabase::filter_t &
-OmniChannelNoiseDB::config(int channel) const
+const IChannelNoiseDatabase::filter_t &OmniChannelNoiseDB::config(int channel) const
 {
     auto filt = dbget(channel).config;
-    if (filt)
-    {
+    if (filt) {
         return *filt;
     }
     static filter_t dummy;
     return dummy;
 }
 
-const IChannelNoiseDatabase::filter_t &
-OmniChannelNoiseDB::noise(int channel) const
+const IChannelNoiseDatabase::filter_t &OmniChannelNoiseDB::noise(int channel) const
 {
     auto filt = dbget(channel).noise;
-    if (filt)
-    {
+    if (filt) {
         return *filt;
     }
     static filter_t dummy;
     return dummy;
 }
 
-const IChannelNoiseDatabase::filter_t &
-OmniChannelNoiseDB::response(int channel) const
+const IChannelNoiseDatabase::filter_t &OmniChannelNoiseDB::response(int channel) const
 {
     auto filt = dbget(channel).response;
-    if (filt)
-    {
+    if (filt) {
         return *filt;
     }
     static filter_t dummy;

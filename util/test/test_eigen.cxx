@@ -31,8 +31,7 @@ using namespace Eigen;
 Eigen::ArrayXf vec2arr(const std::vector<float> &v)
 {
     Eigen::ArrayXf ret(v.size());
-    for (size_t ind = 0; ind < v.size(); ++ind)
-    {
+    for (size_t ind = 0; ind < v.size(); ++ind) {
         ret(ind) = v[ind];
     }
     return ret;
@@ -48,8 +47,7 @@ Eigen::ArrayXf filter_array(const Eigen::ArrayXf &arr)
     return ret;
 }
 
-Eigen::ArrayXf select_row(const Eigen::ArrayXXf &arr, int ind,
-                          WireCell::ExecMon &em)
+Eigen::ArrayXf select_row(const Eigen::ArrayXXf &arr, int ind, WireCell::ExecMon &em)
 {
     auto tmp = arr.row(ind);  // no copy
     em("after assignment to auto type");
@@ -71,9 +69,8 @@ typedef Eigen::ArrayXXcf array_xxc;
 typedef shared_dense<array_xxc> shared_array_xxc;
 
 template <typename Derived>
-Eigen::Block<const Derived> return_block(WireCell::ExecMon &em,
-                                         const_shared_dense<Derived> dense,
-                                         int i, int j, int p, int q)
+Eigen::Block<const Derived> return_block(WireCell::ExecMon &em, const_shared_dense<Derived> dense, int i, int j, int p,
+                                         int q)
 {
     // Eigen::Block<const Derived> b = dense->block(i,j,p,q);
     auto b = dense->block(i, j, p, q);
@@ -97,16 +94,14 @@ void do_fft(WireCell::ExecMon &em, const array_xxf &arr)
     Eigen::FFT<float> fft;
     em("fft: made fft object");
 
-    for (int irow = 0; irow < nrows; ++irow)
-    {
+    for (int irow = 0; irow < nrows; ++irow) {
         Eigen::VectorXcf fspec(ncols);  // frequency spectrum
         fft.fwd(fspec, in.row(irow));
         matc.row(irow) = fspec;
     }
     em("fft: first dimension");
 
-    for (int icol = 0; icol < ncols; ++icol)
-    {
+    for (int icol = 0; icol < ncols; ++icol) {
         Eigen::VectorXcf pspec(nrows);  // periodicity spectrum
         fft.fwd(pspec, matc.col(icol));
         matc.col(icol) = pspec;
@@ -150,10 +145,8 @@ void test_bigass(WireCell::ExecMon &em)
     auto part4 = select_row(bigass, 0, em);
     em("select row again");
     int nzero = 0;
-    for (int ind = 0; ind < part4.rows(); ++ind)
-    {
-        if (part4(ind) == 0.00001)
-        {
+    for (int ind = 0; ind < part4.rows(); ++ind) {
+        if (part4(ind) == 0.00001) {
             ++nzero;
         }
     }
@@ -198,32 +191,26 @@ int main()
     table.col(2) = ar3;
 
     ArrayXf tmp = filter_array(ar3);
-    cerr << "Tmp col:\n"
-         << tmp << ".\n";
+    cerr << "Tmp col:\n" << tmp << ".\n";
 
-    cerr << "Table:\n"
-         << table << ".\n";
+    cerr << "Table:\n" << table << ".\n";
 
     ArrayXf one_row = table.row(0);
-    cerr << "One row:\n"
-         << one_row << ".\n";
+    cerr << "One row:\n" << one_row << ".\n";
 
     ArrayXf one_col = table.col(0);
-    cerr << "One col:\n"
-         << one_col << ".\n";
+    cerr << "One col:\n" << one_col << ".\n";
 
     VectorXf v1 = ar1.matrix();
 
-    for (size_t ind = 0; ind < v.size(); ++ind)
-    {
+    for (size_t ind = 0; ind < v.size(); ++ind) {
         Assert(v[ind] == ar1(ind));
         Assert(v[ind] == ar2(ind));
         Assert(v[ind] == ar3(ind));
         Assert(v[ind] == v1(ind));
     }
 
-    cerr << ar1.size() << " " << ar1.sum() << " " << ar1.prod() << " "
-         << v1.norm() << " " << v1.squaredNorm() << endl;
+    cerr << ar1.size() << " " << ar1.sum() << " " << ar1.prod() << " " << v1.norm() << " " << v1.squaredNorm() << endl;
     int n = v1.size();
     float sigma = sqrt(v1.squaredNorm() / n - ar1.mean() * ar1.mean());
     cerr << ar1.mean() << " +/- " << sigma << endl;

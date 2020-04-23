@@ -4,10 +4,8 @@
 #include "WireCellIface/IFrame.h"
 #include "WireCellIface/ISplitNode.h"
 
-namespace WireCell
-{
-    class IFrameSplitter : public ISplitNode<IFrame, std::tuple<IFrame, IFrame>>
-    {
+namespace WireCell {
+    class IFrameSplitter : public ISplitNode<IFrame, std::tuple<IFrame, IFrame>> {
        public:
         typedef std::shared_ptr<IFrameSplitter> pointer;
         virtual ~IFrameSplitter();

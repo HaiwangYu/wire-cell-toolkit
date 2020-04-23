@@ -20,15 +20,13 @@
 
 #include <variant>
 
-namespace WireCell
-{
+namespace WireCell {
     /// The vertex property.
-    typedef std::variant<size_t, IChannel::pointer, IWire::pointer, IBlob::pointer,
-                         ISlice::pointer, IChannel::shared_vector>
+    typedef std::variant<size_t, IChannel::pointer, IWire::pointer, IBlob::pointer, ISlice::pointer,
+                         IChannel::shared_vector>
         cluster_ptr_t;
 
-    struct cluster_node_t
-    {
+    struct cluster_node_t {
         cluster_ptr_t ptr;
 
         cluster_node_t()
@@ -69,16 +67,12 @@ namespace WireCell
         char code() const
         {
             auto ind = ptr.index();
-            if (ind == std::variant_npos)
-            {
+            if (ind == std::variant_npos) {
                 return 0;
             }
             return "0cwbsm"[ind];
         }
-        bool operator==(const cluster_node_t &other) const
-        {
-            return ptr == other.ptr;
-        }
+        bool operator==(const cluster_node_t &other) const { return ptr == other.ptr; }
         cluster_node_t &operator=(const cluster_node_t &other)
         {
             ptr = other.ptr;
@@ -87,16 +81,13 @@ namespace WireCell
     };
 }  // namespace WireCell
 
-namespace std
-{
+namespace std {
     template <>
-    struct hash<WireCell::cluster_node_t>
-    {
+    struct hash<WireCell::cluster_node_t> {
         std::size_t operator()(const WireCell::cluster_node_t &n) const
         {
             size_t h = 0;
-            switch (n.ptr.index())
-            {
+            switch (n.ptr.index()) {
             case 0:
                 h = std::get<0>(n.ptr);
                 break;
@@ -121,19 +112,13 @@ namespace std
     };
 }  // namespace std
 
-namespace WireCell
-{
-    typedef boost::adjacency_list<boost::setS, boost::vecS, boost::undirectedS,
-                                  cluster_node_t>
-        cluster_graph_t;
-    typedef boost::graph_traits<cluster_graph_t>::vertex_descriptor
-        cluster_vertex_t;
+namespace WireCell {
+    typedef boost::adjacency_list<boost::setS, boost::vecS, boost::undirectedS, cluster_node_t> cluster_graph_t;
+    typedef boost::graph_traits<cluster_graph_t>::vertex_descriptor cluster_vertex_t;
     typedef boost::graph_traits<cluster_graph_t>::edge_descriptor cluster_edge_t;
-    typedef boost::graph_traits<cluster_graph_t>::vertex_iterator
-        cluster_vertex_iter_t;
+    typedef boost::graph_traits<cluster_graph_t>::vertex_iterator cluster_vertex_iter_t;
 
-    class ICluster : public IData<ICluster>
-    {
+    class ICluster : public IData<ICluster> {
        public:
         virtual ~ICluster();
 
@@ -150,11 +135,9 @@ namespace WireCell
     std::vector<Type> oftype(const cluster_indexed_graph_t &g)
     {
         std::vector<Type> ret;
-        for (const auto &v : boost::make_iterator_range(boost::vertices(g.graph())))
-        {
+        for (const auto &v : boost::make_iterator_range(boost::vertices(g.graph()))) {
             const auto &vp = g.graph()[v];
-            if (std::holds_alternative<Type>(vp.ptr))
-            {
+            if (std::holds_alternative<Type>(vp.ptr)) {
                 ret.push_back(std::get<Type>(vp.ptr));
             }
         }
@@ -162,14 +145,11 @@ namespace WireCell
     }
 
     template <typename Type>
-    std::vector<Type> neighbors_oftype(const cluster_indexed_graph_t &g,
-                                       const cluster_node_t &n)
+    std::vector<Type> neighbors_oftype(const cluster_indexed_graph_t &g, const cluster_node_t &n)
     {
         std::vector<Type> ret;
-        for (const auto &vp : g.neighbors(n))
-        {
-            if (std::holds_alternative<Type>(vp.ptr))
-            {
+        for (const auto &vp : g.neighbors(n)) {
+            if (std::holds_alternative<Type>(vp.ptr)) {
                 ret.push_back(std::get<Type>(vp.ptr));
             }
         }

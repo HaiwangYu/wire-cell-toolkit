@@ -20,15 +20,13 @@
 
 using namespace WireCell;
 
-namespace
-{
+namespace {
     ITensorSet::pointer to_itensor(const std::vector<torch::IValue> &inputs)
     {
         ITensor::vector *itv = new ITensor::vector;
 
         int ind = 0;
-        for (auto ival : inputs)
-        {
+        for (auto ival : inputs) {
             auto ten = ival.toTensor().cpu();
             // std::cout << "ten.shape: {"
             //           << ten.size(0) << ", "
@@ -36,8 +34,8 @@ namespace
             //           << ten.size(2) << ", "
             //           << ten.size(3) << "} "
             //           << std::endl;
-            std::vector<size_t> shape = {(size_t) ten.size(0), (size_t) ten.size(1),
-                                         (size_t) ten.size(2), (size_t) ten.size(3)};
+            std::vector<size_t> shape = {(size_t) ten.size(0), (size_t) ten.size(1), (size_t) ten.size(2),
+                                         (size_t) ten.size(3)};
             // TODO need to figure out type from dtyp
             Aux::SimpleTensor<float> *st = new Aux::SimpleTensor<float>(shape);
             // std::cout << "st.shape: {"
@@ -45,8 +43,7 @@ namespace
             //           << st->shape()[1] << ", "
             //           << st->shape()[2] << "} \n";
             size_t nbyte = 4;
-            for (auto n : shape)
-                nbyte *= n;
+            for (auto n : shape) nbyte *= n;
             // std::cout << "nbyte: " << nbyte << std::endl;
             auto data = (float *) st->data();
             // std::cout
@@ -68,24 +65,20 @@ namespace
         // Json::Reader reader;
         // reader.parse(label[zio::tens::form]["metadata"].dump(), md);
 
-        return std::make_shared<Aux::SimpleTensorSet>(seqno, md,
-                                                      ITensor::shared_vector(itv));
+        return std::make_shared<Aux::SimpleTensorSet>(seqno, md, ITensor::shared_vector(itv));
     }
     torch::IValue from_itensor(const ITensorSet::pointer &inputs)
     {
-        if (inputs->tensors()->size() != 1)
-        {
+        if (inputs->tensors()->size() != 1) {
             THROW(ValueError() << errmsg{"inputs->tensors()->size()!=1"});
         }
         auto iten = inputs->tensors()->front();
-        if (iten->shape().size() != 4)
-        {
+        if (iten->shape().size() != 4) {
             THROW(ValueError() << errmsg{"iten->shape().size()!=4"});
         }
         // TODO determine data type from metadata
-        auto ten = torch::from_blob((float *) iten->data(),
-                                    {(long) iten->shape()[0], (long) iten->shape()[1],
-                                     (long) iten->shape()[2], (long) iten->shape()[3]});
+        auto ten = torch::from_blob((float *) iten->data(), {(long) iten->shape()[0], (long) iten->shape()[1],
+                                                             (long) iten->shape()[2], (long) iten->shape()[3]});
 
         // std::cout << "ten.shape: {"
         //           << ten.size(0) << ", "
@@ -100,8 +93,7 @@ namespace
         std::stringstream ss;
         ss << "zio.Message: ";
         ss << "ZIO" << msg.level() << msg.form() << msg.label();
-        ss << " + [0x" << msg.origin() << "," << msg.granule() << "," << msg.seqno()
-           << "]";
+        ss << " + [0x" << msg.origin() << "," << msg.granule() << "," << msg.seqno() << "]";
         ss << " + [" << msg.payload().str() << "]";
         return ss.str();
     }
@@ -111,11 +103,9 @@ namespace
         ss << "ITensorSet: ";
         Json::FastWriter jwriter;
         ss << itens->ident() << ", " << jwriter.write(itens->metadata());
-        for (auto iten : *itens->tensors())
-        {
+        for (auto iten : *itens->tensors()) {
             ss << "shape: [";
-            for (auto l : iten->shape())
-            {
+            for (auto l : iten->shape()) {
                 ss << l << " ";
             }
             ss << "]\n";
@@ -130,20 +120,16 @@ int main()
     std::shared_ptr<zio::domo::Client> m_client;
     zmq::context_t ctx;
     zmq::socket_t sock(ctx, ZMQ_CLIENT);
-    try
-    {
-        m_client =
-            std::make_shared<zio::domo::Client>(sock, "tcp://localhost:5555");
+    try {
+        m_client = std::make_shared<zio::domo::Client>(sock, "tcp://localhost:5555");
     }
-    catch (...)
-    {
+    catch (...) {
         THROW(RuntimeError() << errmsg{"Client init faileds!"});
     }
 
     //
     std::vector<torch::jit::IValue> inputs;
-    inputs.push_back(torch::ones(
-        {1, 3, 800, 600}, torch::dtype(torch::kFloat32).device(torch::kCUDA, 0)));
+    inputs.push_back(torch::ones({1, 3, 800, 600}, torch::dtype(torch::kFloat32).device(torch::kCUDA, 0)));
 
     auto iitens = to_itensor(inputs);
     std::cout << "torch -> itens ... OK\n";

@@ -10,12 +10,9 @@
 #include "WireCellIface/IConfigurable.h"
 #include "WireCellIface/ISliceStriper.h"
 
-namespace WireCell
-{
-    namespace Img
-    {
-        class NaiveStriper : public ISliceStriper, public IConfigurable
-        {
+namespace WireCell {
+    namespace Img {
+        class NaiveStriper : public ISliceStriper, public IConfigurable {
            public:
             virtual ~NaiveStriper();
 

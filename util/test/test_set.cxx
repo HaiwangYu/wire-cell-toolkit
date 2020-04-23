@@ -20,24 +20,20 @@ int main()
     set<int> die2;
 
     vector<int> result;
-    set_difference(items.begin(), items.end(), die.begin(), die.end(),
-                   back_inserter(result));
+    set_difference(items.begin(), items.end(), die.begin(), die.end(), back_inserter(result));
     cout << "items: ";
-    for (auto item : items)
-    {
+    for (auto item : items) {
         cout << item << " ";
     }
     cout << endl;
     cout << "alive: ";
-    for (auto alive : result)
-    {
+    for (auto alive : result) {
         cout << alive << " ";
     }
     cout << endl;
 
     vector<int> result2;
-    set_difference(items.begin(), items.end(), die2.begin(), die2.end(),
-                   back_inserter(result2));
+    set_difference(items.begin(), items.end(), die2.begin(), die2.end(), back_inserter(result2));
 
     Assert(items.size() == 10);
     Assert(die.size() == 4);
@@ -54,16 +50,13 @@ int main()
         typedef std::shared_ptr<int> Pint;
         deque<Pint> queue;
         const int nitems = 1000;
-        for (int ind = 0; ind < nitems; ++ind)
-        {
+        for (int ind = 0; ind < nitems; ++ind) {
             queue.push_back(Pint(new int(dist(re))));
         }
-        for (int ind = 0; ind < nitems; ++ind)
-        {
+        for (int ind = 0; ind < nitems; ++ind) {
             Pint front = queue.front();
             queue.pop_front();
-            cerr << ind << ": popped:" << *front << " now with: " << queue.size()
-                 << " items" << endl;
+            cerr << ind << ": popped:" << *front << " now with: " << queue.size() << " items" << endl;
         }
     }
 }

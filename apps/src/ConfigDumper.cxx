@@ -5,8 +5,7 @@
 #include "WireCellUtil/Persist.h"
 #include "WireCellUtil/String.h"
 
-WIRECELL_FACTORY(ConfigDumper, WireCellApps::ConfigDumper,
-                 WireCell::IApplication, WireCell::IConfigurable)
+WIRECELL_FACTORY(ConfigDumper, WireCellApps::ConfigDumper, WireCell::IApplication, WireCell::IConfigurable)
 
 using spdlog::info;
 using spdlog::warn;
@@ -40,28 +39,23 @@ void ConfigDumper::execute()
     int nfailed = 0;
 
     std::vector<std::string> comps;
-    for (auto jone : m_cfg["components"])
-    {
+    for (auto jone : m_cfg["components"]) {
         comps.push_back(jone.asString());
     }
-    if (comps.empty())
-    {
+    if (comps.empty()) {
         comps = Factory::known_types<IConfigurable>();
     }
 
-    for (auto c : comps)
-    {
+    for (auto c : comps) {
         string type, name;
         tie(type, name) = String::parse_pair(convert<string>(c));
 
         Configuration cfg;
-        try
-        {
+        try {
             auto cfgobj = Factory::lookup<IConfigurable>(type, name);
             cfg = cfgobj->default_configuration();
         }
-        catch (FactoryException &fe)
-        {
+        catch (FactoryException &fe) {
             warn("failed lookup component: \"{}\":\"{}\"", type, name);
             ++nfailed;
             continue;

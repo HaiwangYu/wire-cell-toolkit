@@ -9,10 +9,7 @@ Gen::ImpactData::ImpactData(int impact)
   : m_impact(impact)
 {
 }
-void Gen::ImpactData::add(GaussianDiffusion::pointer diffusion)
-{
-    m_diffusions.push_back(diffusion);
-}
+void Gen::ImpactData::add(GaussianDiffusion::pointer diffusion) { m_diffusions.push_back(diffusion); }
 
 Waveform::realseq_t &Gen::ImpactData::waveform() const { return m_waveform; }
 
@@ -20,30 +17,24 @@ Waveform::compseq_t &Gen::ImpactData::spectrum() const { return m_spectrum; }
 
 Waveform::realseq_t &Gen::ImpactData::weightform() const { return m_weights; }
 
-Waveform::compseq_t &Gen::ImpactData::weight_spectrum() const
-{
-    return m_weight_spectrum;
-}
+Waveform::compseq_t &Gen::ImpactData::weight_spectrum() const { return m_weight_spectrum; }
 
 void Gen::ImpactData::calculate(int nticks) const
 {
-    if (m_waveform.size() > 0)
-    {
+    if (m_waveform.size() > 0) {
         return;
     }
     m_waveform.resize(nticks, 0.0);
     m_weights.resize(nticks, 0.0);
 
-    for (auto diff : m_diffusions)
-    {
+    for (auto diff : m_diffusions) {
         const auto patch = diff->patch();
         const auto qweight = diff->weights();
 
         const int poffset_bin = diff->poffset_bin();
         const int pbin = m_impact - poffset_bin;
         const int np = patch.rows();
-        if (pbin < 0 || pbin >= np)
-        {
+        if (pbin < 0 || pbin >= np) {
             continue;
         }
 
@@ -52,8 +43,7 @@ void Gen::ImpactData::calculate(int nticks) const
 
         //	std::cout << pbin << " " << poffset_bin << " " << m_impact << std::endl;
 
-        for (int tbin = 0; tbin < nt; ++tbin)
-        {
+        for (int tbin = 0; tbin < nt; ++tbin) {
             const int absbin = tbin + toffset_bin;
             m_waveform[absbin] += patch(pbin, tbin);
 
@@ -84,16 +74,14 @@ std::pair<double, double> Gen::ImpactData::span(double nsigma) const
 {
     int ncount = -1;
     double tmin = 0, tmax = 0;
-    for (auto diff : m_diffusions)
-    {
+    for (auto diff : m_diffusions) {
         ++ncount;
 
         auto td = diff->time_desc();
 
         const double ltmin = td.center - td.sigma * nsigma;
         const double ltmax = td.center + td.sigma * nsigma;
-        if (!ncount)
-        {
+        if (!ncount) {
             tmin = ltmin;
             tmax = ltmax;
             continue;

@@ -4,15 +4,13 @@
 #include "WireCellIface/ICluster.h"
 #include "WireCellIface/IFaninNode.h"
 
-namespace WireCell
-{
+namespace WireCell {
     /** A cluster fan-in component takes N clusters on input ports and
- * produces a single output cluster.  The merge policy and
- * restriction on the number of inputs, if any, are left to the
- * implementation.
- */
-    class IClusterFanin : public IFaninNode<ICluster, ICluster, 0>
-    {
+     * produces a single output cluster.  The merge policy and
+     * restriction on the number of inputs, if any, are left to the
+     * implementation.
+     */
+    class IClusterFanin : public IFaninNode<ICluster, ICluster, 0> {
        public:
         virtual ~IClusterFanin();
 

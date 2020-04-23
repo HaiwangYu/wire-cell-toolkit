@@ -5,13 +5,10 @@
 #include "WireCellIface/ISliceFanout.h"
 #include "WireCellUtil/Logging.h"
 
-namespace WireCell
-{
-    namespace Img
-    {
+namespace WireCell {
+    namespace Img {
         // Fan out 1 slice to N set at construction or configuration time.
-        class SliceFanout : public ISliceFanout, public IConfigurable
-        {
+        class SliceFanout : public ISliceFanout, public IConfigurable {
            public:
             SliceFanout(size_t multiplicity = 0);
             virtual ~SliceFanout();

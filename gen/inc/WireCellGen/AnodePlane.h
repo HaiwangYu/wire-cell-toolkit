@@ -12,12 +12,9 @@
 #include "WireCellIface/IConfigurable.h"
 #include "WireCellUtil/Logging.h"
 
-namespace WireCell
-{
-    namespace Gen
-    {
-        class AnodePlane : public IAnodePlane, public IConfigurable
-        {
+namespace WireCell {
+    namespace Gen {
+        class AnodePlane : public IAnodePlane, public IConfigurable {
            public:
             AnodePlane();
             virtual ~AnodePlane() {}

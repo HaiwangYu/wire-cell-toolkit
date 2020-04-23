@@ -7,20 +7,14 @@
 #include <unordered_set>
 #include <vector>
 
-namespace WireCell
-{
-    namespace RayGrid
-    {
+namespace WireCell {
+    namespace RayGrid {
         typedef typename blobs_t::const_iterator blobref_t;
         typedef typename std::vector<blobref_t> blobvec_t;
         typedef typename std::vector<blobvec_t> blobproj_t;
 
-        struct blobref_hash
-        {
-            size_t operator()(blobref_t blobref) const
-            {
-                return std::hash<int *>()((int *) &*blobref);
-            }
+        struct blobref_hash {
+            size_t operator()(blobref_t blobref) const { return std::hash<int *>()((int *) &*blobref); }
         };
         typedef typename std::unordered_set<blobref_t, blobref_hash> blobset_t;
 
@@ -32,8 +26,7 @@ namespace WireCell
 
         // Return blobs in projection which overlap with blob along
         // ray lines of given layer and all lower layers.
-        blobvec_t overlap(const blobref_t &blob, const blobproj_t &proj,
-                          layer_index_t layer);
+        blobvec_t overlap(const blobref_t &blob, const blobproj_t &proj, layer_index_t layer);
 
         // Return true if a's strips are all inside b's strips or vice versa.
         bool surrounding(const blobref_t &a, const blobref_t &b);

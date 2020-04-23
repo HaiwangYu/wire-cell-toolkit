@@ -27,12 +27,9 @@
 
 #include <unordered_set>
 
-namespace WireCell
-{
-    namespace Gen
-    {
-        class Misconfigure : public IFrameFilter, public IConfigurable
-        {
+namespace WireCell {
+    namespace Gen {
+        class Misconfigure : public IFrameFilter, public IConfigurable {
            public:
             Misconfigure();
             virtual ~Misconfigure();

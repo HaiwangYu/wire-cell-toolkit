@@ -5,8 +5,7 @@
 
 #include <iostream>
 
-WIRECELL_FACTORY(WireParams, WireCell::WireParams, WireCell::IWireParameters,
-                 WireCell::IConfigurable)
+WIRECELL_FACTORY(WireParams, WireCell::WireParams, WireCell::IWireParameters, WireCell::IConfigurable)
 
 using namespace WireCell;
 using namespace std;
@@ -95,8 +94,7 @@ void WireParams::configure(const Configuration &cfg)
     this->set(bounds, U, V, W);
 }
 
-void WireParams::set(const Ray &bounds, const Ray &U, const Ray &V,
-                     const Ray &W)
+void WireParams::set(const Ray &bounds, const Ray &U, const Ray &V, const Ray &W)
 {
     // save for posterity
     m_bounds = bounds;
@@ -105,8 +103,7 @@ void WireParams::set(const Ray &bounds, const Ray &U, const Ray &V,
     m_pitchW = W;
 }
 
-void WireParams::set(double dx, double dy, double dz, double pitch,
-                     double angle)
+void WireParams::set(double dx, double dy, double dz, double pitch, double angle)
 {
     // The local origin about which all else is measured.
     const Point center;

@@ -9,10 +9,8 @@
 #include <tuple>
 #include <vector>
 
-namespace WireCell
-{
-    namespace Gen
-    {
+namespace WireCell {
+    namespace Gen {
         /**
    WireBoundedDepos outputs depos based on which wires they
    "land".  To "land" means to drift antiparallel to the
@@ -45,8 +43,7 @@ namespace WireCell
 
 
  */
-        class WireBoundedDepos : public IDrifter, public IConfigurable
-        {
+        class WireBoundedDepos : public IDrifter, public IConfigurable {
            public:
             WireBoundedDepos();
             virtual ~WireBoundedDepos();

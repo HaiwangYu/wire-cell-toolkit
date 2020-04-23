@@ -4,8 +4,7 @@
 typedef std::deque<boost::any> AnyQueue;
 typedef std::vector<AnyQueue> AnyPorts;
 
-class Hydra
-{
+class Hydra {
    public:
     virtual ~Hydra() {}
     bool insert(AnyPorts &input) = 0;
@@ -13,8 +12,7 @@ class Hydra
 };
 
 template <typename OutputType>
-class Source : public Hydra
-{
+class Source : public Hydra {
    public:
     virtual ~Source() {}
 
@@ -25,8 +23,7 @@ class Source : public Hydra
     {
         output_pointer out;
         bool ok = this->extract(out);
-        if (!ok)
-            return false;
+        if (!ok) return false;
         output[0].push_back(out);
         return true;
     }
@@ -35,8 +32,7 @@ class Source : public Hydra
 };
 
 template <typename InputType>
-class Sink : public Hydra
-{
+class Sink : public Hydra {
    public:
     virtual ~Sink() {}
 
@@ -45,12 +41,10 @@ class Sink : public Hydra
     virtual bool extract(AnyPorts &output) { return false; }
     virtual bool insert(AnyPorts &input)
     {
-        for (auto anyin : input[0])
-        {
+        for (auto anyin : input[0]) {
             input_pointer in = any_cast<input_pointer>(anyin);
             bool ok = this->insert(in);
-            if (!ok)
-                return false;
+            if (!ok) return false;
         }
         return true;
     }
@@ -58,8 +52,7 @@ class Sink : public Hydra
     virtual bool insert(const input_pointer &in) = 0;
 };
 
-class IntSource : public Source<int>
-{
+class IntSource : public Source<int> {
     int m_count;
     const int m_max;
 
@@ -74,8 +67,7 @@ class IntSource : public Source<int>
     virtual bool extract(output_pointer &out)
     {
         ++m_count;
-        if (m_count > m_max)
-        {
+        if (m_count > m_max) {
             return false;
         }
         out = new int(m_count);
@@ -83,8 +75,7 @@ class IntSource : public Source<int>
     }
 };
 
-class IntSink : public Sink<int>
-{
+class IntSink : public Sink<int> {
    public:
     virtual ~IntSink() {}
     virtual bool insert(const input_pointer &in) { return true; }

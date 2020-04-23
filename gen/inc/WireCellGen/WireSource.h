@@ -6,14 +6,12 @@
 #include "WireCellIface/IConfigurable.h"
 #include "WireCellIface/IWireSource.h"
 
-namespace WireCell
-{
+namespace WireCell {
     /** A WireCell::IWireSource facade in front of
- * WireCell::WireParams and WireCell::WireGenerator.
- */
+     * WireCell::WireParams and WireCell::WireGenerator.
+     */
 
-    class WireSource : public IWireSource, public IConfigurable
-    {
+    class WireSource : public IWireSource, public IConfigurable {
        public:
         WireSource();
         virtual ~WireSource();
@@ -21,7 +19,7 @@ namespace WireCell
         virtual bool operator()(output_pointer &wires);
 
         /** Configurable interface.
-   */
+         */
         virtual void configure(const WireCell::Configuration &config);
         virtual WireCell::Configuration default_configuration() const;
 

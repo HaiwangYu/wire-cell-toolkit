@@ -4,10 +4,8 @@
 #include <Eigen/Dense>
 #include <string>
 
-namespace WireCell
-{
-    class LinearModel
-    {
+namespace WireCell {
+    class LinearModel {
        public:
         LinearModel();
         virtual ~LinearModel();

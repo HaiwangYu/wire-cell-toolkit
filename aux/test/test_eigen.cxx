@@ -41,28 +41,22 @@ void test_speed(const int nloop = 1)
     Assert(iarr.isApprox(oarr));
 
     auto t1 = Clock::now();
-    for (int i = 0; i < nloop; ++i)
-    {
+    for (int i = 0; i < nloop; ++i) {
         iten = Aux::eigen_array_to_itensor<TestType>(iarr);
     }
     auto t2 = Clock::now();
     std::cout << "Eigen -> TensorSet: "
-              << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1)
-                         .count() /
-                     (float) nloop
-              << " ms/loop" << std::endl;
+              << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count() / (float) nloop << " ms/loop"
+              << std::endl;
 
     t1 = Clock::now();
-    for (int i = 0; i < nloop; ++i)
-    {
+    for (int i = 0; i < nloop; ++i) {
         oarr = Aux::itensor_to_eigen_array<TestType>(iten);
     }
     t2 = Clock::now();
     std::cout << "TensorSet -> Eigen: "
-              << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1)
-                         .count() /
-                     (float) nloop
-              << " ms/loop" << std::endl;
+              << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count() / (float) nloop << " ms/loop"
+              << std::endl;
 }
 
 int main()

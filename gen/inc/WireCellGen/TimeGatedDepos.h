@@ -9,10 +9,8 @@
 #include <tuple>
 #include <vector>
 
-namespace WireCell
-{
-    namespace Gen
-    {
+namespace WireCell {
+    namespace Gen {
         /**
    TimeGatedDepos outputs depos which pass a time based
    selection.
@@ -30,8 +28,7 @@ namespace WireCell
    The gate is half inclusive.  Depo landing exactly at the
    end of the gate is considered outside the gate.
  */
-        class TimeGatedDepos : public IDrifter, public IConfigurable
-        {
+        class TimeGatedDepos : public IDrifter, public IConfigurable {
            public:
             TimeGatedDepos();
             virtual ~TimeGatedDepos();

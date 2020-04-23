@@ -4,12 +4,12 @@
 
 #include <cmath>
 
-WIRECELL_FACTORY(MipRecombination, WireCell::Gen::MipRecombination,
-                 WireCell::IRecombinationModel, WireCell::IConfigurable)
-WIRECELL_FACTORY(BirksRecombination, WireCell::Gen::MipRecombination,
-                 WireCell::IRecombinationModel, WireCell::IConfigurable)
-WIRECELL_FACTORY(BoxRecombination, WireCell::Gen::MipRecombination,
-                 WireCell::IRecombinationModel, WireCell::IConfigurable)
+WIRECELL_FACTORY(MipRecombination, WireCell::Gen::MipRecombination, WireCell::IRecombinationModel,
+                 WireCell::IConfigurable)
+WIRECELL_FACTORY(BirksRecombination, WireCell::Gen::MipRecombination, WireCell::IRecombinationModel,
+                 WireCell::IConfigurable)
+WIRECELL_FACTORY(BoxRecombination, WireCell::Gen::MipRecombination, WireCell::IRecombinationModel,
+                 WireCell::IConfigurable)
 
 using namespace WireCell;
 
@@ -22,10 +22,7 @@ Gen::MipRecombination::MipRecombination(double Rmip, double Wi)
 {
 }
 Gen::MipRecombination::~MipRecombination() {}
-double Gen::MipRecombination::operator()(double dE, double dX)
-{
-    return m_rmip * dE / m_wi;
-}
+double Gen::MipRecombination::operator()(double dE, double dX) { return m_rmip * dE / m_wi; }
 void Gen::MipRecombination::configure(const WireCell::Configuration &config)
 {
     m_rmip = get(config, "Rmip", m_rmip);
@@ -42,8 +39,7 @@ WireCell::Configuration Gen::MipRecombination::default_configuration() const
 /*
   Birks Recombination Model
  */
-Gen::BirksRecombination::BirksRecombination(double Efield, double A3t,
-                                            double k3t, double rho, double Wi)
+Gen::BirksRecombination::BirksRecombination(double Efield, double A3t, double k3t, double rho, double Wi)
   : m_a3t(A3t)
   , m_k3t(k3t)
   , m_efield(Efield)
@@ -79,8 +75,7 @@ WireCell::Configuration Gen::BirksRecombination::default_configuration() const
 /*
   Modified Box Model
 */
-Gen::BoxRecombination::BoxRecombination(double Efield, double A, double B,
-                                        double rho, double Wi)
+Gen::BoxRecombination::BoxRecombination(double Efield, double A, double B, double rho, double Wi)
   : m_efield(Efield)
   , m_a(A)
   , m_b(B)

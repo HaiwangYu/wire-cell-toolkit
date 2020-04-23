@@ -5,13 +5,11 @@
 #include "WireCellIface/IJoinNode.h"
 #include "WireCellUtil/IComponent.h"
 
-namespace WireCell
-{
+namespace WireCell {
     /** A frame joiner is something that takes in two frames and sends
- *  out one.
- */
-    class IFrameJoiner : public IJoinNode<std::tuple<IFrame, IFrame>, IFrame>
-    {
+     *  out one.
+     */
+    class IFrameJoiner : public IJoinNode<std::tuple<IFrame, IFrame>, IFrame> {
        public:
         typedef std::shared_ptr<IFrameJoiner> pointer;
 

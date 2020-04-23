@@ -4,20 +4,18 @@
 #include "WireCellIface/IData.h"
 #include "WireCellIface/IDepo.h"
 
-namespace WireCell
-{
+namespace WireCell {
     /** An interface to information about charge which has diffused in
- * longitudinal and transverse directions.
- *
- * The diffusion is a rectangular patch of (charge) values on a
- * regular grid defined in longitudinal vs. transverse space.
- * Bins are typically tick vs. wire pitch or vs. impact position.
- *
- * See also WireCell::IDiffuser which is one interface that
- * produces these objects.
- */
-    class IDiffusion : public IData<IDiffusion>
-    {
+     * longitudinal and transverse directions.
+     *
+     * The diffusion is a rectangular patch of (charge) values on a
+     * regular grid defined in longitudinal vs. transverse space.
+     * Bins are typically tick vs. wire pitch or vs. impact position.
+     *
+     * See also WireCell::IDiffuser which is one interface that
+     * produces these objects.
+     */
+    class IDiffusion : public IData<IDiffusion> {
        public:
         virtual ~IDiffusion();
 
@@ -54,13 +52,10 @@ namespace WireCell
     };
 
     // A set ordered by beginning of patch
-    struct IDiffusionCompareLbegin
-    {
-        bool operator()(const IDiffusion::pointer &lhs,
-                        const IDiffusion::pointer &rhs) const
+    struct IDiffusionCompareLbegin {
+        bool operator()(const IDiffusion::pointer &lhs, const IDiffusion::pointer &rhs) const
         {
-            if (lhs->lbegin() == rhs->lbegin())
-            {
+            if (lhs->lbegin() == rhs->lbegin()) {
                 return lhs.get() < rhs.get();  // break tie with pointer
             }
             return lhs->lbegin() < rhs->lbegin();

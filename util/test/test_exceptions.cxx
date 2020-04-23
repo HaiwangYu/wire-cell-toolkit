@@ -18,13 +18,10 @@ int main()
     cerr << format("value=%d", value) << endl;
     cerr << format("value=%d, omg=\"%s\", number=%f", value, omg, number) << endl;
 
-    try
-    {
-        THROW(ValueError() << errmsg{
-                  format("some error with value=%d msg=\"%s\"", value, omg)});
+    try {
+        THROW(ValueError() << errmsg{format("some error with value=%d msg=\"%s\"", value, omg)});
     }
-    catch (ValueError &e)
-    {
+    catch (ValueError &e) {
         cerr << "caught ValueError: " << errstr(e) << endl;
     }
 }

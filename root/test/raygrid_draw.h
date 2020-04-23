@@ -11,14 +11,12 @@
 #include "TStyle.h"
 #include "TText.h"
 
-void draw_text(const Point &pt, const std::string text, int color = 1,
-               int align = 22);
+void draw_text(const Point &pt, const std::string text, int color = 1, int align = 22);
 
 void dump(const blobs_t &blobs)
 {
     info("-----dumping {} blobs:", blobs.size());
-    for (const auto &b : blobs)
-    {
+    for (const auto &b : blobs) {
         info("\t{}", b.as_string());
     }
     info("------");
@@ -40,62 +38,52 @@ void draw_ray(const Ray &ray, int color = 1, float width = 1.0)
     l.SetLineWidth(width);
     l.DrawLine(ray.first.z(), ray.first.y(), ray.second.z(), ray.second.y());
 }
-void draw_arrow(const Ray &ray, int color = 1, float width = 1.0,
-                float asize = 0, const char *opt = "")
+void draw_arrow(const Ray &ray, int color = 1, float width = 1.0, float asize = 0, const char *opt = "")
 {
     TArrow l;
     l.SetLineColor(color);
     l.SetLineWidth(width);
-    l.DrawArrow(ray.first.z(), ray.first.y(), ray.second.z(), ray.second.y(),
-                asize, opt);
+    l.DrawArrow(ray.first.z(), ray.first.y(), ray.second.z(), ray.second.y(), asize, opt);
 }
 
 TH1F *draw_frame(TCanvas &canvas, std::string title)
 {
-    auto *frame = canvas.DrawFrame(-1.0 * border, -1.0 * border, width + border,
-                                   height + border);
+    auto *frame = canvas.DrawFrame(-1.0 * border, -1.0 * border, width + border, height + border);
     frame->SetTitle(title.c_str());
     return frame;
 }
 
 const std::vector<int> layer_colors{1, 1, 2, 3, 4};
 
-void draw_strip(const Point &head, const Point &tail, const Vector &raydir,
-                int color, bool outline = true);
-void draw_strip(const Point &head, const Point &tail, const Vector &raydir,
-                int color, bool outline)
+void draw_strip(const Point &head, const Point &tail, const Vector &raydir, int color, bool outline = true);
+void draw_strip(const Point &head, const Point &tail, const Vector &raydir, int color, bool outline)
 {
     const double shoot = 2 * std::max(width, height);
-    std::vector<Point> points{tail + raydir * shoot, tail - raydir * shoot,
-                              head - raydir * shoot, head + raydir * shoot};
+    std::vector<Point> points{tail + raydir * shoot, tail - raydir * shoot, head - raydir * shoot,
+                              head + raydir * shoot};
 
     TPolyLine *pl = new TPolyLine;  // like a sieve
     pl->SetLineColor(color);
     pl->SetFillColorAlpha(color, 0.1);
-    for (const auto &p : points)
-    {
+    for (const auto &p : points) {
         pl->SetNextPoint(p.z(), p.y());
     }
     pl->SetNextPoint(points.front().z(), points.front().y());
     pl->Draw("f");
-    if (outline)
-    {
+    if (outline) {
         pl->Draw("");
     }
 }
 
-void draw_layer(Coordinates &coords, int ilayer, double pitch_mag,
-                const Point &pitch, const Point &center,
+void draw_layer(Coordinates &coords, int ilayer, double pitch_mag, const Point &pitch, const Point &center,
                 const std::vector<double> &measure)
 {
     const Vector ecks(1, 0, 0);
     const auto raydir = ecks.cross(pitch);
 
-    for (size_t ind = 0; ind < measure.size(); ++ind)
-    {
+    for (size_t ind = 0; ind < measure.size(); ++ind) {
         int color = layer_colors[ilayer];
-        if (measure[ind] <= 0.0)
-        {
+        if (measure[ind] <= 0.0) {
             continue;
         }
         const auto tail = center + ind * pitch_mag * pitch;
@@ -104,14 +92,12 @@ void draw_layer(Coordinates &coords, int ilayer, double pitch_mag,
     }
 }
 
-void draw_strips(Coordinates &coords, const strips_t &strips,
-                 bool outline = true);
+void draw_strips(Coordinates &coords, const strips_t &strips, bool outline = true);
 void draw_strips(Coordinates &coords, const strips_t &strips, bool outline)
 {
     const Vector ecks(1, 0, 0);
 
-    for (const auto &strip : strips)
-    {
+    for (const auto &strip : strips) {
         int color = layer_colors[strip.layer];
         const auto &pitch = coords.pitch_dirs()[strip.layer];
         const auto raydir = ecks.cross(pitch);
@@ -132,15 +118,13 @@ void draw_strips(Coordinates &coords, const strips_t &strips, bool outline)
 Point draw_blob(Coordinates &coords, const Blob &blob, int color = 1)
 {
     const auto &corners = blob.corners();
-    if (corners.empty())
-    {
+    if (corners.empty()) {
         return Point();
     }
 
     std::vector<Point> points;
     Point center;
-    for (const auto &corn : corners)
-    {
+    for (const auto &corn : corners) {
         const auto p = coords.ray_crossing(corn.first, corn.second);
         center += p;
         points.push_back(p);
@@ -158,8 +142,7 @@ Point draw_blob(Coordinates &coords, const Blob &blob, int color = 1)
     pl->SetLineColor(color);
     pl->SetLineWidth(2);
 
-    for (const auto &p : points)
-    {
+    for (const auto &p : points) {
         pl->SetNextPoint(p.z(), p.y());
     }
     pl->SetNextPoint(points.front().z(), points.front().y());
@@ -167,8 +150,7 @@ Point draw_blob(Coordinates &coords, const Blob &blob, int color = 1)
     return center;
 }
 
-struct Printer
-{
+struct Printer {
     TCanvas canvas;
     std::string fname;
     int count;
@@ -189,67 +171,51 @@ struct Printer
     }
 };
 
-void draw_points_blobs(Coordinates &coords, Printer &print,
-                       const std::vector<Point> &points, const blobs_t &blobs)
+void draw_points_blobs(Coordinates &coords, Printer &print, const std::vector<Point> &points, const blobs_t &blobs)
 {
     int nstrips = 0;
-    for (const auto &b : blobs)
-    {
+    for (const auto &b : blobs) {
         nstrips += b.strips().size();
     }
 
-    draw_frame(print.canvas,
-               Form("%d points, %d blobs, %d strips", (int) points.size(),
-                    (int) blobs.size(), nstrips));
-    for (size_t ipt = 0; ipt < points.size(); ++ipt)
-    {
+    draw_frame(print.canvas, Form("%d points, %d blobs, %d strips", (int) points.size(), (int) blobs.size(), nstrips));
+    for (size_t ipt = 0; ipt < points.size(); ++ipt) {
         const auto &p = points[ipt];
         draw_point(p, 1, 24, ipt + 1);
     }
-    for (size_t ib = 0; ib < blobs.size(); ++ib)
-    {
+    for (size_t ib = 0; ib < blobs.size(); ++ib) {
         draw_blob(coords, blobs[ib], 1);
     }
 }
 
-void draw_points_blobs_solved(
-    Coordinates &coords, Printer &print, const std::vector<Point> &points,
-    const blobs_t &blobs,
-    const std::unordered_map<size_t, float> &blob_charge)
+void draw_points_blobs_solved(Coordinates &coords, Printer &print, const std::vector<Point> &points,
+                              const blobs_t &blobs, const std::unordered_map<size_t, float> &blob_charge)
 {
     int nstrips = 0;
-    for (const auto &b : blobs)
-    {
+    for (const auto &b : blobs) {
         nstrips += b.strips().size();
     }
 
-    draw_frame(print.canvas,
-               Form("%d points, %d blobs, %d strips", (int) points.size(),
-                    (int) blobs.size(), nstrips));
+    draw_frame(print.canvas, Form("%d points, %d blobs, %d strips", (int) points.size(), (int) blobs.size(), nstrips));
 
-    for (size_t ipt = 0; ipt < points.size(); ++ipt)
-    {
+    for (size_t ipt = 0; ipt < points.size(); ++ipt) {
         const auto &p = points[ipt];
         draw_point(p, 1, 24, ipt + 1);
     }
 
-    for (auto it : blob_charge)
-    {
+    for (auto it : blob_charge) {
         size_t ind = it.first;
         const auto &blob = blobs[ind];
         float q = it.second;
         int color = 1;
-        if (q < 1.0)
-        {
+        if (q < 1.0) {
             color = 2;
         }
         auto center = draw_blob(coords, blob, color);
-        if (q < 1.0)
-        {
+        if (q < 1.0) {
             draw_text(center, Form("s%d", (int) ind), color, 22);
         }
-        else
-        {
+        else {
             draw_text(center, Form("s%d:%.1f", (int) ind, q), color, 22);
         }
         info("center:{} ind:{} q:[]", center, ind, q);
@@ -265,8 +231,7 @@ void draw_text(const Point &pt, const std::string text, int color, int align)
     l.SetTextColor(color);
     l.DrawLatex(pt.z(), pt.y(), text.c_str());
 }
-void draw_raygrid(Printer &print, const Coordinates &coords,
-                  const ray_pair_vector_t &raypairs)
+void draw_raygrid(Printer &print, const Coordinates &coords, const ray_pair_vector_t &raypairs)
 {
     auto *frame = print.canvas.DrawFrame(-110, 50 - 110, 110, 50 + 110);
     frame->SetTitle("Ray Grid");
@@ -277,8 +242,7 @@ void draw_raygrid(Printer &print, const Coordinates &coords,
     const int ui = 2, vi = 3, wi = 4;
     int index[] = {2, 3, 4};
     int colors[] = {2, 4, 1};
-    for (int ind = 0; ind < 3; ++ind)
-    {
+    for (int ind = 0; ind < 3; ++ind) {
         int ri = index[ind];
 
         auto r0 = raypairs[ri].first;

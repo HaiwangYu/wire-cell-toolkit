@@ -6,17 +6,13 @@
 
 #include "WireCellIface/IWirePlane.h"
 
-namespace WireCell
-{
-    namespace Gen
-    {
-        class WirePlane : public IWirePlane
-        {
+namespace WireCell {
+    namespace Gen {
+        class WirePlane : public IWirePlane {
            public:
             // WirePlane(int ident, IWire::vector wires, Pimpos* pimpos,
             // PlaneImpactResponse* pir);
-            WirePlane(int ident, Pimpos *pimpos, const IWire::vector &wires,
-                      const IChannel::vector &channels);
+            WirePlane(int ident, Pimpos *pimpos, const IWire::vector &wires, const IChannel::vector &channels);
             virtual ~WirePlane();
 
             virtual int ident() const { return m_ident; }

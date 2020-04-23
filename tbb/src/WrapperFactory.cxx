@@ -28,14 +28,12 @@ WrapperFactory::WrapperFactory(tbb::flow::graph &graph)
 Node WrapperFactory::operator()(INode::pointer wcnode)
 {
     auto nit = m_nodes.find(wcnode);
-    if (nit != m_nodes.end())
-    {
+    if (nit != m_nodes.end()) {
         return nit->second;
     }
 
     auto mit = m_factory.find(wcnode->category());
-    if (mit == m_factory.end())
-    {
+    if (mit == m_factory.end()) {
         return nullptr;
     }
     auto maker = mit->second;

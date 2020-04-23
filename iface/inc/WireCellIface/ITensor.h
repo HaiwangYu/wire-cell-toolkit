@@ -12,10 +12,8 @@
 #include <vector>
 #include "WireCellIface/IData.h"
 
-namespace WireCell
-{
-    class ITensor : public IData<ITensor>
-    {
+namespace WireCell {
+    class ITensor : public IData<ITensor> {
        public:
         /// Shape gives size of each dimension.  Size of shape give Ndim.
         typedef std::vector<size_t> shape_t;

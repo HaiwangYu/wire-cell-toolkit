@@ -12,8 +12,7 @@
 
 #include <vector>
 
-WIRECELL_FACTORY(MultiDuctor, WireCell::Gen::MultiDuctor, WireCell::IDuctor,
-                 WireCell::IConfigurable)
+WIRECELL_FACTORY(MultiDuctor, WireCell::Gen::MultiDuctor, WireCell::IDuctor, WireCell::IConfigurable)
 
 using namespace WireCell;
 
@@ -67,8 +66,7 @@ WireCell::Configuration Gen::MultiDuctor::default_configuration() const
     return cfg;
 }
 
-struct Wirebounds
-{
+struct Wirebounds {
     std::vector<const Pimpos *> pimpos;
     Json::Value jargs;
     Wirebounds(const std::vector<const Pimpos *> &p, Json::Value jargs)
@@ -79,8 +77,7 @@ struct Wirebounds
 
     bool operator()(IDepo::pointer depo)
     {
-        if (!depo)
-        {
+        if (!depo) {
             std::cerr << "Gen::MultiDuctor::Wirebounds: error: no depo given\n";
             return false;
         }
@@ -91,31 +88,26 @@ struct Wirebounds
         // some faster data structure.
 
         // return true if depo is "in" ANY region.
-        for (auto jregion : jargs)
-        {
+        for (auto jregion : jargs) {
             bool inregion = true;
 
             // depo must be in ALL ranges of a region
-            for (auto jrange : jregion)
-            {
+            for (auto jrange : jregion) {
                 int iplane = jrange["plane"].asInt();
                 int imin = jrange["min"].asInt();
                 int imax = jrange["max"].asInt();
 
                 // double drift = pimpos[iplane]->distance(depo->pos(), 0);
                 double pitch = pimpos[iplane]->distance(depo->pos(), 2);
-                int iwire = pimpos[iplane]->region_binning().bin(
-                    pitch);  // fixme: warning: round off error?
+                int iwire = pimpos[iplane]->region_binning().bin(pitch);  // fixme: warning: round off error?
                 inregion = inregion && (imin <= iwire && iwire <= imax);
-                if (!inregion)
-                {
+                if (!inregion) {
                     // std::cerr << "Wirebounds: wire: "<<iwire<<" of plane " << iplane <<
                     // " not in [" << imin << "," << imax << "]\n";
                     break;  // not in this view's region, no reason to keep checking.
                 }
             }
-            if (inregion)
-            {  // only need one region
+            if (inregion) {  // only need one region
                 return true;
             }
         }
@@ -123,8 +115,7 @@ struct Wirebounds
     }
 };
 
-struct ReturnBool
-{
+struct ReturnBool {
     bool ok;
     ReturnBool(Json::Value jargs)
       : ok(jargs.asBool())
@@ -132,8 +123,7 @@ struct ReturnBool
     }
     bool operator()(IDepo::pointer depo)
     {
-        if (!depo)
-        {
+        if (!depo) {
             return false;
         }
         return ok;
@@ -150,75 +140,56 @@ void Gen::MultiDuctor::configure(const WireCell::Configuration &cfg)
 
     m_anode_tn = get(cfg, "anode", m_anode_tn);
     m_anode = Factory::find_tn<IAnodePlane>(m_anode_tn);
-    if (!m_anode)
-    {
-        std::cerr << "Gen::MultiDuctor::configure: error: unknown anode: "
-                  << m_anode_tn << std::endl;
+    if (!m_anode) {
+        std::cerr << "Gen::MultiDuctor::configure: error: unknown anode: " << m_anode_tn << std::endl;
         return;
     }
     auto jchains = cfg["chains"];
-    if (jchains.isNull())
-    {
+    if (jchains.isNull()) {
         std::cerr << "Gen::MultiDuctor::configure: warning: configured with empty "
                      "collection of chains\n";
         return;
     }
 
     /// fixme: this is totally going to break when going to two-faced anodes.
-    if (m_anode->faces().size() > 1)
-    {
+    if (m_anode->faces().size() > 1) {
         std::cerr << "Gen::MultDuctor:configure: warning: I currently only support "
                      "a front-faced AnodePlane.\n";
     }
 
     std::vector<const Pimpos *> pimpos;
-    for (auto face : m_anode->faces())
-    {
-        if (face->planes().empty())
-        {
-            std::cerr << "Gen::MultDuctor: not given multi-plane AnodeFace for face "
-                      << face->ident() << "\n";
+    for (auto face : m_anode->faces()) {
+        if (face->planes().empty()) {
+            std::cerr << "Gen::MultDuctor: not given multi-plane AnodeFace for face " << face->ident() << "\n";
             continue;
         }
-        for (auto plane : face->planes())
-        {
+        for (auto plane : face->planes()) {
             pimpos.push_back(plane->pimpos());
         }
         break;  // fixme:
     }
-    if (pimpos.size() != 3)
-    {
-        std::cerr << "Gen::MultiDuctor got unexpected number planes ("
-                  << pimpos.size() << ") from anode\n";
-        THROW(ValueError() << errmsg{
-                  "Gen::MultiDuctor got unexpected number planes"});
+    if (pimpos.size() != 3) {
+        std::cerr << "Gen::MultiDuctor got unexpected number planes (" << pimpos.size() << ") from anode\n";
+        THROW(ValueError() << errmsg{"Gen::MultiDuctor got unexpected number planes"});
     }
 
-    for (auto jchain : jchains)
-    {
+    for (auto jchain : jchains) {
         std::cerr << "Gen::MultiDuctor::configure chain:\n";
         ductorchain_t dchain;
 
-        for (auto jrule : jchain)
-        {
+        for (auto jrule : jchain) {
             auto rule = jrule["rule"].asString();
             auto ductor_tn = jrule["ductor"].asString();
-            std::cerr << "\tMultiDuctor: " << ductor_tn << " rule: " << rule
-                      << std::endl;
+            std::cerr << "\tMultiDuctor: " << ductor_tn << " rule: " << rule << std::endl;
             auto ductor = Factory::find_tn<IDuctor>(ductor_tn);
-            if (!ductor)
-            {
-                THROW(
-                    KeyError() << errmsg{"Failed to find (sub) Ductor: " + ductor_tn});
+            if (!ductor) {
+                THROW(KeyError() << errmsg{"Failed to find (sub) Ductor: " + ductor_tn});
             }
             auto jargs = jrule["args"];
-            if (rule == "wirebounds")
-            {
-                dchain.push_back(
-                    SubDuctor(ductor_tn, Wirebounds(pimpos, jargs), ductor));
+            if (rule == "wirebounds") {
+                dchain.push_back(SubDuctor(ductor_tn, Wirebounds(pimpos, jargs), ductor));
             }
-            if (rule == "bool")
-            {
+            if (rule == "bool") {
                 dchain.push_back(SubDuctor(ductor_tn, ReturnBool(jargs), ductor));
             }
         }
@@ -240,15 +211,12 @@ void Gen::MultiDuctor::configure(const WireCell::Configuration &cfg)
 // in continuous mode.
 bool Gen::MultiDuctor::start_processing(const input_pointer &depo)
 {
-    if (!depo)
-    {
+    if (!depo) {
         m_eos = true;
         return true;
     }
-    if (!m_continuous)
-    {
-        if (depo && m_eos)
-        {
+    if (!m_continuous) {
+        if (depo && m_eos) {
             m_eos = false;
             m_start_time = depo->time();
             return false;
@@ -257,37 +225,30 @@ bool Gen::MultiDuctor::start_processing(const input_pointer &depo)
     return depo->time() > m_start_time + m_readout_time;
 }
 
-void Gen::MultiDuctor::dump_frame(const IFrame::pointer frame,
-                                  std::string msg)
+void Gen::MultiDuctor::dump_frame(const IFrame::pointer frame, std::string msg)
 {
     auto traces = frame->traces();
-    if (!traces or traces->empty())
-    {
+    if (!traces or traces->empty()) {
         std::cerr << msg << " fid:" << frame->ident() << " has no traces\n";
         return;
     }
 
     auto mm = FrameTools::tbin_range(*traces);
-    std::cerr << msg << " fid:" << frame->ident() << " #ch:" << traces->size()
-              << " t:" << std::setprecision(12) << m_start_time / units::us
-              << "us "
+    std::cerr << msg << " fid:" << frame->ident() << " #ch:" << traces->size() << " t:" << std::setprecision(12)
+              << m_start_time / units::us << "us "
               << " tbins:[" << mm.first << "," << mm.second << "]\n";
 }
 
 // Outframes should not get a terminating nullptr even if depo is nullptr
-void Gen::MultiDuctor::maybe_extract(const input_pointer &depo,
-                                     output_queue &outframes)
+void Gen::MultiDuctor::maybe_extract(const input_pointer &depo, output_queue &outframes)
 {
-    if (!start_processing(depo))
-    {  // may set m_start_time
+    if (!start_processing(depo)) {  // may set m_start_time
         return;
     }
 
     // Must flush all sub-ductors to assure synchronization.
-    for (auto &chain : m_chains)
-    {
-        for (auto &sd : chain)
-        {
+    for (auto &chain : m_chains) {
+        for (auto &sd : chain) {
             output_queue newframes;
             (*sd.ductor)(nullptr, newframes);  // flush with EOS marker
             merge(newframes);                  // updates frame buffer
@@ -300,14 +261,11 @@ void Gen::MultiDuctor::maybe_extract(const input_pointer &depo,
     // blocks of m_readout_time even if there be no data.  Need to
     // also handle a more isolated running where the readout window is
     // data driven up until EOS is found.
-    if (!m_frame_buffer.size())
-    {
-        std::cerr << "MultiDuctor: returning empty frame with " << m_frame_count
-                  << " at " << m_start_time << "\n";
+    if (!m_frame_buffer.size()) {
+        std::cerr << "MultiDuctor: returning empty frame with " << m_frame_count << " at " << m_start_time << "\n";
 
         ITrace::vector traces;
-        auto frame = std::make_shared<SimpleFrame>(m_frame_count, m_start_time,
-                                                   traces, m_tick);
+        auto frame = std::make_shared<SimpleFrame>(m_frame_count, m_start_time, traces, m_tick);
         outframes.push_back(frame);
 
         m_start_time += m_readout_time;
@@ -321,27 +279,22 @@ void Gen::MultiDuctor::maybe_extract(const input_pointer &depo,
 
     const double target_time = m_start_time + m_readout_time;
     output_queue to_keep, to_extract;
-    for (auto frame : m_frame_buffer)
-    {
-        if (!frame)
-        {
+    for (auto frame : m_frame_buffer) {
+        if (!frame) {
             std::cerr << "Gen::MultiDuctor: skipping null frame in frame buffer\n";
             continue;
         }
-        if (!frame->traces())
-        {
+        if (!frame->traces()) {
             std::cerr << "Gen::MultiDuctor: skipping empty frame in frame buffer\n";
             continue;
         }
 
         {
             const double tick = frame->tick();
-            if (std::abs(tick - m_tick) > 0.0001)
-            {
+            if (std::abs(tick - m_tick) > 0.0001) {
                 std::cerr << "MultiDuctor: configuration error: got different tick in "
                              "frame from sub-ductor = "
-                          << tick / units::us << "us, mine = " << m_tick / units::us
-                          << "us\n";
+                          << tick / units::us << "us, mine = " << m_tick / units::us << "us\n";
                 THROW(ValueError() << errmsg{"tick size mismatch"});
             }
         }
@@ -353,52 +306,43 @@ void Gen::MultiDuctor::maybe_extract(const input_pointer &depo,
         //           << "cmp returns " << cmp << ", frame is:\n";
         // dump_frame(frame, "\t");
 
-        if (cmp < 0)
-        {
+        if (cmp < 0) {
             to_extract.push_back(frame);
             continue;
         }
-        if (cmp > 0)
-        {
+        if (cmp > 0) {
             to_keep.push_back(frame);
             continue;
         }
 
         // If cmp==0 above then both halves of the pair should hold a frame.
         auto ff = FrameTools::split(frame, target_time);
-        if (ff.first)
-        {
+        if (ff.first) {
             to_extract.push_back(ff.first);
             // dump_frame(ff.first, "Gen::MultiDuctor: to extract");
         }
-        else
-        {
+        else {
             std::cerr << "Gen::MultiDuctor: error: early split is null\n";
         }
 
-        if (ff.second)
-        {
+        if (ff.second) {
             to_keep.push_back(ff.second);
             // dump_frame(ff.second, "Gen::MultiDuctor: to keep");
         }
-        else
-        {
+        else {
             std::cerr << "Gen::MultiDuctor: error: late split is null\n";
         }
     }
     m_frame_buffer = to_keep;
 
-    if (!to_extract.size())
-    {
+    if (!to_extract.size()) {
         // we read out, and yet we have nothing
 
-        std::cerr
-            << "MultiDuctor: returning empty frame after sub frame sorting with "
-            << m_frame_count << " at " << m_start_time << "\n";
+        std::cerr << "MultiDuctor: returning empty frame after sub frame sorting with " << m_frame_count << " at "
+                  << m_start_time << "\n";
 
         ITrace::vector traces;
-        auto frame = std::make_shared<SimpleFrame>(m_frame_count, m_start_time,
-                                                   traces, m_tick);
+        auto frame = std::make_shared<SimpleFrame>(m_frame_count, m_start_time, traces, m_tick);
         outframes.push_back(frame);
         m_start_time += m_readout_time;
         ++m_frame_count;
@@ -415,12 +359,10 @@ void Gen::MultiDuctor::maybe_extract(const input_pointer &depo,
     /// on the same channel which may overlap in time.
 
     ITrace::vector traces;
-    for (auto frame : to_extract)
-    {
+    for (auto frame : to_extract) {
         const double tref = frame->time();
         const int extra_tbins = (tref - m_start_time) / m_tick;
-        for (auto trace : (*frame->traces()))
-        {
+        for (auto trace : (*frame->traces())) {
             const int tbin = trace->tbin() + extra_tbins;
             const int chid = trace->channel();
             // std::cerr <<traces.size()
@@ -432,8 +374,7 @@ void Gen::MultiDuctor::maybe_extract(const input_pointer &depo,
             traces.push_back(mtrace);
         }
     }
-    auto frame = std::make_shared<SimpleFrame>(m_frame_count, m_start_time,
-                                               traces, m_tick);
+    auto frame = std::make_shared<SimpleFrame>(m_frame_count, m_start_time, traces, m_tick);
     dump_frame(frame, "Gen::MultiDuctor: output frame");
 
     outframes.push_back(frame);
@@ -443,19 +384,15 @@ void Gen::MultiDuctor::maybe_extract(const input_pointer &depo,
 
 void Gen::MultiDuctor::merge(const output_queue &newframes)
 {
-    for (auto frame : newframes)
-    {
-        if (!frame)
-        {
+    for (auto frame : newframes) {
+        if (!frame) {
             continue;
         }  // skip internal EOS
         auto traces = frame->traces();
-        if (!traces)
-        {
+        if (!traces) {
             continue;
         }
-        if (traces->empty())
-        {
+        if (traces->empty()) {
             continue;
         }
 
@@ -464,21 +401,16 @@ void Gen::MultiDuctor::merge(const output_queue &newframes)
     }
 }
 
-bool Gen::MultiDuctor::operator()(const input_pointer &depo,
-                                  output_queue &outframes)
+bool Gen::MultiDuctor::operator()(const input_pointer &depo, output_queue &outframes)
 {
     // end of stream processing
-    if (!depo)
-    {
+    if (!depo) {
         // std::cerr << "Gen::MultiDuctor: end of stream processing\n";
         maybe_extract(depo, outframes);
         outframes.push_back(nullptr);  // pass on EOS marker
-        if (!m_frame_buffer.empty())
-        {
-            std::cerr << "Gen::MultiDuctor: purging " << m_frame_buffer.size()
-                      << " frames at EOS\n";
-            for (auto frame : m_frame_buffer)
-            {
+        if (!m_frame_buffer.empty()) {
+            std::cerr << "Gen::MultiDuctor: purging " << m_frame_buffer.size() << " frames at EOS\n";
+            for (auto frame : m_frame_buffer) {
                 dump_frame(frame, "\t");
             }
             m_frame_buffer.clear();
@@ -489,12 +421,9 @@ bool Gen::MultiDuctor::operator()(const input_pointer &depo,
     // check each rule in the chain to find match
     bool all_okay = true;
     int count = 0;
-    for (auto &chain : m_chains)
-    {
-        for (auto &sd : chain)
-        {
-            if (!sd.check(depo))
-            {
+    for (auto &chain : m_chains) {
+        for (auto &sd : chain) {
+            if (!sd.check(depo)) {
                 continue;
             }
 
@@ -511,18 +440,13 @@ bool Gen::MultiDuctor::operator()(const input_pointer &depo,
             break;
         }
     }
-    if (count == 0)
-    {
-        std::cerr
-            << "Gen::MultiDuctor: warning: no appropriate Ductor for depo at: "
-            << depo->pos() << std::endl;
+    if (count == 0) {
+        std::cerr << "Gen::MultiDuctor: warning: no appropriate Ductor for depo at: " << depo->pos() << std::endl;
     }
 
     maybe_extract(depo, outframes);
-    if (outframes.size())
-    {
-        std::cerr << "Gen::MultiDuctor: returning " << outframes.size()
-                  << " frames\n";
+    if (outframes.size()) {
+        std::cerr << "Gen::MultiDuctor: returning " << outframes.size() << " frames\n";
     }
     return true;
 }

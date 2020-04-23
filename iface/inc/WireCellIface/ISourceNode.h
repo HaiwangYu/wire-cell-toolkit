@@ -6,12 +6,10 @@
 #include <boost/any.hpp>
 #include <vector>
 
-namespace WireCell
-{
+namespace WireCell {
     /** A node which acts as a source.
- */
-    class ISourceNodeBase : public INode
-    {
+     */
+    class ISourceNodeBase : public INode {
        public:
         typedef std::shared_ptr<ISourceNodeBase> pointer;
 
@@ -23,8 +21,7 @@ namespace WireCell
     };
 
     template <typename OutputType>
-    class ISourceNode : public ISourceNodeBase
-    {
+    class ISourceNode : public ISourceNodeBase {
        public:
         typedef OutputType output_type;
 
@@ -44,8 +41,7 @@ namespace WireCell
         {
             output_pointer out;
             bool ok = (*this)(out);
-            if (!ok)
-                return false;
+            if (!ok) return false;
             anyout = out;
 
             return true;
@@ -55,10 +51,7 @@ namespace WireCell
         virtual bool operator()(output_pointer &out) = 0;
 
         // Return the names of the types this node takes as output.
-        virtual std::vector<std::string> output_types()
-        {
-            return std::vector<std::string>{typeid(output_type).name()};
-        }
+        virtual std::vector<std::string> output_types() { return std::vector<std::string>{typeid(output_type).name()}; }
     };
 
 }  // namespace WireCell

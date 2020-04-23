@@ -4,10 +4,8 @@
 #include <functional>
 #include "WireCellUtil/IComponent.h"
 
-namespace WireCell
-{
-    class IRandom : public IComponent<IRandom>
-    {
+namespace WireCell {
+    class IRandom : public IComponent<IRandom> {
        public:
         virtual ~IRandom();
 

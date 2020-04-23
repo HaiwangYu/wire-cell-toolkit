@@ -7,8 +7,7 @@
 
 #include <iostream>
 
-WIRECELL_FACTORY(DepoSplat, WireCell::Gen::DepoSplat, WireCell::IDuctor,
-                 WireCell::IConfigurable)
+WIRECELL_FACTORY(DepoSplat, WireCell::Gen::DepoSplat, WireCell::IDuctor, WireCell::IConfigurable)
 
 using namespace WireCell;
 
@@ -20,8 +19,7 @@ Gen::DepoSplat::DepoSplat()
 
 Gen::DepoSplat::~DepoSplat() {}
 
-ITrace::vector Gen::DepoSplat::process_face(IAnodeFace::pointer face,
-                                            const IDepo::vector &depos)
+ITrace::vector Gen::DepoSplat::process_face(IAnodeFace::pointer face, const IDepo::vector &depos)
 
 {
     const int time_offset = 2;  // # of ticks
@@ -32,12 +30,10 @@ ITrace::vector Gen::DepoSplat::process_face(IAnodeFace::pointer face,
     std::unordered_map<int, std::vector<float>> chch;
 
     // tick-edged bins
-    Binning tbins(m_readout_time / m_tick, m_start_time,
-                  m_start_time + m_readout_time);
+    Binning tbins(m_readout_time / m_tick, m_start_time, m_start_time + m_readout_time);
 
     int iplane = -1;
-    for (auto plane : face->planes())
-    {
+    for (auto plane : face->planes()) {
         ++iplane;
 
         const Pimpos *pimpos = plane->pimpos();
@@ -54,8 +50,7 @@ ITrace::vector Gen::DepoSplat::process_face(IAnodeFace::pointer face,
         //           << "#depos:" << depos.size() << "\n";
 
         int idepo = 0;
-        for (auto depo : depos)
-        {
+        for (auto depo : depos) {
             // const double tsig = depo->extent_long() * difusion_scaler;
             // const double psig = depo->extent_tran() * difusion_scaler;
 
@@ -64,18 +59,14 @@ ITrace::vector Gen::DepoSplat::process_face(IAnodeFace::pointer face,
 
             // l->info("dirft: sigma_L: {} sigma_T: {}", sigma_L, sigma_T);
 
-            if (true)
-            {
+            if (true) {
                 int nrebin = 1;
-                double time_slice_width = nrebin * m_drift_speed * m_tick;  // units::mm
-                double add_sigma_L = 1.428249 * time_slice_width / nrebin /
-                                     (m_tick / units::us);  // units::mm
-                sigma_L = sqrt(pow(depo->extent_long(), 2) +
-                               pow(add_sigma_L, 2));  // / time_slice_width;
+                double time_slice_width = nrebin * m_drift_speed * m_tick;                         // units::mm
+                double add_sigma_L = 1.428249 * time_slice_width / nrebin / (m_tick / units::us);  // units::mm
+                sigma_L = sqrt(pow(depo->extent_long(), 2) + pow(add_sigma_L, 2));  // / time_slice_width;
             }
 
-            if (true)
-            {
+            if (true) {
                 double add_sigma_T = wbins.binsize();
                 if (iplane == 0)
                     add_sigma_T *= (0.402993 * 0.3);
@@ -83,8 +74,7 @@ ITrace::vector Gen::DepoSplat::process_face(IAnodeFace::pointer face,
                     add_sigma_T *= (0.402993 * 0.5);
                 else if (iplane == 2)
                     add_sigma_T *= (0.188060 * 0.2);
-                sigma_T = sqrt(pow(depo->extent_tran(), 2) +
-                               pow(add_sigma_T, 2));  // / wbins.binsize();
+                sigma_T = sqrt(pow(depo->extent_tran(), 2) + pow(add_sigma_T, 2));  // / wbins.binsize();
             }
 
             // l->info("final: sigma_L: {} sigma_T: {}", sigma_L, sigma_T);
@@ -104,17 +94,14 @@ ITrace::vector Gen::DepoSplat::process_face(IAnodeFace::pointer face,
             const int tend = std::min(tbins.bin(tcen + twid) + 1,
                                       tbins.nbins() - 1);  //  to enforce here?
 
-            if (tbeg > tend)
-                continue;
+            if (tbeg > tend) continue;
 
-            if (tbeg < 0)
-                continue;
+            if (tbeg < 0) continue;
 
             Gen::GausDesc time_desc(tcen, tsig);
             Gen::GausDesc pitch_desc(pcen, psig);
 
-            auto gd =
-                std::make_shared<Gen::GaussianDiffusion>(depo, time_desc, pitch_desc);
+            auto gd = std::make_shared<Gen::GaussianDiffusion>(depo, time_desc, pitch_desc);
             gd->set_sampling(tbins, wbins, m_nsigma, 0, 1);
             const auto patch = gd->patch();
 
@@ -135,22 +122,17 @@ ITrace::vector Gen::DepoSplat::process_face(IAnodeFace::pointer face,
             // {}, {}", gd->toffset_bin(), gd->poffset_bin()); l->info("patch bins:
             // {}, {}", patch.cols(), patch.rows()); l->info("\n");
 
-            for (int ip = pbeg; ip < pend; ++ip)
-            {
+            for (int ip = pbeg; ip < pend; ++ip) {
                 auto irow = ip - gd->poffset_bin();
-                if (irow < 0 or irow >= patch.rows())
-                    continue;
+                if (irow < 0 or irow >= patch.rows()) continue;
                 auto iwire = wires[ip];
                 auto &charge = chch[iwire->channel()];
-                if ((int) charge.size() < tend)
-                {
+                if ((int) charge.size() < tend) {
                     charge.resize(tend, 0.0);
                 }
-                for (int it = tbeg; it < tend; ++it)
-                {
+                for (int it = tbeg; it < tend; ++it) {
                     auto icol = it - gd->toffset_bin() + time_offset;
-                    if (icol < 0 or icol >= patch.cols())
-                        continue;
+                    if (icol < 0 or icol >= patch.cols()) continue;
                     charge[it] += std::abs(patch(irow, icol) * charge_scaler);
                 }
             }
@@ -160,8 +142,7 @@ ITrace::vector Gen::DepoSplat::process_face(IAnodeFace::pointer face,
 
     // make output traces
     ITrace::vector traces;
-    for (auto &chchit : chch)
-    {
+    for (auto &chchit : chch) {
         const int chid = chchit.first;
         auto &chv = chchit.second;
         auto trace = std::make_shared<SimpleTrace>(chid, 0, chv);

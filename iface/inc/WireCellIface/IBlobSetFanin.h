@@ -4,13 +4,11 @@
 #include "WireCellIface/IBlobSet.h"
 #include "WireCellIface/IFaninNode.h"
 
-namespace WireCell
-{
+namespace WireCell {
     /** A blob set fan-in component takes blobs sets on N input ports
- * and produces a vector of them on its output port.
- */
-    class IBlobSetFanin : public IFaninNode<IBlobSet, IBlobSet, 0>
-    {
+     * and produces a vector of them on its output port.
+     */
+    class IBlobSetFanin : public IFaninNode<IBlobSet, IBlobSet, 0> {
        public:
         virtual ~IBlobSetFanin();
 

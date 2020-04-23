@@ -24,8 +24,8 @@ int main()
         Vector zdir(0, 0, 1);
         Point pt(0 * units::mm, 3.92772 * units::mm, 5.34001 * units::mm);
         double dot = zdir.dot(pt - origin);
-        cerr << "origin=" << origin / units::mm << ", zdir=" << zdir
-             << ", pt=" << pt / units::mm << " dot=" << dot / units::mm << endl;
+        cerr << "origin=" << origin / units::mm << ", zdir=" << zdir << ", pt=" << pt / units::mm
+             << " dot=" << dot / units::mm << endl;
     }
 
     Point p1(1, 2, 3);
@@ -49,16 +49,14 @@ int main()
 
     double eps = (1 - 1e-11);
     Point peps = p1 * eps;
-    cerr << "Epsilon=" << std::setprecision(12) << eps << " peps=" << peps
-         << endl;
+    cerr << "Epsilon=" << std::setprecision(12) << eps << " peps=" << peps << endl;
     PointSet pset;
     pset.insert(p1);
     pset.insert(p2);
     pset.insert(p3);
     pset.insert(ps);
     pset.insert(peps);
-    for (auto pit = pset.begin(); pit != pset.end(); ++pit)
-    {
+    for (auto pit = pset.begin(); pit != pset.end(); ++pit) {
         cerr << *pit << endl;
     }
     AssertMsg(pset.size() == 2, "tolerance set broken");
@@ -69,8 +67,7 @@ int main()
 
     Point foo;
     /// temporarily make this a really big loop to test no memory leakage
-    for (int ind = 0; ind < 1000; ++ind)
-    {
+    for (int ind = 0; ind < 1000; ++ind) {
         foo = p1;
         foo = p2;
         foo = p3;

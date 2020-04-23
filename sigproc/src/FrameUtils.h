@@ -8,10 +8,8 @@
 
 #include <vector>
 
-namespace wct
-{  // eventually make this namespace
-    namespace sigproc
-    {  // pattern global.
+namespace wct {          // eventually make this namespace
+    namespace sigproc {  // pattern global.
 
         // Print some info to cerr about frame
         void dump_frame(WireCell::IFrame::pointer frame);
@@ -28,15 +26,13 @@ namespace wct
         // Return a baseline calculated on a collection of traces as
         // the most probable binned sample value.  By default use a 12
         // bit ADC Binning.  The index of the binning is returned.
-        int maxcount_baseline(
-            const WireCell::ITrace::vector &traces,
-            const WireCell::Binning &binning = WireCell::Binning(4096, 0, 4096));
+        int maxcount_baseline(const WireCell::ITrace::vector &traces,
+                              const WireCell::Binning &binning = WireCell::Binning(4096, 0, 4096));
 
         // Get the tagged trace indices and resolve them to traces.
         // If no trace tags match but the given tag matches the frame
         // tag then all traces are returned.
-        WireCell::ITrace::vector tagged_traces(WireCell::IFrame::pointer frame,
-                                               WireCell::IFrame::tag_t tag);
+        WireCell::ITrace::vector tagged_traces(WireCell::IFrame::pointer frame, WireCell::IFrame::tag_t tag);
 
     }  // namespace sigproc
 }  // namespace wct

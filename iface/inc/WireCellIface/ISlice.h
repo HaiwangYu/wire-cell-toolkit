@@ -19,10 +19,8 @@ application-dependent.
 
 #include <unordered_map>
 
-namespace WireCell
-{
-    class ISlice : public IData<ISlice>
-    {
+namespace WireCell {
+    class ISlice : public IData<ISlice> {
        public:
         virtual ~ISlice();
 

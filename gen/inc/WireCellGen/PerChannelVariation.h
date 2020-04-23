@@ -25,12 +25,9 @@
 
 #include <unordered_set>
 
-namespace WireCell
-{
-    namespace Gen
-    {
-        class PerChannelVariation : public IFrameFilter, public IConfigurable
-        {
+namespace WireCell {
+    namespace Gen {
+        class PerChannelVariation : public IFrameFilter, public IConfigurable {
            public:
             PerChannelVariation();
             virtual ~PerChannelVariation();

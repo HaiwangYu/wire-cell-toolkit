@@ -13,19 +13,14 @@
 
 #include <unordered_map>
 
-namespace WireCell
-{
-    namespace Gen
-    {
-        class StaticChannelStatus : public IChannelStatus, public IConfigurable
-        {
+namespace WireCell {
+    namespace Gen {
+        class StaticChannelStatus : public IChannelStatus, public IConfigurable {
            public:
-            struct ChannelStatus
-            {
+            struct ChannelStatus {
                 double gain;
                 double shaping;
-                ChannelStatus(double g = 14.0 * units::mV / units::fC,
-                              double s = 2.0 * units::us)
+                ChannelStatus(double g = 14.0 * units::mV / units::fC, double s = 2.0 * units::us)
                   : gain(g)
                   , shaping(s)
                 {

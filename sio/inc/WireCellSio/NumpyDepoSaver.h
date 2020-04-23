@@ -6,22 +6,17 @@
 #include "WireCellIface/IConfigurable.h"
 #include "WireCellIface/IDepoFilter.h"
 
-namespace WireCell
-{
-    namespace Sio
-    {
+namespace WireCell {
+    namespace Sio {
         // This saver will buffer depos in memory until EOS is received.
-        class NumpyDepoSaver : public WireCell::IDepoFilter,
-                               public WireCell::IConfigurable
-        {
+        class NumpyDepoSaver : public WireCell::IDepoFilter, public WireCell::IConfigurable {
            public:
             NumpyDepoSaver();
             virtual ~NumpyDepoSaver();
 
             /// IDepoFilter.  This works by buffering depos and saving
             /// them at the same time a frame is saved.
-            virtual bool operator()(const WireCell::IDepo::pointer &indepo,
-                                    WireCell::IDepo::pointer &outdepo);
+            virtual bool operator()(const WireCell::IDepo::pointer &indepo, WireCell::IDepo::pointer &outdepo);
 
             /// IConfigurable
             virtual WireCell::Configuration default_configuration() const;

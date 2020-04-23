@@ -3,10 +3,8 @@
 
 #include "WireCellUtil/IComponent.h"
 
-namespace WireCell
-{
-    class ITerminal : virtual public IComponent<ITerminal>
-    {
+namespace WireCell {
+    class ITerminal : virtual public IComponent<ITerminal> {
        public:
         virtual ~ITerminal();
 

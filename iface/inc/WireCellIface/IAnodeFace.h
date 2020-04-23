@@ -23,10 +23,8 @@
 #include "WireCellUtil/IComponent.h"
 #include "WireCellUtil/RayGrid.h"
 
-namespace WireCell
-{
-    class IAnodeFace : public IComponent<IAnodeFace>
-    {
+namespace WireCell {
+    class IAnodeFace : public IComponent<IAnodeFace> {
        public:
         virtual ~IAnodeFace();
 

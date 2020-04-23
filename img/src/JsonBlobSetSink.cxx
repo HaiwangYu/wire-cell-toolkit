@@ -6,8 +6,7 @@
 
 #include <fstream>
 
-WIRECELL_FACTORY(JsonBlobSetSink, WireCell::Img::JsonBlobSetSink,
-                 WireCell::IBlobSetSink, WireCell::IConfigurable)
+WIRECELL_FACTORY(JsonBlobSetSink, WireCell::Img::JsonBlobSetSink, WireCell::IBlobSetSink, WireCell::IConfigurable)
 
 using namespace WireCell;
 
@@ -43,15 +42,13 @@ WireCell::Configuration Img::JsonBlobSetSink::default_configuration() const
 
 bool Img::JsonBlobSetSink::operator()(const IBlobSet::pointer &bs)
 {
-    if (!bs)
-    {
+    if (!bs) {
         l->debug("JsonBlobSetSink: eos");
         return true;
     }
 
     const auto &blobs = bs->blobs();
-    if (blobs.empty())
-    {
+    if (blobs.empty()) {
         l->info("JsonBlobSetSink: no blobs");
         return true;
     }
@@ -65,22 +62,18 @@ bool Img::JsonBlobSetSink::operator()(const IBlobSet::pointer &bs)
     l->debug(
         "JsonBlobSetSink: frame:{}, slice:{} set:{} time:{} ms, start={} ms "
         "x:{} nblobs:{}",
-        frame->ident(), slice->ident(), bs->ident(), time / units::ms,
-        start / units::ms, x, blobs.size());
+        frame->ident(), slice->ident(), bs->ident(), time / units::ms, start / units::ms, x, blobs.size());
 
     Json::Value jblobs = Json::arrayValue;
 
-    for (const auto &iblob : blobs)
-    {
-        if (m_face >= 0 and m_face != iblob->face()->ident())
-        {
+    for (const auto &iblob : blobs) {
+        if (m_face >= 0 and m_face != iblob->face()->ident()) {
             continue;  // filter
         }
         const auto &coords = iblob->face()->raygrid();
         const auto &blob = iblob->shape();
         Json::Value jcorners = Json::arrayValue;
-        for (const auto &corner : blob.corners())
-        {
+        for (const auto &corner : blob.corners()) {
             Json::Value jcorner = Json::arrayValue;
             auto pt = coords.ray_crossing(corner.first, corner.second);
             jcorner.append(x);
@@ -103,13 +96,11 @@ bool Img::JsonBlobSetSink::operator()(const IBlobSet::pointer &bs)
     top["blobs"] = jblobs;
 
     std::string fname = m_filename;
-    if (m_filename.find("%") != std::string::npos)
-    {
+    if (m_filename.find("%") != std::string::npos) {
         fname = String::format(m_filename, bs->ident());
     }
     std::ofstream fstr(fname);
-    if (!fstr)
-    {
+    if (!fstr) {
         l->error("Failed to open for writing: %s", fname);
         return false;
     }

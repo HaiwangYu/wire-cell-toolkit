@@ -7,14 +7,12 @@ using namespace std;
 int main()
 {
     {
-        std::vector<short> adcv{-1, 0, 0, 1, 1, 2, 3, 4, 4, 4, 5,
-                                6, 4, 3, 4, 5, 6, 7, 7, 6, 5};
+        std::vector<short> adcv{-1, 0, 0, 1, 1, 2, 3, 4, 4, 4, 5, 6, 4, 3, 4, 5, 6, 7, 7, 6, 5};
         auto mf = Waveform::most_frequent(adcv);
         cerr << mf << endl;
     }
     {
-        std::vector<short> adcv{-1, 0, 0, -1, -1, 2, 3, 4, 4, -1, -1,
-                                5, 6, 4, 3, 4, 5, 6, 7, 7, 6, 5};
+        std::vector<short> adcv{-1, 0, 0, -1, -1, 2, 3, 4, 4, -1, -1, 5, 6, 4, 3, 4, 5, 6, 7, 7, 6, 5};
         auto mf = Waveform::most_frequent(adcv);
         cerr << mf << endl;
     }

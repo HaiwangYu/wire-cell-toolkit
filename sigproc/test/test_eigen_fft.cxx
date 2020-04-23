@@ -15,13 +15,11 @@ int main()
     // manipulate freqvec
     fft.inv(timevec, freqvec);
 
-    for (auto x : timevec)
-    {
+    for (auto x : timevec) {
         cerr << x << " ";
     }
     cerr << endl;
-    for (auto x : freqvec)
-    {
+    for (auto x : freqvec) {
         cerr << x << " ";
     }
     cerr << endl;

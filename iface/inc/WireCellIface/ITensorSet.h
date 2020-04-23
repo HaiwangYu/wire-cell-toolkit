@@ -4,10 +4,8 @@
 #include "WireCellIface/ITensor.h"
 #include "WireCellUtil/Configuration.h"
 
-namespace WireCell
-{
-    class ITensorSet : public IData<ITensorSet>
-    {
+namespace WireCell {
+    class ITensorSet : public IData<ITensorSet> {
        public:
         virtual ~ITensorSet() {}
 

@@ -23,8 +23,7 @@
 using namespace WireCell;
 using namespace std;
 
-struct Meta
-{
+struct Meta {
     // TApplication* theApp = 0;
 
     TCanvas *canvas;
@@ -48,8 +47,7 @@ struct Meta
     }
 };
 
-const double t0 =
-    1 * units::s;  // put it way out in left field to catch any offset errors
+const double t0 = 1 * units::s;  // put it way out in left field to catch any offset errors
 // const double t0 = 0*units::s;
 const int nticks = 9600;
 const double tick = 0.5 * units::us;
@@ -68,8 +66,7 @@ Binning tbins(nticks, t0, t0 + readout_time);
 // we have field responses calculated.
 const int npmwires = 10;
 
-void test_track(Meta &meta, double charge, double track_time,
-                const Ray &track_ray, double stepsize,
+void test_track(Meta &meta, double charge, double track_time, const Ray &track_ray, double stepsize,
                 IRandom::pointer fluctuate)
 {
     const int ndiffision_sigma = 3.0;
@@ -89,8 +86,7 @@ void test_track(Meta &meta, double charge, double track_time,
     const double xstop = pimpos.origin()[0];
 
     meta.em("begin adding Depp's");
-    for (double dist = 0.0; dist < track_length; dist += stepsize)
-    {
+    for (double dist = 0.0; dist < track_length; dist += stepsize) {
         auto pt = track_start + dist * track_dir;
         const double delta_x = pt.x() - xstop;
         const double drift_time = delta_x / drift_speed;
@@ -104,8 +100,7 @@ void test_track(Meta &meta, double charge, double track_time,
 
         const double tmpcm2 = 2 * DL * drift_time / units::centimeter2;
         const double sigmaL = sqrt(tmpcm2) * units::centimeter / drift_speed;
-        const double sigmaT =
-            sqrt(2 * DT * drift_time / units::centimeter2) * units::centimeter2;
+        const double sigmaT = sqrt(2 * DT * drift_time / units::centimeter2) * units::centimeter2;
 
         auto depo = std::make_shared<SimpleDepo>(time, pt, charge);
         bd.add(depo, sigmaL, sigmaT);
@@ -116,61 +111,50 @@ void test_track(Meta &meta, double charge, double track_time,
 
     meta.em("begin swiping wires");
 
-    for (int iwire = 0; iwire < nwires; ++iwire)
-    {
+    for (int iwire = 0; iwire < nwires; ++iwire) {
         const int min_wire = std::max(iwire - npmwires, 0);
         const int max_wire = std::min(iwire + npmwires, nwires - 1);
 
         const int min_impact = std::max(pimpos.wire_impacts(min_wire).first, 0);
-        const int max_impact =
-            std::min(pimpos.wire_impacts(max_wire).second, ibins.nbins());
+        const int max_impact = std::min(pimpos.wire_impacts(max_wire).second, ibins.nbins());
 
         std::pair<double, double> time_span(0, 0);
         std::vector<Gen::ImpactData::pointer> collect;
 
         std::set<int> seen;
-        for (int imp = min_impact; imp <= max_impact; ++imp)
-        {
+        for (int imp = min_impact; imp <= max_impact; ++imp) {
             auto impact_data = bd.impact_data(imp);
-            if (!impact_data)
-            {
+            if (!impact_data) {
                 continue;
             }
 
             const int impnum = impact_data->impact_number();
-            if (seen.find(impnum) != seen.end())
-            {
-                cerr << "Got duplicate impact number: " << impnum << " in wire "
-                     << iwire << endl;
+            if (seen.find(impnum) != seen.end()) {
+                cerr << "Got duplicate impact number: " << impnum << " in wire " << iwire << endl;
             }
             seen.insert(impnum);
-            if (iwire == 974)
-            {
+            if (iwire == 974) {
                 cerr << "collecting: " << iwire << " " << impnum << endl;
             }
 
             auto ts = impact_data->span(ndiffision_sigma);
-            if (collect.empty())
-            {
+            if (collect.empty()) {
                 time_span = ts;
             }
-            else
-            {
+            else {
                 time_span.first = std::min(time_span.first, ts.first);
                 time_span.second = std::max(time_span.second, ts.second);
             }
             collect.push_back(impact_data);
         }
 
-        if (collect.empty())
-        {
+        if (collect.empty()) {
             continue;
         }
 
         // bd.erase(0, min_impact);
 
-        if (false)
-        {
+        if (false) {
             cerr << "Not histogramming\n";
             continue;
         }
@@ -196,42 +180,35 @@ void test_track(Meta &meta, double charge, double track_time,
         Assert(max_pitch > min_pitch);
         Assert(npbins > 1);
 
-        TH2F hist(Form("hwire%04d", iwire),
-                  Form("Diffused charge for wire %d", iwire), ntbins,
-                  (min_time - t0) / units::us, (max_time - t0) / units::us, npbins,
-                  min_pitch / units::mm, max_pitch / units::mm);
+        TH2F hist(Form("hwire%04d", iwire), Form("Diffused charge for wire %d", iwire), ntbins,
+                  (min_time - t0) / units::us, (max_time - t0) / units::us, npbins, min_pitch / units::mm,
+                  max_pitch / units::mm);
         hist.SetXTitle("time (us)");
         hist.SetYTitle("pitch (mm)");
 
-        TH1F hp(Form("pwire%04d", iwire), Form("Pitches for wire %d", iwire),
-                npbins, min_pitch / units::mm, max_pitch / units::mm);
-        TH1F ht(Form("twire%04d", iwire), Form("Times for wire %d", iwire), ntbins,
-                (min_time - t0) / units::us, (max_time - t0) / units::us);
+        TH1F hp(Form("pwire%04d", iwire), Form("Pitches for wire %d", iwire), npbins, min_pitch / units::mm,
+                max_pitch / units::mm);
+        TH1F ht(Form("twire%04d", iwire), Form("Times for wire %d", iwire), ntbins, (min_time - t0) / units::us,
+                (max_time - t0) / units::us);
 
-        for (auto idptr : collect)
-        {
+        for (auto idptr : collect) {
             auto wave = idptr->waveform();
             Assert(wave.size() == nticks);
             const int impact = idptr->impact_number();
             const double pitch_dist = ibins.center(impact);
-            if (iwire == 974)
-            {
-                cerr << iwire << " impact=" << impact << " pitch=" << pitch_dist
-                     << endl;
+            if (iwire == 974) {
+                cerr << iwire << " impact=" << impact << " pitch=" << pitch_dist << endl;
             }
             auto mm = idptr->span(ndiffision_sigma);
             const int min_tick = tbins.bin(mm.first);
             const int max_tick = tbins.bin(mm.second);
             // cerr << "impact:" << impact << " pitch="<<pitch_dist/units::mm << "
             // ticks:["<<min_tick<<","<<max_tick<<"]\n";
-            for (int itick = min_tick; itick <= max_tick; ++itick)
-            {
+            for (int itick = min_tick; itick <= max_tick; ++itick) {
                 const double time = tbins.center(itick);
-                if (!tbins.inside(time))
-                {
+                if (!tbins.inside(time)) {
                     cerr << "OOB time: " << time / units::us << "us tick:" << itick
-                         << " impact:" << idptr->impact_number()
-                         << " pitch:" << pitch_dist / units::mm << "mm\n";
+                         << " impact:" << idptr->impact_number() << " pitch:" << pitch_dist / units::mm << "mm\n";
                 }
 
                 Assert(tbins.inside(time));
@@ -273,8 +250,7 @@ int main(int argc, char *argv[])
 
     const double track_time = t0 + 10 * units::ns;
     const double delta = 100 * units::mm;
-    Ray track_ray(Point(1 * units::m - delta, 0, -delta),
-                  Point(1 * units::m + delta, 0, +delta));
+    Ray track_ray(Point(1 * units::m - delta, 0, -delta), Point(1 * units::m + delta, 0, +delta));
     const double stepsize = 1 * units::mm;
     const double charge = 1e5;
 

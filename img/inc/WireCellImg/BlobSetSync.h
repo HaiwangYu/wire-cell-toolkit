@@ -8,12 +8,9 @@
 #include "WireCellIface/IConfigurable.h"
 #include "WireCellUtil/Logging.h"
 
-namespace WireCell
-{
-    namespace Img
-    {
-        class BlobSetSync : public IBlobSetFanin, public IConfigurable
-        {
+namespace WireCell {
+    namespace Img {
+        class BlobSetSync : public IBlobSetFanin, public IConfigurable {
            public:
             BlobSetSync();
             virtual ~BlobSetSync();

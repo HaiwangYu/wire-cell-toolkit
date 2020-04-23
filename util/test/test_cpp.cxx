@@ -4,8 +4,7 @@
 #include <string>
 #include <vector>
 
-struct Person
-{
+struct Person {
     std::string name;
     int id;
 };
@@ -22,8 +21,7 @@ int main()
     std::vector<Person> people;
     fill_people(people);
 
-    for (auto peep : people)
-    {
+    for (auto peep : people) {
         std::cout << " #" << peep.id << ": " << peep.name << std::endl;
     }
 }

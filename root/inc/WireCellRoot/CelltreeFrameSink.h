@@ -13,19 +13,15 @@
 
 #include <string>
 
-namespace WireCell
-{
-    namespace Root
-    {
-        class CelltreeFrameSink : public IFrameFilter, public IConfigurable
-        {
+namespace WireCell {
+    namespace Root {
+        class CelltreeFrameSink : public IFrameFilter, public IConfigurable {
            public:
             CelltreeFrameSink();
             virtual ~CelltreeFrameSink();
 
             /// Frame sink interface
-            virtual bool operator()(const IFrame::pointer &frame,
-                                    IFrame::pointer &out_frame);
+            virtual bool operator()(const IFrame::pointer &frame, IFrame::pointer &out_frame);
 
             /// Configurable interface
             virtual void configure(const WireCell::Configuration &config);

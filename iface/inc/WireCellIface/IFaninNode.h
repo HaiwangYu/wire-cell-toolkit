@@ -6,14 +6,12 @@
 #include <boost/any.hpp>
 #include <vector>
 
-namespace WireCell
-{
+namespace WireCell {
     /** A node which fans-in N data objects of the same, given
- * InputType to produce the given OutputType.
- */
+     * InputType to produce the given OutputType.
+     */
 
-    class IFaninNodeBase : public INode
-    {
+    class IFaninNodeBase : public INode {
        public:
         typedef std::shared_ptr<IFaninNodeBase> pointer;
 
@@ -32,8 +30,7 @@ namespace WireCell
 
     // This converts between any and typed.
     template <typename InputType, typename OutputType, int FaninMultiplicity = 3>
-    class IFaninNode : public IFaninNodeBase
-    {
+    class IFaninNode : public IFaninNodeBase {
        public:
         typedef InputType input_type;
         typedef OutputType output_type;
@@ -46,15 +43,13 @@ namespace WireCell
         virtual bool operator()(const any_vector &anyv, boost::any &anyout)
         {
             input_vector invec;
-            for (auto a : anyv)
-            {
+            for (auto a : anyv) {
                 auto in = boost::any_cast<input_pointer>(a);
                 invec.push_back(in);
             }
             output_pointer out;
             bool ok = (*this)(invec, out);
-            if (ok)
-            {
+            if (ok) {
                 anyout = out;
             }
             return ok;
@@ -68,15 +63,11 @@ namespace WireCell
         // construction time, this needs to be overridden.
         virtual std::vector<std::string> input_types()
         {
-            std::vector<std::string> ret(FaninMultiplicity,
-                                         std::string(typeid(input_type).name()));
+            std::vector<std::string> ret(FaninMultiplicity, std::string(typeid(input_type).name()));
             return ret;
         }
         // Return the names of the types this node produces as output.
-        virtual std::vector<std::string> output_types()
-        {
-            return std::vector<std::string>{typeid(output_type).name()};
-        }
+        virtual std::vector<std::string> output_types() { return std::vector<std::string>{typeid(output_type).name()}; }
     };
 
 }  // namespace WireCell

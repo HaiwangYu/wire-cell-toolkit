@@ -39,8 +39,7 @@ void test3D(MultiPdf &pdf, bool interactive)
 
     const Ray &bbox = params->bounds();
 
-    TH1F *frame = pdf.canvas.DrawFrame(bbox.first.z(), bbox.first.y(),
-                                       bbox.second.z(), bbox.second.y());
+    TH1F *frame = pdf.canvas.DrawFrame(bbox.first.z(), bbox.first.y(), bbox.second.z(), bbox.second.y());
     frame->SetTitle("red=U, blue=V, +X (-drift) direction into page");
     frame->SetXTitle("Transverse Z direction");
     frame->SetYTitle("Transverse Y (W) direction");
@@ -54,8 +53,7 @@ void test3D(MultiPdf &pdf, bool interactive)
     size_t n_wires[3] = {u_wires.size(), v_wires.size(), w_wires.size()};
 
     double max_width = 5;
-    for (auto wit = wires->begin(); wit != wires->end(); ++wit)
-    {
+    for (auto wit = wires->begin(); wit != wires->end(); ++wit) {
         IWire::pointer wire = *wit;
         int iplane = wire->planeid().index();
         int index = wire->index();
@@ -65,8 +63,7 @@ void test3D(MultiPdf &pdf, bool interactive)
 
         const Ray ray = wire->ray();
 
-        TArrow *a_wire = new TArrow(ray.first.z(), ray.first.y(), ray.second.z(),
-                                    ray.second.y(), 0.01, "|>");
+        TArrow *a_wire = new TArrow(ray.first.z(), ray.first.y(), ray.second.z(), ray.second.y(), 0.01, "|>");
         a_wire->SetLineColor(colors[iplane]);
         a_wire->SetLineWidth(width);
         a_wire->Draw();

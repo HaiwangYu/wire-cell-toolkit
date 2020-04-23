@@ -4,8 +4,7 @@
 #include <boost/iterator/iterator_categories.hpp>
 #include <boost/iterator/iterator_facade.hpp>
 
-namespace WireCell
-{
+namespace WireCell {
     // template <typename Callable, typename Value>
     // struct NullGenerator : public Callable {
     // 	NullGenerator() {}
@@ -17,21 +16,19 @@ namespace WireCell
     // };
 
     /** A generator iterator using a Callable.
- *
- * Requirements on Callable
- * - returns Value.
- * - evaluates as false when it is not exhausted, true otherwise.
- * - copy-by-value, copies are independent.
- * - instances must be testable for equality.
- *
- * Inspired by:
- * http://stackoverflow.com/questions/27604201/implement-lazy-generator-as-forward-iterator-in-c
- */
+     *
+     * Requirements on Callable
+     * - returns Value.
+     * - evaluates as false when it is not exhausted, true otherwise.
+     * - copy-by-value, copies are independent.
+     * - instances must be testable for equality.
+     *
+     * Inspired by:
+     * http://stackoverflow.com/questions/27604201/implement-lazy-generator-as-forward-iterator-in-c
+     */
     template <typename Callable, typename Value>
     struct GeneratorIter
-      : public boost::iterator_facade<GeneratorIter<Callable, Value>, Value,
-                                      boost::forward_traversal_tag>
-    {
+      : public boost::iterator_facade<GeneratorIter<Callable, Value>, Value, boost::forward_traversal_tag> {
         GeneratorIter(const Callable &func)
           : count(0)
           , func(func)
@@ -41,8 +38,7 @@ namespace WireCell
         }
         void advance()
         {
-            if (func)
-            {
+            if (func) {
                 last_val = func();
             }
         }

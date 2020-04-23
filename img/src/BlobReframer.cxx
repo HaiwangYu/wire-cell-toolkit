@@ -11,8 +11,7 @@
 #include "WireCellIface/SimpleTrace.h"
 #include "WireCellUtil/NamedFactory.h"
 
-WIRECELL_FACTORY(BlobReframer, WireCell::Img::BlobReframer,
-                 WireCell::IClusterFramer, WireCell::IConfigurable)
+WIRECELL_FACTORY(BlobReframer, WireCell::Img::BlobReframer, WireCell::IClusterFramer, WireCell::IConfigurable)
 
 using namespace WireCell;
 
@@ -41,12 +40,10 @@ WireCell::Configuration Img::BlobReframer::default_configuration() const
 }
 
 // cluster goes in, frame goes out.
-bool Img::BlobReframer::operator()(const input_pointer &in,
-                                   output_pointer &out)
+bool Img::BlobReframer::operator()(const input_pointer &in, output_pointer &out)
 {
     out = nullptr;
-    if (!in)
-    {
+    if (!in) {
         return true;  // EOS
     }
 
@@ -54,19 +51,16 @@ bool Img::BlobReframer::operator()(const input_pointer &in,
 
     WireCell::IFrame::pointer iframe;
     std::unordered_map<int, ITrace::ChargeSequence> map_charges;
-    for (auto iblob : oftype<IBlob::pointer>(grind))
-    {
+    for (auto iblob : oftype<IBlob::pointer>(grind)) {
         auto islice = iblob->slice();
-        if (!iframe)
-        {
+        if (!iframe) {
             // typical values for protoDUNE
             // period: 0.5us, nticks: 6000
             iframe = islice->frame();
             m_period = iframe->tick();
             {
                 std::vector<int> tbins;
-                for (auto trace : *iframe->traces())
-                {
+                for (auto trace : *iframe->traces()) {
                     const int tbin = trace->tbin();
                     const int nbins = trace->charge().size();
                     tbins.push_back(tbin);
@@ -76,32 +70,26 @@ bool Img::BlobReframer::operator()(const input_pointer &in,
                 int tbinmin = *mme.first;
                 int tbinmax = *mme.second;
                 m_nticks = tbinmax - tbinmin;
-                log->debug("BlobReframer: nticks={} tbinmin={} tbinmax={}", m_nticks,
-                           tbinmin, tbinmax);
+                log->debug("BlobReframer: nticks={} tbinmin={} tbinmax={}", m_nticks, tbinmin, tbinmax);
             }
         }
         int itick = islice->start() / m_period;
         int nspan = islice->span() / m_period;
 
-        for (auto const &act : islice->activity())
-        {
+        for (auto const &act : islice->activity()) {
             auto ichan = act.first;
-            if (map_charges.find(ichan->ident()) == map_charges.end())
-            {
-                map_charges.insert(std::make_pair(
-                    ichan->ident(), ITrace::ChargeSequence(m_nticks, 0.0)));
+            if (map_charges.find(ichan->ident()) == map_charges.end()) {
+                map_charges.insert(std::make_pair(ichan->ident(), ITrace::ChargeSequence(m_nticks, 0.0)));
             }
             float q = act.second;
-            for (int ns = 0; ns < nspan; ns++)
-            {
+            for (int ns = 0; ns < nspan; ns++) {
                 map_charges.at(ichan->ident()).at(itick + ns) += q / (float) nspan;
             }
         }
     }
 
     ITrace::vector *itraces = new ITrace::vector;  // will become shared_ptr.
-    for (auto const &it : map_charges)
-    {
+    for (auto const &it : map_charges) {
         int ident = it.first;
         auto charge = it.second;
         // Save the waveform densely, including zeros.
@@ -110,8 +98,7 @@ bool Img::BlobReframer::operator()(const input_pointer &in,
     }
 
     SimpleFrame *sframe =
-        new SimpleFrame(iframe->ident(), iframe->time(),
-                        ITrace::shared_vector(itraces), iframe->tick());
+        new SimpleFrame(iframe->ident(), iframe->time(), ITrace::shared_vector(itraces), iframe->tick());
     sframe->tag_frame(m_frame_tag);
     out = IFrame::pointer(sframe);
 

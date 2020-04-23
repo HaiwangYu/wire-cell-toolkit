@@ -6,11 +6,9 @@
 
 #include <iostream>  // temporary, don't ignore the error code, chump!
 
-namespace WireCellTbb
-{
+namespace WireCellTbb {
     // Body for a TBB function node.
-    class FunctionBody
-    {
+    class FunctionBody {
         WireCell::IFunctionNodeBase::pointer m_wcnode;
 
        public:
@@ -24,8 +22,7 @@ namespace WireCellTbb
         {
             boost::any ret;
             bool ok = (*m_wcnode)(in, ret);  // fixme: don't ignore the error code!
-            if (!ok)
-            {
+            if (!ok) {
                 std::cerr << "I'm ignoring the error code!\n";
             }
             return ret;
@@ -33,26 +30,18 @@ namespace WireCellTbb
     };
 
     // Wrap the TBB (compound) node
-    class FunctionWrapper : public NodeWrapper
-    {
+    class FunctionWrapper : public NodeWrapper {
         tbb::flow::graph_node *m_tbbnode;
 
        public:
         FunctionWrapper(tbb::flow::graph &graph, WireCell::INode::pointer wcnode)
-          : m_tbbnode(new function_node(graph, wcnode->concurrency(),
-                                        FunctionBody(wcnode)))
+          : m_tbbnode(new function_node(graph, wcnode->concurrency(), FunctionBody(wcnode)))
         {
         }
 
-        virtual receiver_port_vector receiver_ports()
-        {
-            return {dynamic_cast<receiver_type *>(m_tbbnode)};
-        }
+        virtual receiver_port_vector receiver_ports() { return {dynamic_cast<receiver_type *>(m_tbbnode)}; }
 
-        virtual sender_port_vector sender_ports()
-        {
-            return {dynamic_cast<sender_type *>(m_tbbnode)};
-        }
+        virtual sender_port_vector sender_ports() { return {dynamic_cast<sender_type *>(m_tbbnode)}; }
     };
 
 }  // namespace WireCellTbb

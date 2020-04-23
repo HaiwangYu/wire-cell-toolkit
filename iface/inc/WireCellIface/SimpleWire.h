@@ -3,11 +3,9 @@
 
 #include "WireCellIface/IWire.h"
 
-namespace WireCell
-{
+namespace WireCell {
     /** A wire that simply holds all its data. */
-    class SimpleWire : public WireCell::IWire
-    {
+    class SimpleWire : public WireCell::IWire {
         WireCell::WirePlaneId m_wpid;
         int m_ident;
         int m_index;
@@ -16,8 +14,8 @@ namespace WireCell
         WireCell::Ray m_ray;
 
        public:
-        SimpleWire(WireCell::WirePlaneId wpid, int ident, int index, int channel,
-                   const WireCell::Ray &ray, int segment = 0)
+        SimpleWire(WireCell::WirePlaneId wpid, int ident, int index, int channel, const WireCell::Ray &ray,
+                   int segment = 0)
           : m_wpid(wpid)
           , m_ident(ident)
           , m_index(index)

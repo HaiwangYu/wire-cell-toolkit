@@ -9,18 +9,15 @@
 #include <iostream>
 #include <memory>
 
-namespace WireCell
-{
-    namespace Gen
-    {
+namespace WireCell {
+    namespace Gen {
         /** A GausDesc describes a Gaussian distribution.
- *
- * Two are used by GaussianDiffusion.  One describes the
- * transverse dimension along the direction of wire pitch (and
- * for a given wire plane) and one the longitudinal dimension
- * is along the drift direction as measured in time.  */
-        struct GausDesc
-        {
+         *
+         * Two are used by GaussianDiffusion.  One describes the
+         * transverse dimension along the direction of wire pitch (and
+         * for a given wire plane) and one the longitudinal dimension
+         * is along the drift direction as measured in time.  */
+        struct GausDesc {
             /// The absolute location of the mean of the Gaussian as
             /// measured relative to some externally defined origin.
             double center;
@@ -37,12 +34,10 @@ namespace WireCell
             double distance(double x)
             {
                 double ret = 0.0;
-                if (!sigma)
-                {
+                if (!sigma) {
                     ret = x - center;
                 }
-                else
-                {
+                else {
                     ret = (x - center) / sigma;
                 }
                 return ret;
@@ -57,19 +52,17 @@ namespace WireCell
             std::vector<double> sample(double start, double step, int nsamples) const;
 
             /** Integrate Gaussian across uniform bins.  Result is
-   * normalized assuming integral of Gaussian over entire
-   * domain is 1.0. */
+             * normalized assuming integral of Gaussian over entire
+             * domain is 1.0. */
             std::vector<double> binint(double start, double step, int nbins) const;
 
             /** Integrate Gaussian diffusion with linear weighting
-   *  to redistribute the charge to the two neartest impact positions
-   *  for linear interpolation of the field response */
-            std::vector<double> weight(double start, double step, int nbins,
-                                       std::vector<double> pvec) const;
+             *  to redistribute the charge to the two neartest impact positions
+             *  for linear interpolation of the field response */
+            std::vector<double> weight(double start, double step, int nbins, std::vector<double> pvec) const;
         };
 
-        class GaussianDiffusion
-        {
+        class GaussianDiffusion {
            public:
             typedef std::shared_ptr<GaussianDiffusion> pointer;
 
@@ -82,10 +75,9 @@ namespace WireCell
             typedef Array::array_xxf patch_t;
 
             /** Create a diffused deposition.
-   */
+             */
 
-            GaussianDiffusion(const IDepo::pointer &depo, const GausDesc &time_desc,
-                              const GausDesc &pitch_desc);
+            GaussianDiffusion(const IDepo::pointer &depo, const GausDesc &time_desc, const GausDesc &pitch_desc);
 
             /// This fills the patch once matching the given time and
             /// pitch binning. The patch is limited to the 2D sample
@@ -96,11 +88,9 @@ namespace WireCell
             /// represents the 2D bin-centered sampling of the
             /// Gaussian.
 
-            void
-            set_sampling(const Binning &tbin, const Binning &pbin, double nsigma = 3.0,
-                         IRandom::pointer fluctuate = nullptr,
-                         unsigned int weightstrat =
-                             1 /*see BinnedDiffusion ImpactDataCalculationStrategy*/);
+            void set_sampling(const Binning &tbin, const Binning &pbin, double nsigma = 3.0,
+                              IRandom::pointer fluctuate = nullptr,
+                              unsigned int weightstrat = 1 /*see BinnedDiffusion ImpactDataCalculationStrategy*/);
             void clear_sampling();
 
             /// Get the diffusion patch as an array of N_pitch rows X

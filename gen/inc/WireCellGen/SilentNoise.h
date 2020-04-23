@@ -4,16 +4,13 @@
 #include "WireCellIface/IConfigurable.h"
 #include "WireCellIface/IFrameSource.h"
 
-namespace WireCell
-{
-    namespace Gen
-    {
+namespace WireCell {
+    namespace Gen {
         /// A source of "noise" which has no noise.  It's used just as
         /// an trivial example which real noise models may copy.
         /// Although it inherits from IConfigurable, it's not really.
         /// Again, just giving an example.
-        class SilentNoise : public IFrameSource, public IConfigurable
-        {
+        class SilentNoise : public IFrameSource, public IConfigurable {
            public:
             SilentNoise();
             virtual ~SilentNoise();

@@ -12,12 +12,9 @@
 #include "WireCellIface/IPlaneImpactResponse.h"
 #include "WireCellIface/IRandom.h"
 
-namespace WireCell
-{
-    namespace Gen
-    {
-        class DepoZipper : public IDepoFramer, public IConfigurable
-        {
+namespace WireCell {
+    namespace Gen {
+        class DepoZipper : public IDepoFramer, public IConfigurable {
            public:
             DepoZipper();
             virtual ~DepoZipper();

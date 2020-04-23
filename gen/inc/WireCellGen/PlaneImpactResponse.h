@@ -8,17 +8,14 @@
 #include "WireCellUtil/Units.h"
 #include "WireCellUtil/Waveform.h"
 
-namespace WireCell
-{
-    namespace Gen
-    {
+namespace WireCell {
+    namespace Gen {
         /** The information about detector response at a particular impact
- * position (discrete position along the pitch direction of a
- * plane on which a response function is defined).  Note,
- * different physical positions may share the same ImpactResponse.
- */
-        class ImpactResponse : public IImpactResponse
-        {
+         * position (discrete position along the pitch direction of a
+         * plane on which a response function is defined).  Note,
+         * different physical positions may share the same ImpactResponse.
+         */
+        class ImpactResponse : public IImpactResponse {
             int m_impact;
             Waveform::compseq_t m_spectrum;
             Waveform::realseq_t m_waveform;
@@ -45,10 +42,7 @@ namespace WireCell
             int waveform_pad() const { return m_waveform_pad; };
 
             const Waveform::compseq_t &long_aux_spectrum();
-            const Waveform::realseq_t &long_aux_waveform() const
-            {
-                return m_long_waveform;
-            };
+            const Waveform::realseq_t &long_aux_waveform() const { return m_long_waveform; };
             int long_aux_waveform_pad() const { return m_long_waveform_pad; };
 
             /// Corresponding impact number
@@ -56,8 +50,7 @@ namespace WireCell
         };
 
         /** Collection of all impact responses for a plane */
-        class PlaneImpactResponse : public IPlaneImpactResponse, public IConfigurable
-        {
+        class PlaneImpactResponse : public IPlaneImpactResponse, public IConfigurable {
            public:
             /** Create a PlaneImpactResponse.
 
@@ -73,8 +66,7 @@ namespace WireCell
 
       Fixme: field response should be provided by a component.
    */
-            PlaneImpactResponse(int plane_ident = 0, size_t nbins = 10000,
-                                double tick = 0.5 * units::us);
+            PlaneImpactResponse(int plane_ident = 0, size_t nbins = 10000, double tick = 0.5 * units::us);
             ~PlaneImpactResponse();
 
             // IConfigurable interface

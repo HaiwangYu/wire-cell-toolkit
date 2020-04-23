@@ -16,20 +16,16 @@
 
 #include <string>
 
-namespace WireCell
-{
-    namespace Gen
-    {
-        class AddNoise : public IFrameFilter, public IConfigurable
-        {
+namespace WireCell {
+    namespace Gen {
+        class AddNoise : public IFrameFilter, public IConfigurable {
            public:
             AddNoise(const std::string &model = "", const std::string &rng = "Random");
 
             virtual ~AddNoise();
 
             /// IFrameFilter
-            virtual bool operator()(const input_pointer &inframe,
-                                    output_pointer &outframe);
+            virtual bool operator()(const input_pointer &inframe, output_pointer &outframe);
 
             /// IConfigurable
             virtual void configure(const WireCell::Configuration &config);

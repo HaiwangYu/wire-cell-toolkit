@@ -11,12 +11,9 @@
 #include "WireCellIface/IAnodePlane.h"
 #include "WireCellIface/IRandom.h"
 
-namespace WireCell
-{
-    namespace Gen
-    {
-        class TruthTraceID : public IDuctor, public IConfigurable
-        {
+namespace WireCell {
+    namespace Gen {
+        class TruthTraceID : public IDuctor, public IConfigurable {
            public:
             TruthTraceID();
 

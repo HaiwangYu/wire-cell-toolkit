@@ -6,8 +6,7 @@
 #include <string>
 #include <typeinfo>
 
-namespace WireCell
-{
+namespace WireCell {
     // Warning! do not rely on the actual format of demangle() and
     // type() to be consistent across compilers!  It's only for adding
     // pretty-printing niceties for those that happen to be supported.

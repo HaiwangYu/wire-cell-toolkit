@@ -4,14 +4,12 @@
 #include "WireCellIface/IFaninNode.h"
 #include "WireCellIface/IFrame.h"
 
-namespace WireCell
-{
+namespace WireCell {
     /** A frame fan-in component takes N frames on input ports and
- * produces a single output frame.  The merge policy and number of
- * inputs is left to the implementation.
- */
-    class IFrameFanin : public IFaninNode<IFrame, IFrame, 0>
-    {
+     * produces a single output frame.  The merge policy and number of
+     * inputs is left to the implementation.
+     */
+    class IFrameFanin : public IFaninNode<IFrame, IFrame, 0> {
        public:
         virtual ~IFrameFanin();
 

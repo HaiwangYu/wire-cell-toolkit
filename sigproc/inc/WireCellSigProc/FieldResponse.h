@@ -8,12 +8,9 @@
 #include "WireCellIface/IFieldResponse.h"
 #include "WireCellUtil/Units.h"
 
-namespace WireCell
-{
-    namespace SigProc
-    {
-        class FieldResponse : public IFieldResponse, public IConfigurable
-        {
+namespace WireCell {
+    namespace SigProc {
+        class FieldResponse : public IFieldResponse, public IConfigurable {
            public:
             // Create directly with the JSON data file or delay that
             // for configuration.

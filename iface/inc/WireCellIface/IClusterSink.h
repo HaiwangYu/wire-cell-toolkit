@@ -4,10 +4,8 @@
 #include "WireCellIface/ICluster.h"
 #include "WireCellIface/ISinkNode.h"
 
-namespace WireCell
-{
-    class IClusterSink : public ISinkNode<ICluster>
-    {
+namespace WireCell {
+    class IClusterSink : public ISinkNode<ICluster> {
        public:
         typedef std::shared_ptr<IClusterSink> pointer;
 

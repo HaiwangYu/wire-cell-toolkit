@@ -9,10 +9,8 @@
 #include "WireCellIface/ICluster.h"
 #include "WireCellIface/IQueuedoutNode.h"
 
-namespace WireCell
-{
-    class IClustering : public IQueuedoutNode<IBlobSet, ICluster>
-    {
+namespace WireCell {
+    class IClustering : public IQueuedoutNode<IBlobSet, ICluster> {
        public:
         typedef std::shared_ptr<IClustering> pointer;
 

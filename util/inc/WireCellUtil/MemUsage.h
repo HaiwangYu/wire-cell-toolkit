@@ -8,14 +8,12 @@
 #include <string>
 #include <vector>
 
-namespace WireCell
-{
+namespace WireCell {
     double memusage_resident();
     double memusage_shared();
     double memusage_size();
 
-    class MemUsage
-    {
+    class MemUsage {
        public:
         typedef std::pair<double, double> memusage;
         typedef std::pair<memusage, std::string> event;
@@ -25,8 +23,7 @@ namespace WireCell
         void push(const std::string &msg, MemUsage::memusage mu = memusage(-1, -1));
 
         /// Record an event.
-        std::string operator()(std::string msg = "<tick>",
-                               MemUsage::memusage mu = memusage(-1, -1));
+        std::string operator()(std::string msg = "<tick>", MemUsage::memusage mu = memusage(-1, -1));
 
         /// Return summary up to now.
         std::string summary() const;

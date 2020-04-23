@@ -11,8 +11,7 @@
 
 using namespace WireCell;
 
-struct Plotter
-{
+struct Plotter {
     TCanvas canvas;
     std::string filename;
     Plotter(const std::string &fname)
@@ -25,8 +24,7 @@ struct Plotter
     void operator()() { canvas.Print(filename.c_str(), "pdf"); }
 };
 
-std::pair<TH1F *, TH1F *>
-plot_response(Plotter &plt, double gain_unit = units::mV / units::fC);
+std::pair<TH1F *, TH1F *> plot_response(Plotter &plt, double gain_unit = units::mV / units::fC);
 std::pair<TH1F *, TH1F *> plot_response(Plotter &plt, double gain_unit)
 {
     const double gain1 = 7.8 * gain_unit;
@@ -45,16 +43,13 @@ std::pair<TH1F *, TH1F *> plot_response(Plotter &plt, double gain_unit)
     Waveform::realseq_t res1 = ce1.generate(bins);
     Waveform::realseq_t res2 = ce2.generate(bins);
 
-    TH1F *resp1 =
-        new TH1F("resp1", "Cold Electronics Response at 1us shaping",
-                 bins.nbins(), bins.min() / units::us, bins.max() / units::us);
-    TH1F *resp2 =
-        new TH1F("resp2", "Cold Electronics Response at 2us shaping",
-                 bins.nbins(), bins.min() / units::us, bins.max() / units::us);
+    TH1F *resp1 = new TH1F("resp1", "Cold Electronics Response at 1us shaping", bins.nbins(), bins.min() / units::us,
+                           bins.max() / units::us);
+    TH1F *resp2 = new TH1F("resp2", "Cold Electronics Response at 2us shaping", bins.nbins(), bins.min() / units::us,
+                           bins.max() / units::us);
     resp1->SetLineColor(2);
     resp2->SetLineColor(4);
-    for (size_t ind = 0; ind < res1.size(); ++ind)
-    {
+    for (size_t ind = 0; ind < res1.size(); ++ind) {
         const double t_us = bins.center(ind) / units::us;
         resp1->Fill(t_us, res1[ind] / gain_unit);
         resp2->Fill(t_us, res2[ind] / gain_unit);
@@ -64,16 +59,12 @@ std::pair<TH1F *, TH1F *> plot_response(Plotter &plt, double gain_unit)
     auto pad = &plt.canvas;
     pad->SetGridx();
     pad->SetGridy();
-    TH1F *frame = pad->DrawFrame(
-        0, 0, 10, 15,
-        "Cold Electronics Response Functions (1us,7.8mV/fC and 2us,14.0mV/fC)");
+    TH1F *frame = pad->DrawFrame(0, 0, 10, 15, "Cold Electronics Response Functions (1us,7.8mV/fC and 2us,14.0mV/fC)");
     frame->SetXTitle("Time (microsecond)");
-    if (gain_unit == units::mV / units::fC)
-    {
+    if (gain_unit == units::mV / units::fC) {
         frame->SetYTitle("Gain (mV/fC)");
     }
-    else
-    {
+    else {
         frame->SetYTitle("Gain");
     }
     resp1->Draw("hist,same");

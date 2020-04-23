@@ -3,10 +3,8 @@
 
 #include "WireCellUtil/IComponent.h"
 
-namespace WireCell
-{
-    class IRecombinationModel : virtual public IComponent<IRecombinationModel>
-    {
+namespace WireCell {
+    class IRecombinationModel : virtual public IComponent<IRecombinationModel> {
        public:
         virtual ~IRecombinationModel();
 

@@ -39,10 +39,8 @@ In C++ this file provides utilities to parse and query this structure.
 #include <unordered_set>
 #include <vector>
 
-namespace WireCell
-{
-    namespace tagrules
-    {
+namespace WireCell {
+    namespace tagrules {
         typedef std::string tag_t;
         typedef std::string match_t;
         typedef std::unordered_set<tag_t> tagset_t;
@@ -56,19 +54,16 @@ namespace WireCell
         // matching rule value and return true if match found.  Else
         // return false.  If "all_rules" is false, then stop checking
         // rules after the first is found.
-        bool match(const tag_t &tag, const ruleset_t &rs, tagset_t &ret,
-                   bool all_rules = true);
+        bool match(const tag_t &tag, const ruleset_t &rs, tagset_t &ret, bool all_rules = true);
 
         // Given a tagset and a ruleset return a tagset which
         // transforms all input tags according to rules.
-        tagset_t transform(const tagset_t &ts, const ruleset_t &rs,
-                           bool all_rules = true);
+        tagset_t transform(const tagset_t &ts, const ruleset_t &rs, bool all_rules = true);
 
         /* A tagrule::Context represents a collection of tag
- * transforms, each at an index and with a name.
- */
-        class Context
-        {
+         * transforms, each at an index and with a name.
+         */
+        class Context {
             std::unordered_map<std::string, std::vector<ruleset_t>> m_rulesets;
 
            public:
@@ -84,8 +79,7 @@ namespace WireCell
             Tags transform(size_t ind, const std::string &name, const Tags &tags)
             {
                 const auto &rsv = m_rulesets[name];
-                if (rsv.empty() or ind >= rsv.size())
-                {
+                if (rsv.empty() or ind >= rsv.size()) {
                     return Tags();
                 }
                 tagrules::tagset_t ts(tags.begin(), tags.end());
@@ -100,20 +94,15 @@ namespace WireCell
     // Some Configuration cverter helpers for targules types.
 
     template <>
-    inline tagrules::tagset_t
-    convert<tagrules::tagset_t>(const Configuration &cfg,
-                                const tagrules::tagset_t &def)
+    inline tagrules::tagset_t convert<tagrules::tagset_t>(const Configuration &cfg, const tagrules::tagset_t &def)
     {
         tagrules::tagset_t ret;
-        if (cfg.isString())
-        {
+        if (cfg.isString()) {
             ret.insert(cfg.asString());
             return ret;
         }
-        if (cfg.isArray())
-        {
-            for (auto one : cfg)
-            {
+        if (cfg.isArray()) {
+            for (auto one : cfg) {
                 ret.insert(one.asString());
             }
             return ret;
@@ -122,22 +111,17 @@ namespace WireCell
     }
 
     template <>
-    inline tagrules::ruleset_t
-    convert<tagrules::ruleset_t>(const Configuration &cfg,
-                                 const tagrules::ruleset_t &def)
+    inline tagrules::ruleset_t convert<tagrules::ruleset_t>(const Configuration &cfg, const tagrules::ruleset_t &def)
     {
         tagrules::ruleset_t ret;
-        for (auto key : cfg.getMemberNames())
-        {
+        for (auto key : cfg.getMemberNames()) {
             auto ts = convert<tagrules::tagset_t>(cfg[key]);
-            if (ts.empty())
-            {
+            if (ts.empty()) {
                 continue;
             }
             ret.push_back(make_pair(std::regex(key), ts));
         }
-        if (ret.empty())
-        {
+        if (ret.empty()) {
             return def;
         }
         return ret;

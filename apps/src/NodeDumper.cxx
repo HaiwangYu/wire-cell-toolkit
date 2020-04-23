@@ -7,8 +7,7 @@
 #include "WireCellUtil/String.h"
 #include "WireCellUtil/Type.h"
 
-WIRECELL_FACTORY(NodeDumper, WireCellApps::NodeDumper, WireCell::IApplication,
-                 WireCell::IConfigurable)
+WIRECELL_FACTORY(NodeDumper, WireCellApps::NodeDumper, WireCell::IApplication, WireCell::IConfigurable)
 
 using spdlog::info;
 using spdlog::warn;
@@ -40,44 +39,36 @@ void NodeDumper::execute()
 
     int nnodes = m_cfg["nodes"].size();
     std::vector<std::string> types;
-    if (0 == nnodes)
-    {
+    if (0 == nnodes) {
         types = Factory::known_classes<INode>();
         nnodes = types.size();
         info("Dumping all known node classes ({})", nnodes);
     }
-    else
-    {
+    else {
         info("Dumping: ({})", nnodes);
-        for (auto type_cfg : m_cfg["nodes"])
-        {
+        for (auto type_cfg : m_cfg["nodes"]) {
             std::string type = convert<string>(type_cfg);
             types.push_back(type);
             info("\t{}", type);
         }
     }
 
-    for (auto type : types)
-    {
+    for (auto type : types) {
         INode::pointer node;
-        try
-        {
+        try {
             node = Factory::lookup<INode>(type);
         }
-        catch (FactoryException &fe)
-        {
+        catch (FactoryException &fe) {
             warn("NodeDumper: failed lookup node: \"{}\"", type);
             continue;
         }
 
         Configuration one;
         one["type"] = type;
-        for (auto intype : node->input_types())
-        {
+        for (auto intype : node->input_types()) {
             one["input_types"].append(demangle(intype));
         }
-        for (auto intype : node->output_types())
-        {
+        for (auto intype : node->output_types()) {
             one["output_types"].append(demangle(intype));
         }
         one["concurrency"] = node->concurrency();

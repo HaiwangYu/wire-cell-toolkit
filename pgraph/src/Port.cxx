@@ -30,8 +30,7 @@ Edge Port::plug(Edge edge)
 // return edge queue size or 0 if no edge has been plugged
 size_t Port::size()
 {
-    if (!m_edge)
-    {
+    if (!m_edge) {
         return 0;
     }
     return m_edge->size();
@@ -40,8 +39,7 @@ size_t Port::size()
 // Return true if queue is empty or no edge has been plugged.
 bool Port::empty()
 {
-    if (!m_edge or m_edge->empty())
-    {
+    if (!m_edge or m_edge->empty()) {
         return true;
     }
     return false;
@@ -51,21 +49,17 @@ bool Port::empty()
 // the queue.  To "peek" at the data, pas false.
 Data Port::get(bool pop)
 {
-    if (isoutput())
-    {
+    if (isoutput()) {
         THROW(RuntimeError() << errmsg{"can not get from output port"});
     }
-    if (!m_edge)
-    {
+    if (!m_edge) {
         THROW(RuntimeError() << errmsg{"port has no edge"});
     }
-    if (m_edge->empty())
-    {
+    if (m_edge->empty()) {
         THROW(RuntimeError() << errmsg{"edge is empty"});
     }
     Data ret = m_edge->front();
-    if (pop)
-    {
+    if (pop) {
         m_edge->pop_front();
     }
     return ret;
@@ -74,12 +68,10 @@ Data Port::get(bool pop)
 // Put the data onto the queue.
 void Port::put(Data &data)
 {
-    if (isinput())
-    {
+    if (isinput()) {
         THROW(RuntimeError() << errmsg{"can not put to input port"});
     }
-    if (!m_edge)
-    {
+    if (!m_edge) {
         THROW(RuntimeError() << errmsg{"port has no edge"});
     }
     m_edge->push_back(data);

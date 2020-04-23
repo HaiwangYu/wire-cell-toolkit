@@ -8,15 +8,11 @@
 #include <map>
 #include <vector>
 
-namespace WireCell
-{
-    namespace SigProc
-    {
-        class SignalROI
-        {
+namespace WireCell {
+    namespace SigProc {
+        class SignalROI {
            public:
-            SignalROI(int plane, int chid, int start_bin, int end_bin,
-                      const Waveform::realseq_t &signal);
+            SignalROI(int plane, int chid, int start_bin, int end_bin, const Waveform::realseq_t &signal);
             SignalROI(SignalROI *roi);
             ~SignalROI();
             int get_start_bin() { return start_bin; }
@@ -56,8 +52,7 @@ namespace WireCell
         typedef std::vector<SignalROIList> SignalROIChList;
         typedef std::map<SignalROI *, SignalROISelection> SignalROIMap;
 
-        struct CompareRois
-        {
+        struct CompareRois {
             bool operator()(SignalROI *roi1, SignalROI *roi2) const
             {
                 return roi1->get_start_bin() < roi2->get_start_bin();

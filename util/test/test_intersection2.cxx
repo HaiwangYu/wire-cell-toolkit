@@ -20,19 +20,15 @@ int main()
     Ray bounds(Point(0, 0, 0), Point(1, 1, 1));
     Vector direction = Point(1, 1, 1).norm();
 
-    for (double x = -1.1; x <= 1; x += 0.5)
-    {
-        for (double y = -1.1; y <= 1; y += 0.5)
-        {
-            for (double z = -1.0; z <= 1; z += 0.5)
-            {
+    for (double x = -1.1; x <= 1; x += 0.5) {
+        for (double y = -1.1; y <= 1; y += 0.5) {
+            for (double z = -1.0; z <= 1; z += 0.5) {
                 Vector point(x, y, z);
                 Ray ray(point, point + direction);
                 Ray hits(Point(-111, -111, -111), Point(-222, -222, -222));
 
                 int hitmask = box_intersection(bounds, ray, hits);
-                cerr << "RESULT: " << hitmask << " p=" << point << " hits=" << hits
-                     << endl;
+                cerr << "RESULT: " << hitmask << " p=" << point << " hits=" << hits << endl;
                 Assert(hitmask >= 0);
             }
         }

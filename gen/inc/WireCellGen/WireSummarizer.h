@@ -6,10 +6,8 @@
 
 #include <deque>
 
-namespace WireCell
-{
-    class WireSummarizer : public IWireSummarizer
-    {
+namespace WireCell {
+    class WireSummarizer : public IWireSummarizer {
        public:
         WireSummarizer();
         virtual ~WireSummarizer();

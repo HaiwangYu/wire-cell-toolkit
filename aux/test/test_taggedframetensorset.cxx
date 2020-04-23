@@ -21,12 +21,9 @@ int main()
     const double signal_start_time = 6 * units::ms;
     vector<float> signal{0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 0.0};
 
-    ITrace::vector signal_traces{make_shared<SimpleTrace>(1, 10, signal),
-                                 make_shared<SimpleTrace>(1, 20, signal),
-                                 make_shared<SimpleTrace>(2, 30, signal),
-                                 make_shared<SimpleTrace>(2, 33, signal)};
-    auto iframe1 = make_shared<SimpleFrame>(signal_frame_ident, signal_start_time,
-                                            signal_traces, tick);
+    ITrace::vector signal_traces{make_shared<SimpleTrace>(1, 10, signal), make_shared<SimpleTrace>(1, 20, signal),
+                                 make_shared<SimpleTrace>(2, 30, signal), make_shared<SimpleTrace>(2, 33, signal)};
+    auto iframe1 = make_shared<SimpleFrame>(signal_frame_ident, signal_start_time, signal_traces, tick);
 
     ITensorSet::pointer itensorset = nullptr;
     Aux::TaggedFrameTensorSet tfts;
@@ -61,23 +58,19 @@ int main()
     Assert(tbin == 10);
     auto jch = jten["channels"];
     Assert(nchans == (int) jch.size());  // JsonCPP type unsafety is annoying!
-    Assert(jch[0].asInt() ==
-           1);  // arrays must be int, not size_t, but size is size_t!
+    Assert(jch[0].asInt() == 1);         // arrays must be int, not size_t, but size is size_t!
     Assert(jch[1].asInt() == 2);
 
     Eigen::Map<Eigen::ArrayXXf> arr((float *) ten->data(), nchans, nticks);
     std::cout << "channels:\ntick\t";
-    for (int ichan = 0; ichan < nchans; ++ichan)
-    {
+    for (int ichan = 0; ichan < nchans; ++ichan) {
         std::cout << jch[ichan].asInt() << "\t";
     }
     std::cout << endl;
 
-    for (int itick = 0; itick < nticks; ++itick)
-    {
+    for (int itick = 0; itick < nticks; ++itick) {
         std::cout << tbin + itick;
-        for (int ichan = 0; ichan < nchans; ++ichan)
-        {
+        for (int ichan = 0; ichan < nchans; ++ichan) {
             std::cout << "\t" << arr(ichan, itick);
         }
         std::cout << endl;

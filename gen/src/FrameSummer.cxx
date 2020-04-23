@@ -3,8 +3,7 @@
 #include "WireCellIface/SimpleFrame.h"
 #include "WireCellUtil/NamedFactory.h"
 
-WIRECELL_FACTORY(FrameSummer, WireCell::Gen::FrameSummer,
-                 WireCell::IFrameJoiner, WireCell::IConfigurable)
+WIRECELL_FACTORY(FrameSummer, WireCell::Gen::FrameSummer, WireCell::IFrameJoiner, WireCell::IConfigurable)
 
 using namespace WireCell;
 
@@ -32,29 +31,25 @@ void Gen::FrameSummer::configure(const Configuration &cfg)
     m_toffset = get(cfg, "offset", m_toffset);
 }
 
-bool Gen::FrameSummer::operator()(const input_tuple_type &intup,
-                                  output_pointer &out)
+bool Gen::FrameSummer::operator()(const input_tuple_type &intup, output_pointer &out)
 {
     auto one = std::get<0>(intup);
     auto two = std::get<1>(intup);
-    if (!one or !two)
-    {
+    if (!one or !two) {
         // assume eos
         out = nullptr;
         return true;
     }
 
     double t2 = two->time();
-    if (m_align)
-    {
+    if (m_align) {
         t2 = one->time();
     }
     t2 += m_toffset;
 
     auto vtraces2 = two->traces();
     ITrace::vector out_traces(vtraces2->begin(), vtraces2->end());
-    auto newtwo =
-        std::make_shared<SimpleFrame>(two->ident(), t2, out_traces, two->tick());
+    auto newtwo = std::make_shared<SimpleFrame>(two->ident(), t2, out_traces, two->tick());
 
     out = Gen::sum(IFrame::vector{one, two}, one->ident());
     return true;

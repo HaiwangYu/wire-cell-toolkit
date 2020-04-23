@@ -25,8 +25,7 @@ using namespace WireCell;
 using namespace WireCell::Test;
 using namespace std;
 
-void plot_time(MultiPdf &mpdf, IPlaneImpactResponse::pointer pir, int iplane,
-               Binning tbins, const std::string &name,
+void plot_time(MultiPdf &mpdf, IPlaneImpactResponse::pointer pir, int iplane, Binning tbins, const std::string &name,
                const std::string &title)
 {
     // only show bins where we think the response is
@@ -50,14 +49,12 @@ void plot_time(MultiPdf &mpdf, IPlaneImpactResponse::pointer pir, int iplane,
     std::string zunit = "negative microvolt";
     double zunitval = -units::microvolt;
     vector<double> zextent{1.0, 1.0, 2.0};
-    if (name == "fr")
-    {
+    if (name == "fr") {
         zunit = "induced electrons";
         zunitval = -units::eplus;
         zextent = vector<double>{0.3, 0.15, 0.6};
     }
-    std::cerr << "zunits: " << zunit
-              << " tbinsize: " << tbins.binsize() / units::us << " us\n";
+    std::cerr << "zunits: " << zunit << " tbinsize: " << tbins.binsize() / units::us << " us\n";
 
     // they all suck.  black body sucks the least.
     set_palette(kBlackBody);
@@ -69,36 +66,30 @@ void plot_time(MultiPdf &mpdf, IPlaneImpactResponse::pointer pir, int iplane,
     // set_palette();
     gStyle->SetOptStat(0);
     TH2F *hist =
-        new TH2F(Form("h%s_%c", name.c_str(), uvw[iplane]),
-                 Form("%s, 1e-/impact %c-plane", title.c_str(), uvw[iplane]),
-                 ntbins, tmin / units::us, tmax / units::us, npbins,
-                 pmin / units::mm, pmax / units::mm);
+        new TH2F(Form("h%s_%c", name.c_str(), uvw[iplane]), Form("%s, 1e-/impact %c-plane", title.c_str(), uvw[iplane]),
+                 ntbins, tmin / units::us, tmax / units::us, npbins, pmin / units::mm, pmax / units::mm);
     hist->SetXTitle("time (us)");
     hist->SetYTitle("pitch (mm)");
     hist->SetZTitle(zunit.c_str());
 
     hist->GetZaxis()->SetRangeUser(-zextent[iplane], +zextent[iplane]);
 
-    TH1F *htot = new TH1F(
-        Form("htot%s_%c", name.c_str(), uvw[iplane]),
-        Form("%s total, 1e-/impact %c-plane", title.c_str(), uvw[iplane]), npbins,
-        pmin / units::mm, pmax / units::mm);
+    TH1F *htot = new TH1F(Form("htot%s_%c", name.c_str(), uvw[iplane]),
+                          Form("%s total, 1e-/impact %c-plane", title.c_str(), uvw[iplane]), npbins, pmin / units::mm,
+                          pmax / units::mm);
     htot->SetXTitle("pitch (mm)");
     htot->SetYTitle(Form("impact total [%s]", zunit.c_str()));
 
-    for (double pitch = -half_pitch; pitch <= half_pitch; pitch += impact_dist)
-    {
+    for (double pitch = -half_pitch; pitch <= half_pitch; pitch += impact_dist) {
         auto ir = pir->closest(pitch);
-        if (!ir)
-        {
+        if (!ir) {
             std::cerr << "No closest for pitch " << pitch << endl;
             continue;
         }
         auto spec = ir->spectrum();
         auto wave = Waveform::idft(spec);
         pitch += 0.001 * impact_dist;
-        for (int ind = 0; ind < ntbins; ++ind)
-        {
+        for (int ind = 0; ind < ntbins; ++ind) {
             const double time = tbins.center(ind);
             hist->Fill(time / units::us, pitch / units::mm, wave[ind] / zunitval);
             htot->Fill(pitch / units::mm, wave[ind] / zunitval);
@@ -115,17 +106,14 @@ void plot_time(MultiPdf &mpdf, IPlaneImpactResponse::pointer pir, int iplane,
     wline.SetLineStyle(1);
     hline.SetLineColorAlpha(2, 0.5);
     hline.SetLineStyle(2);
-    for (int iwire = 0; iwire < nwires / 2; ++iwire)
-    {
+    for (int iwire = 0; iwire < nwires / 2; ++iwire) {
         double wpitch = iwire * pir->pitch();
-        if (wpitch < pmax)
-        {
+        if (wpitch < pmax) {
             wline.DrawLine(tmin / units::us, wpitch, tmax / units::us, wpitch);
             wline.DrawLine(tmin / units::us, -wpitch, tmax / units::us, -wpitch);
         }
         wpitch += 0.5 * pir->pitch();
-        if (wpitch < pmax)
-        {
+        if (wpitch < pmax) {
             hline.DrawLine(tmin / units::us, wpitch, tmax / units::us, wpitch);
             hline.DrawLine(tmin / units::us, -wpitch, tmax / units::us, -wpitch);
         }
@@ -154,12 +142,10 @@ int main(int argc, const char *argv[])
 
     string out_basename = argv[0];
     string response_file = "ub-10-half.json.bz2";
-    if (argc > 1)
-    {
+    if (argc > 1) {
         response_file = argv[1];
     };
-    if (argc > 2)
-    {
+    if (argc > 2) {
         out_basename = argv[2];
     }
     cerr << "Using response file: " << response_file << endl;
@@ -193,12 +179,9 @@ int main(int argc, const char *argv[])
         icfg->configure(cfg);
     }
 
-    std::vector<std::string> pir_tns{"PlaneImpactResponse:frU",
-                                     "PlaneImpactResponse:frV",
-                                     "PlaneImpactResponse:frW"};
+    std::vector<std::string> pir_tns{"PlaneImpactResponse:frU", "PlaneImpactResponse:frV", "PlaneImpactResponse:frW"};
     {  // configure pirs, just FR
-        for (int iplane = 0; iplane < 3; ++iplane)
-        {
+        for (int iplane = 0; iplane < 3; ++iplane) {
             auto icfg = Factory::lookup_tn<IConfigurable>(pir_tns[iplane]);
             auto cfg = icfg->default_configuration();
             cfg["plane"] = iplane;
@@ -207,12 +190,10 @@ int main(int argc, const char *argv[])
             icfg->configure(cfg);
         }
     }
-    std::vector<std::string> pir_ele_tns{"PlaneImpactResponse:frerU",
-                                         "PlaneImpactResponse:frerV",
+    std::vector<std::string> pir_ele_tns{"PlaneImpactResponse:frerU", "PlaneImpactResponse:frerV",
                                          "PlaneImpactResponse:frerW"};
     {  // configure pirs, FR + ER + RCRC
-        for (int iplane = 0; iplane < 3; ++iplane)
-        {
+        for (int iplane = 0; iplane < 3; ++iplane) {
             auto icfg = Factory::lookup_tn<IConfigurable>(pir_ele_tns[iplane]);
             auto cfg = icfg->default_configuration();
             cfg["plane"] = iplane;
@@ -228,12 +209,10 @@ int main(int argc, const char *argv[])
     // auto ifr = Factory::find_tn<IFieldResponse>("FieldResponse");
     // const auto& fr = ifr->field_response();
 
-    TFile *rootfile =
-        TFile::Open(Form("%s.root", out_basename.c_str()), "recreate");
+    TFile *rootfile = TFile::Open(Form("%s.root", out_basename.c_str()), "recreate");
 
     MultiPdf mpdf(out_basename.c_str());
-    for (int iplane = 0; iplane < 3; ++iplane)
-    {
+    for (int iplane = 0; iplane < 3; ++iplane) {
         auto pir = Factory::find_tn<IPlaneImpactResponse>(pir_tns[iplane]);
         plot_time(mpdf, pir, iplane, tbins, "fr", "Field Response");
 

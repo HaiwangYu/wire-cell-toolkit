@@ -10,8 +10,7 @@
 #include <tuple>
 #include <vector>
 
-WIRECELL_FACTORY(NumpyFrameSaver, WireCell::Sio::NumpyFrameSaver,
-                 WireCell::IFrameFilter, WireCell::IConfigurable)
+WIRECELL_FACTORY(NumpyFrameSaver, WireCell::Sio::NumpyFrameSaver, WireCell::IFrameFilter, WireCell::IConfigurable)
 
 using namespace WireCell;
 
@@ -60,16 +59,11 @@ WireCell::Configuration Sio::NumpyFrameSaver::default_configuration() const
     return cfg;
 }
 
-void Sio::NumpyFrameSaver::configure(const WireCell::Configuration &config)
-{
-    m_cfg = config;
-}
+void Sio::NumpyFrameSaver::configure(const WireCell::Configuration &config) { m_cfg = config; }
 
-bool Sio::NumpyFrameSaver::operator()(const IFrame::pointer &inframe,
-                                      IFrame::pointer &outframe)
+bool Sio::NumpyFrameSaver::operator()(const IFrame::pointer &inframe, IFrame::pointer &outframe)
 {
-    if (!inframe)
-    {
+    if (!inframe) {
         l->debug("NumpyFrameSaver: EOS");
         outframe = nullptr;
         return true;
@@ -91,37 +85,31 @@ bool Sio::NumpyFrameSaver::operator()(const IFrame::pointer &inframe,
     // Numpy saves reversed dimensions: {ncols, nrows} aka {ntick, nchan}
     // dimensions.
 
-    if (m_cfg["frame_tags"].isNull() or m_cfg["frame_tags"].empty())
-    {
+    if (m_cfg["frame_tags"].isNull() or m_cfg["frame_tags"].empty()) {
         m_cfg["frame_tags"][0] = "";
     }
 
     std::stringstream ss;
-    ss << "NumpyFrameSaver: see frame #" << inframe->ident() << " with "
-       << inframe->traces()->size() << " traces with frame tags:";
-    for (auto t : inframe->frame_tags())
-    {
+    ss << "NumpyFrameSaver: see frame #" << inframe->ident() << " with " << inframe->traces()->size()
+       << " traces with frame tags:";
+    for (auto t : inframe->frame_tags()) {
         ss << " \"" << t << "\"";
     }
     ss << " and trace tags:";
-    for (auto t : inframe->trace_tags())
-    {
+    for (auto t : inframe->trace_tags()) {
         ss << " \"" << t << "\"";
     }
     ss << " looking for tags:";
-    for (auto jt : m_cfg["frame_tags"])
-    {
+    for (auto jt : m_cfg["frame_tags"]) {
         ss << " \"" << jt.asString() << "\"";
     }
     l->debug(ss.str());
 
-    for (auto jtag : m_cfg["frame_tags"])
-    {
+    for (auto jtag : m_cfg["frame_tags"]) {
         const std::string tag = jtag.asString();
         auto traces = FrameTools::tagged_traces(inframe, tag);
         l->debug("NumpyFrameSaver: save {} tagged as {}", traces.size(), tag);
-        if (traces.empty())
-        {
+        if (traces.empty()) {
             l->warn("NumpyFrameSaver: no traces for tag: \"{}\"", tag);
             continue;
         }
@@ -141,16 +129,13 @@ bool Sio::NumpyFrameSaver::operator()(const IFrame::pointer &inframe,
         arr = arr * scale + offset;
 
         {  // the 2D frame array
-            const std::string aname =
-                String::format("frame_%s_%d", tag.c_str(), m_save_count);
-            if (digitize)
-            {
+            const std::string aname = String::format("frame_%s_%d", tag.c_str(), m_save_count);
+            if (digitize) {
                 Array::array_xxs sarr = arr.cast<short>();
                 const short *sdata = sarr.data();
                 cnpy::npz_save(fname, aname, sdata, {ncols, nrows}, mode);
             }
-            else
-            {
+            else {
                 cnpy::npz_save(fname, aname, arr.data(), {ncols, nrows}, mode);
             }
             l->debug(
@@ -160,16 +145,13 @@ bool Sio::NumpyFrameSaver::operator()(const IFrame::pointer &inframe,
         }
 
         {  // the channel array
-            const std::string aname =
-                String::format("channels_%s_%d", tag.c_str(), m_save_count);
+            const std::string aname = String::format("channels_%s_%d", tag.c_str(), m_save_count);
             cnpy::npz_save(fname, aname, channels.data(), {nrows}, mode);
         }
 
         {  // the tick array
-            const std::string aname =
-                String::format("tickinfo_%s_%d", tag.c_str(), m_save_count);
-            const std::vector<double> tickinfo{inframe->time(), inframe->tick(),
-                                               (double) tbinmm.first};
+            const std::string aname = String::format("tickinfo_%s_%d", tag.c_str(), m_save_count);
+            const std::vector<double> tickinfo{inframe->time(), inframe->tick(), (double) tbinmm.first};
             cnpy::npz_save(fname, aname, tickinfo.data(), {3}, mode);
         }
     }

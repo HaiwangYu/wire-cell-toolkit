@@ -4,15 +4,13 @@
 #include "WireCellIface/IFanoutNode.h"
 #include "WireCellIface/IFrame.h"
 
-namespace WireCell
-{
+namespace WireCell {
     /** A frame fan-out component takes 1 input frame and produces one
  * frame on each of its output ports.  What each of those N frames
  * are depends on implementation.
 
  */
-    class IFrameFanout : public IFanoutNode<IFrame, IFrame, 0>
-    {
+    class IFrameFanout : public IFanoutNode<IFrame, IFrame, 0> {
        public:
         virtual ~IFrameFanout();
 

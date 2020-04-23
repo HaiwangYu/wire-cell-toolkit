@@ -13,17 +13,13 @@
 #include <set>
 
 // Register the components defined here
-WIRECELL_FACTORY(mbCoherentNoiseSub,
-                 WireCell::SigProc::Microboone::CoherentNoiseSub,
-                 WireCell::IChannelFilter)
-WIRECELL_FACTORY(mbOneChannelNoise,
-                 WireCell::SigProc::Microboone::OneChannelNoise,
-                 WireCell::IChannelFilter, WireCell::IConfigurable)
-WIRECELL_FACTORY(mbOneChannelStatus,
-                 WireCell::SigProc::Microboone::OneChannelStatus,
-                 WireCell::IChannelFilter, WireCell::IConfigurable)
-WIRECELL_FACTORY(mbADCBitShift, WireCell::SigProc::Microboone::ADCBitShift,
-                 WireCell::IChannelFilter, WireCell::IConfigurable)
+WIRECELL_FACTORY(mbCoherentNoiseSub, WireCell::SigProc::Microboone::CoherentNoiseSub, WireCell::IChannelFilter)
+WIRECELL_FACTORY(mbOneChannelNoise, WireCell::SigProc::Microboone::OneChannelNoise, WireCell::IChannelFilter,
+                 WireCell::IConfigurable)
+WIRECELL_FACTORY(mbOneChannelStatus, WireCell::SigProc::Microboone::OneChannelStatus, WireCell::IChannelFilter,
+                 WireCell::IConfigurable)
+WIRECELL_FACTORY(mbADCBitShift, WireCell::SigProc::Microboone::ADCBitShift, WireCell::IChannelFilter,
+                 WireCell::IConfigurable)
 
 using namespace WireCell::SigProc;
 
@@ -38,25 +34,22 @@ double filter_time(double freq)
 
 double filter_low(double freq, double cut_off)
 {
-    if ((freq > 0.177 && freq < 0.18) || (freq > 0.2143 && freq < 0.215) ||
-        (freq >= 0.106 && freq <= 0.109) || (freq > 0.25 && freq < 0.251))
-    {
+    if ((freq > 0.177 && freq < 0.18) || (freq > 0.2143 && freq < 0.215) || (freq >= 0.106 && freq <= 0.109) ||
+        (freq > 0.25 && freq < 0.251)) {
         return 0;
     }
-    else
-    {
+    else {
         return 1 - exp(-pow(freq / cut_off, 8));
     }
 }
 
 double filter_low_loose(double freq) { return 1 - exp(-pow(freq / 0.005, 2)); }
 
-bool Microboone::Subtract_WScaling(
-    WireCell::IChannelFilter::channel_signals_t &chansig,
-    const WireCell::Waveform::realseq_t &medians,
-    const WireCell::Waveform::compseq_t &respec, int res_offset,
-    std::vector<std::vector<int>> &rois, float decon_limit1,
-    float roi_min_max_ratio, float rms_threshold)
+bool Microboone::Subtract_WScaling(WireCell::IChannelFilter::channel_signals_t &chansig,
+                                   const WireCell::Waveform::realseq_t &medians,
+                                   const WireCell::Waveform::compseq_t &respec, int res_offset,
+                                   std::vector<std::vector<int>> &rois, float decon_limit1, float roi_min_max_ratio,
+                                   float rms_threshold)
 {
     double ave_coef = 0;
     double_t ave_coef1 = 0;
@@ -64,8 +57,7 @@ bool Microboone::Subtract_WScaling(
 
     const int nbin = medians.size();
 
-    for (auto it : chansig)
-    {
+    for (auto it : chansig) {
         int ch = it.first;
         WireCell::IChannelFilter::signal_t &signal = it.second;
 
@@ -80,16 +72,13 @@ bool Microboone::Subtract_WScaling(
         //     std::cout << ch << " " << temp.first << " " << temp.second << " "  <<
         //     std::endl;
 
-        for (int j = 0; j != nbin; j++)
-        {
-            if (fabs(signal.at(j)) < 4 * temp.second)
-            {
+        for (int j = 0; j != nbin; j++) {
+            if (fabs(signal.at(j)) < 4 * temp.second) {
                 sum2 += signal.at(j) * medians.at(j);
                 sum3 += medians.at(j) * medians.at(j);
             }
         }
-        if (sum3 > 0)
-        {
+        if (sum3 > 0) {
             coef = sum2 / sum3;
         }
         // protect against the extreme cases
@@ -97,62 +86,48 @@ bool Microboone::Subtract_WScaling(
         // if (coef > 1.5) coef = 1.5;
 
         coef_all[ch] = coef;
-        if (coef != 0)
-        {  // FIXME: expect some fluctuation?
+        if (coef != 0) {  // FIXME: expect some fluctuation?
             ave_coef += coef;
             ave_coef1++;
         }
     }
-    if (ave_coef1 > 0)
-    {
+    if (ave_coef1 > 0) {
         ave_coef = ave_coef / ave_coef1;
     }
 
-    for (auto it : chansig)
-    {
+    for (auto it : chansig) {
         int ch = it.first;
         WireCell::IChannelFilter::signal_t &signal = it.second;
         float scaling;
-        if (ave_coef != 0)
-        {
+        if (ave_coef != 0) {
             scaling = coef_all[ch] / ave_coef;
             // add some protections ...
-            if (scaling < 0)
-                scaling = 0;
+            if (scaling < 0) scaling = 0;
             //	    if (scaling < 0.5 && scaling > 0.3) scaling = 0.5;
-            if (scaling > 1.5)
-                scaling = 1.5;
+            if (scaling > 1.5) scaling = 1.5;
         }
-        else
-        {
+        else {
             scaling = 0;
         }
         // if ( abs(ch-6117)<5)
         //     std::cout << ch << " " << scaling << " "  << std::endl;
         // scaling = 1.0;
 
-        if (respec.size() > 0 &&
-            (respec.at(0).real() != 1 || respec.at(0).imag() != 0) &&
-            res_offset != 0)
-        {
+        if (respec.size() > 0 && (respec.at(0).real() != 1 || respec.at(0).imag() != 0) && res_offset != 0) {
             int nbin = signal.size();
             WireCell::Waveform::realseq_t signal_roi(nbin, 0);
-            if (rms_threshold)
-            {
+            if (rms_threshold) {
                 signal_roi = signal;
             }
-            else
-            {
-                for (auto roi : rois)
-                {
+            else {
+                for (auto roi : rois) {
                     const int bin0 = std::max(roi.front() - 1, 0);
                     const int binf = std::min(roi.back() + 1, nbin - 1);
                     const double m0 = signal[bin0];
                     const double mf = signal[binf];
                     const double roi_run = binf - bin0;
                     const double roi_rise = mf - m0;
-                    for (auto bin : roi)
-                    {
+                    for (auto bin : roi) {
                         const double m = m0 + (bin - bin0) / roi_run * roi_rise;
                         signal_roi.at(bin) = signal.at(bin) - m;
                     }
@@ -160,30 +135,23 @@ bool Microboone::Subtract_WScaling(
             }
 
             // do the deconvolution with a very loose low-frequency filter
-            WireCell::Waveform::compseq_t signal_roi_freq =
-                WireCell::Waveform::dft(signal_roi);
+            WireCell::Waveform::compseq_t signal_roi_freq = WireCell::Waveform::dft(signal_roi);
             WireCell::Waveform::shrink(signal_roi_freq, respec);
-            for (size_t i = 0; i != signal_roi_freq.size(); i++)
-            {
+            for (size_t i = 0; i != signal_roi_freq.size(); i++) {
                 double freq;
                 // assuming 2 MHz digitization
-                if (i < signal_roi_freq.size() / 2.)
-                {
+                if (i < signal_roi_freq.size() / 2.) {
                     freq = i / (1. * signal_roi_freq.size()) * 2.;
                 }
-                else
-                {
-                    freq =
-                        (signal_roi_freq.size() - i) / (1. * signal_roi_freq.size()) * 2.;
+                else {
+                    freq = (signal_roi_freq.size() - i) / (1. * signal_roi_freq.size()) * 2.;
                 }
                 std::complex<float> factor = filter_time(freq) * filter_low_loose(freq);
                 signal_roi_freq.at(i) = signal_roi_freq.at(i) * factor;
             }
-            WireCell::Waveform::realseq_t signal_roi_decon =
-                WireCell::Waveform::idft(signal_roi_freq);
+            WireCell::Waveform::realseq_t signal_roi_decon = WireCell::Waveform::idft(signal_roi_freq);
 
-            if (rms_threshold)
-            {
+            if (rms_threshold) {
                 std::pair<double, double> temp = Derivations::CalcRMS(signal_roi_decon);
                 double mean = temp.first;
                 double rms = temp.second;
@@ -193,49 +161,37 @@ bool Microboone::Subtract_WScaling(
                 //     " << rms << std::endl;
                 // }
                 // std::cout << "[Jujube] dfg_rms_ch" << ch << "\t" << rms << std::endl;
-                for (size_t i = 0; i != signal_roi_freq.size(); i++)
-                {
+                for (size_t i = 0; i != signal_roi_freq.size(); i++) {
                     signal_roi_decon.at(i) -= mean;
                 }
                 double rms_limit = rms_threshold * rms;
-                if (rms_limit < 0.02 && rms_limit > 0)
-                    rms_limit = 0.02;
-                if (rms_limit > decon_limit1)
-                    rms_limit = decon_limit1;
+                if (rms_limit < 0.02 && rms_limit > 0) rms_limit = 0.02;
+                if (rms_limit > decon_limit1) rms_limit = decon_limit1;
                 decon_limit1 = rms_limit;
             }
 
             std::map<int, bool> flag_replace;
-            for (auto roi : rois)
-            {
+            for (auto roi : rois) {
                 flag_replace[roi.front()] = false;
             }
 
             // judge if any ROI is good ...
-            for (auto roi : rois)
-            {
+            for (auto roi : rois) {
                 const int bin0 = std::max(roi.front() - 1, 0);
                 const int binf = std::min(roi.back() + 1, nbin - 1);
                 double max_val = 0;
                 double min_val = 0;
-                for (int i = bin0; i <= binf; i++)
-                {
+                for (int i = bin0; i <= binf; i++) {
                     int time_bin = i - res_offset;
-                    if (time_bin < 0)
-                        time_bin += nbin;
-                    if (time_bin >= nbin)
-                        time_bin -= nbin;
-                    if (i == bin0)
-                    {
+                    if (time_bin < 0) time_bin += nbin;
+                    if (time_bin >= nbin) time_bin -= nbin;
+                    if (i == bin0) {
                         max_val = signal_roi_decon.at(time_bin);
                         min_val = signal_roi_decon.at(time_bin);
                     }
-                    else
-                    {
-                        if (signal_roi_decon.at(time_bin) > max_val)
-                            max_val = signal_roi_decon.at(time_bin);
-                        if (signal_roi_decon.at(time_bin) < min_val)
-                            min_val = signal_roi_decon.at(time_bin);
+                    else {
+                        if (signal_roi_decon.at(time_bin) > max_val) max_val = signal_roi_decon.at(time_bin);
+                        if (signal_roi_decon.at(time_bin) < min_val) min_val = signal_roi_decon.at(time_bin);
                     }
                 }
 
@@ -243,8 +199,7 @@ bool Microboone::Subtract_WScaling(
                 // std::cout << roi.front() << " Xin " << max_val << " " << decon_limit1
                 // << std::endl;
 
-                if (max_val > decon_limit1 &&
-                    fabs(min_val) < max_val * roi_min_max_ratio)
+                if (max_val > decon_limit1 && fabs(min_val) < max_val * roi_min_max_ratio)
                     flag_replace[roi.front()] = true;
             }
 
@@ -254,19 +209,16 @@ bool Microboone::Subtract_WScaling(
 
             WireCell::Waveform::realseq_t temp_medians = medians;
 
-            for (auto roi : rois)
-            {
+            for (auto roi : rois) {
                 // original code used the bins just outside the ROI
                 const int bin0 = std::max(roi.front() - 1, 0);
                 const int binf = std::min(roi.back() + 1, nbin - 1);
-                if (flag_replace[roi.front()])
-                {
+                if (flag_replace[roi.front()]) {
                     const double m0 = temp_medians[bin0];
                     const double mf = temp_medians[binf];
                     const double roi_run = binf - bin0;
                     const double roi_rise = mf - m0;
-                    for (auto bin : roi)
-                    {
+                    for (auto bin : roi) {
                         const double m = m0 + (bin - bin0) / roi_run * roi_rise;
                         temp_medians.at(bin) = m;
                     }
@@ -294,21 +246,16 @@ bool Microboone::Subtract_WScaling(
             //    }
 
             // collection plane, directly subtracti ...
-            for (int i = 0; i != nbin; i++)
-            {
-                if (fabs(signal.at(i)) > 0.001)
-                {
+            for (int i = 0; i != nbin; i++) {
+                if (fabs(signal.at(i)) > 0.001) {
                     signal.at(i) = signal.at(i) - temp_medians.at(i) * scaling;
                 }
             }
         }
-        else
-        {
+        else {
             // collection plane, directly subtracti ...
-            for (int i = 0; i != nbin; i++)
-            {
-                if (fabs(signal.at(i)) > 0.001)
-                {
+            for (int i = 0; i != nbin; i++) {
+                if (fabs(signal.at(i)) > 0.001) {
                     signal.at(i) = signal.at(i) - medians.at(i) * scaling;
                 }
             }
@@ -323,11 +270,11 @@ bool Microboone::Subtract_WScaling(
     return true;
 }
 
-std::vector<std::vector<int>> Microboone::SignalProtection(
-    WireCell::Waveform::realseq_t &medians,
-    const WireCell::Waveform::compseq_t &respec, int res_offset, int pad_f,
-    int pad_b, float upper_decon_limit, float decon_lf_cutoff,
-    float upper_adc_limit, float protection_factor, float min_adc_limit)
+std::vector<std::vector<int>> Microboone::SignalProtection(WireCell::Waveform::realseq_t &medians,
+                                                           const WireCell::Waveform::compseq_t &respec, int res_offset,
+                                                           int pad_f, int pad_b, float upper_decon_limit,
+                                                           float decon_lf_cutoff, float upper_adc_limit,
+                                                           float protection_factor, float min_adc_limit)
 {
     // WireCell::Waveform::realseq_t temp1;
     // for (int i=0;i!=medians.size();i++){
@@ -360,16 +307,13 @@ std::vector<std::vector<int>> Microboone::SignalProtection(
     // std::endl;
 
     float limit;
-    if (protection_factor * rms > upper_adc_limit)
-    {
+    if (protection_factor * rms > upper_adc_limit) {
         limit = protection_factor * rms;
     }
-    else
-    {
+    else {
         limit = upper_adc_limit;
     }
-    if (min_adc_limit < limit)
-    {
+    if (min_adc_limit < limit) {
         limit = min_adc_limit;
     }
 
@@ -377,27 +321,21 @@ std::vector<std::vector<int>> Microboone::SignalProtection(
     // *protection_factor << " " << upper_adc_limit << " " << decon_lf_cutoff << "
     // " << upper_decon_limit << std::endl;
 
-    for (int j = 0; j != nbin; j++)
-    {
+    for (int j = 0; j != nbin; j++) {
         float content = medians.at(j);
-        if (fabs(content - mean) > limit)
-        {
+        if (fabs(content - mean) > limit) {
             // protection_factor*rms) {
             //	    medians.at(j) = 0;
             signalsBool.at(j) = true;
             // add the front and back padding
-            for (int k = 0; k != pad_b; k++)
-            {
+            for (int k = 0; k != pad_b; k++) {
                 int bin = j + k + 1;
-                if (bin > nbin - 1)
-                    bin = nbin - 1;
+                if (bin > nbin - 1) bin = nbin - 1;
                 signalsBool.at(bin) = true;
             }
-            for (int k = 0; k != pad_f; k++)
-            {
+            for (int k = 0; k != pad_f; k++) {
                 int bin = j - k - 1;
-                if (bin < 0)
-                {
+                if (bin < 0) {
                     bin = 0;
                 }
                 signalsBool.at(bin) = true;
@@ -407,74 +345,56 @@ std::vector<std::vector<int>> Microboone::SignalProtection(
 
     // std::cout << "Xin: " << respec.size() << " " << res_offset << std::endl;
     // the deconvolution protection code ...
-    if (respec.size() > 0 &&
-        (respec.at(0).real() != 1 || respec.at(0).imag() != 0) &&
-        res_offset != 0)
-    {
+    if (respec.size() > 0 && (respec.at(0).real() != 1 || respec.at(0).imag() != 0) && res_offset != 0) {
         // std::cout << nbin << std::endl;
 
-        WireCell::Waveform::compseq_t medians_freq =
-            WireCell::Waveform::dft(medians);
+        WireCell::Waveform::compseq_t medians_freq = WireCell::Waveform::dft(medians);
         WireCell::Waveform::shrink(medians_freq, respec);
 
-        for (size_t i = 0; i != medians_freq.size(); i++)
-        {
+        for (size_t i = 0; i != medians_freq.size(); i++) {
             double freq;
             // assuming 2 MHz digitization
-            if (i < medians_freq.size() / 2.)
-            {
+            if (i < medians_freq.size() / 2.) {
                 freq = i / (1. * medians_freq.size()) * 2.;
             }
-            else
-            {
+            else {
                 freq = (medians_freq.size() - i) / (1. * medians_freq.size()) * 2.;
             }
-            std::complex<float> factor =
-                filter_time(freq) * filter_low(freq, decon_lf_cutoff);
+            std::complex<float> factor = filter_time(freq) * filter_low(freq, decon_lf_cutoff);
             medians_freq.at(i) = medians_freq.at(i) * factor;
         }
-        WireCell::Waveform::realseq_t medians_decon =
-            WireCell::Waveform::idft(medians_freq);
+        WireCell::Waveform::realseq_t medians_decon = WireCell::Waveform::idft(medians_freq);
 
         temp = Derivations::CalcRMS(medians_decon);
         mean = temp.first;
         rms = temp.second;
 
-        if (protection_factor * rms > upper_decon_limit)
-        {
+        if (protection_factor * rms > upper_decon_limit) {
             limit = protection_factor * rms;
         }
-        else
-        {
+        else {
             limit = upper_decon_limit;
         }
 
         //	std::cout << "Xin: " << protection_factor << " " << rms << " " <<
-        //upper_decon_limit << std::endl;
+        // upper_decon_limit << std::endl;
 
-        for (int j = 0; j != nbin; j++)
-        {
+        for (int j = 0; j != nbin; j++) {
             float content = medians_decon.at(j);
-            if ((content - mean) > limit)
-            {
+            if ((content - mean) > limit) {
                 int time_bin = j + res_offset;
-                if (time_bin >= nbin)
-                    time_bin -= nbin;
+                if (time_bin >= nbin) time_bin -= nbin;
                 //	medians.at(time_bin) = 0;
                 signalsBool.at(time_bin) = true;
                 // add the front and back padding
-                for (int k = 0; k != pad_b; k++)
-                {
+                for (int k = 0; k != pad_b; k++) {
                     int bin = time_bin + k + 1;
-                    if (bin > nbin - 1)
-                        bin = nbin - 1;
+                    if (bin > nbin - 1) bin = nbin - 1;
                     signalsBool.at(bin) = true;
                 }
-                for (int k = 0; k != pad_f; k++)
-                {
+                for (int k = 0; k != pad_f; k++) {
                     int bin = time_bin - k - 1;
-                    if (bin < 0)
-                    {
+                    if (bin < 0) {
                         bin = 0;
                     }
                     signalsBool.at(bin) = true;
@@ -542,23 +462,17 @@ std::vector<std::vector<int>> Microboone::SignalProtection(
     // signalsBool true.
     std::vector<std::vector<int>> rois;
     bool inside = false;
-    for (int ind = 0; ind < nbin; ++ind)
-    {
-        if (inside)
-        {
-            if (signalsBool[ind])
-            {  // still inside
+    for (int ind = 0; ind < nbin; ++ind) {
+        if (inside) {
+            if (signalsBool[ind]) {  // still inside
                 rois.back().push_back(ind);
             }
-            else
-            {
+            else {
                 inside = false;
             }
         }
-        else
-        {  // outside the Rio
-            if (signalsBool[ind])
-            {  // just entered ROI
+        else {                       // outside the Rio
+            if (signalsBool[ind]) {  // just entered ROI
                 std::vector<int> roi;
                 roi.push_back(ind);
                 rois.push_back(roi);
@@ -568,17 +482,12 @@ std::vector<std::vector<int>> Microboone::SignalProtection(
     }
 
     std::map<int, bool> flag_replace;
-    for (auto roi : rois)
-    {
+    for (auto roi : rois) {
         flag_replace[roi.front()] = true;
     }
 
-    if (respec.size() > 0 &&
-        (respec.at(0).real() != 1 || respec.at(0).imag() != 0) &&
-        res_offset != 0)
-    {
-        for (auto roi : rois)
-        {
+    if (respec.size() > 0 && (respec.at(0).real() != 1 || respec.at(0).imag() != 0) && res_offset != 0) {
+        for (auto roi : rois) {
             flag_replace[roi.front()] = false;
         }
     }
@@ -658,19 +567,16 @@ std::vector<std::vector<int>> Microboone::SignalProtection(
 
     // Replace medians for above regions with interpolation on values
     // just outside each region.
-    for (auto roi : rois)
-    {
+    for (auto roi : rois) {
         // original code used the bins just outside the ROI
         const int bin0 = std::max(roi.front() - 1, 0);
         const int binf = std::min(roi.back() + 1, nbin - 1);
-        if (flag_replace[roi.front()])
-        {
+        if (flag_replace[roi.front()]) {
             const double m0 = medians[bin0];
             const double mf = medians[binf];
             const double roi_run = binf - bin0;
             const double roi_rise = mf - m0;
-            for (auto bin : roi)
-            {
+            for (auto bin : roi) {
                 const double m = m0 + (bin - bin0) / roi_run * roi_rise;
                 medians.at(bin) = m;
             }
@@ -680,8 +586,7 @@ std::vector<std::vector<int>> Microboone::SignalProtection(
     return rois;
 }
 
-bool Microboone::NoisyFilterAlg(WireCell::Waveform::realseq_t &sig,
-                                float min_rms, float max_rms)
+bool Microboone::NoisyFilterAlg(WireCell::Waveform::realseq_t &sig, float min_rms, float max_rms)
 {
     const double rmsVal = Microboone::CalcRMSWithFlags(sig);
 
@@ -741,11 +646,9 @@ bool Microboone::NoisyFilterAlg(WireCell::Waveform::realseq_t &sig,
     // }
 
     // if(rmsVal > maxRMSCut[planeNum] || rmsVal < minRMSCut[planeNum]) {
-    if (rmsVal > max_rms || rmsVal < min_rms)
-    {
+    if (rmsVal > max_rms || rmsVal < min_rms) {
         int numBins = sig.size();
-        for (int i = 0; i < numBins; i++)
-        {
+        for (int i = 0; i < numBins; i++) {
             sig.at(i) = 10000.0;
         }
 
@@ -755,15 +658,11 @@ bool Microboone::NoisyFilterAlg(WireCell::Waveform::realseq_t &sig,
     return false;
 }
 
-bool Microboone::Chirp_raise_baseline(WireCell::Waveform::realseq_t &sig,
-                                      int bin1, int bin2)
+bool Microboone::Chirp_raise_baseline(WireCell::Waveform::realseq_t &sig, int bin1, int bin2)
 {
-    if (bin1 < 0)
-        bin1 = 0;
-    if (bin2 > (int) sig.size())
-        bin2 = sig.size();
-    for (int i = bin1; i < bin2; i++)
-    {
+    if (bin1 < 0) bin1 = 0;
+    if (bin2 > (int) sig.size()) bin2 = sig.size();
+    for (int i = bin1; i < bin2; i++) {
         sig.at(i) = 10000.0;
     }
     return true;
@@ -775,14 +674,11 @@ float Microboone::CalcRMSWithFlags(const WireCell::Waveform::realseq_t &sig)
     // int waveformSize = sig.size();
 
     WireCell::Waveform::realseq_t temp;
-    for (size_t i = 0; i != sig.size(); i++)
-    {
-        if (sig.at(i) < 4096)
-            temp.push_back(sig.at(i));
+    for (size_t i = 0; i != sig.size(); i++) {
+        if (sig.at(i) < 4096) temp.push_back(sig.at(i));
     }
     float par[3];
-    if (temp.size() > 0)
-    {
+    if (temp.size() > 0) {
         par[0] = WireCell::Waveform::percentile_binned(temp, 0.5 - 0.34);
         par[1] = WireCell::Waveform::percentile_binned(temp, 0.5);
         par[2] = WireCell::Waveform::percentile_binned(temp, 0.5 + 0.34);
@@ -807,40 +703,30 @@ bool Microboone::SignalFilter(WireCell::Waveform::realseq_t &sig)
     std::vector<bool> signalRegions;
     int numBins = sig.size();
 
-    for (int i = 0; i < numBins; i++)
-    {
+    for (int i = 0; i < numBins; i++) {
         ADCval = sig.at(i);
-        if (((ADCval > sigThreshold) || (ADCval < -1.0 * sigThreshold)) &&
-            (ADCval < 4096.0))
-        {
+        if (((ADCval > sigThreshold) || (ADCval < -1.0 * sigThreshold)) && (ADCval < 4096.0)) {
             signalRegions.push_back(true);
         }
-        else
-        {
+        else {
             signalRegions.push_back(false);
         }
     }
 
-    for (int i = 0; i < numBins; i++)
-    {
-        if (signalRegions[i] == true)
-        {
+    for (int i = 0; i < numBins; i++) {
+        if (signalRegions[i] == true) {
             int bin1 = i - padBins;
-            if (bin1 < 0)
-            {
+            if (bin1 < 0) {
                 bin1 = 0;
             }
             int bin2 = i + padBins;
-            if (bin2 > numBins)
-            {
+            if (bin2 > numBins) {
                 bin2 = numBins;
             }
 
-            for (int j = bin1; j < bin2; j++)
-            {
+            for (int j = bin1; j < bin2; j++) {
                 ADCval = sig.at(j);
-                if (ADCval < 4096.0)
-                {
+                if (ADCval < 4096.0) {
                     sig.at(j) = sig.at(j) + 20000.0;
                 }
             }
@@ -860,15 +746,12 @@ bool Microboone::RawAdapativeBaselineAlg(WireCell::Waveform::realseq_t &sig)
 
     int numFlaggedBins = 0;
 
-    for (int j = 0; j < numBins; j++)
-    {
-        if (sig.at(j) == 10000.0)
-        {
+    for (int j = 0; j < numBins; j++) {
+        if (sig.at(j) == 10000.0) {
             numFlaggedBins++;
         }
     }
-    if (numFlaggedBins == numBins)
-    {
+    if (numFlaggedBins == numBins) {
         return true;  // Eventually replace this with flag check
     }
 
@@ -876,127 +759,98 @@ bool Microboone::RawAdapativeBaselineAlg(WireCell::Waveform::realseq_t &sig)
     int windowBins = 0;
     // int index;
     double ADCval = 0.0;
-    for (int j = 0; j <= windowSize / 2; j++)
-    {
+    for (int j = 0; j <= windowSize / 2; j++) {
         ADCval = sig.at(j);
-        if (ADCval < 4096.0)
-        {
+        if (ADCval < 4096.0) {
             baselineVal += ADCval;
             windowBins++;
         }
     }
 
-    if (windowBins == 0)
-    {
+    if (windowBins == 0) {
         baselineVec[0] = 0.0;
     }
-    else
-    {
+    else {
         baselineVec[0] = baselineVal / ((double) windowBins);
     }
 
-    if (windowBins < minWindowBins)
-    {
+    if (windowBins < minWindowBins) {
         isFilledVec[0] = false;
     }
-    else
-    {
+    else {
         isFilledVec[0] = true;
     }
 
-    for (int j = 1; j < numBins; j++)
-    {
+    for (int j = 1; j < numBins; j++) {
         int oldIndex = j - windowSize / 2 - 1;
         int newIndex = j + windowSize / 2;
 
-        if (oldIndex >= 0)
-        {
+        if (oldIndex >= 0) {
             ADCval = sig.at(oldIndex);
-            if (ADCval < 4096.0)
-            {
+            if (ADCval < 4096.0) {
                 baselineVal -= sig.at(oldIndex);
                 windowBins--;
             }
         }
-        if (newIndex < numBins)
-        {
+        if (newIndex < numBins) {
             ADCval = sig.at(newIndex);
-            if (ADCval < 4096)
-            {
+            if (ADCval < 4096) {
                 baselineVal += sig.at(newIndex);
                 windowBins++;
             }
         }
 
-        if (windowBins == 0)
-        {
+        if (windowBins == 0) {
             baselineVec[j] = 0.0;
         }
-        else
-        {
+        else {
             baselineVec[j] = baselineVal / windowBins;
         }
 
-        if (windowBins < minWindowBins)
-        {
+        if (windowBins < minWindowBins) {
             isFilledVec[j] = false;
         }
-        else
-        {
+        else {
             isFilledVec[j] = true;
         }
     }
 
-    for (int j = 0; j < numBins; j++)
-    {
+    for (int j = 0; j < numBins; j++) {
         bool downFlag = false;
         bool upFlag = false;
 
         ADCval = sig.at(j);
-        if (ADCval != 10000.0)
-        {
-            if (isFilledVec[j] == false)
-            {
+        if (ADCval != 10000.0) {
+            if (isFilledVec[j] == false) {
                 int downIndex = j;
-                while ((isFilledVec[downIndex] == false) && (downIndex > 0) &&
-                       (sig.at(downIndex) != 10000.0))
-                {
+                while ((isFilledVec[downIndex] == false) && (downIndex > 0) && (sig.at(downIndex) != 10000.0)) {
                     downIndex--;
                 }
 
-                if (isFilledVec[downIndex] == false)
-                {
+                if (isFilledVec[downIndex] == false) {
                     downFlag = true;
                 }
 
                 int upIndex = j;
-                while ((isFilledVec[upIndex] == false) && (upIndex < numBins - 1) &&
-                       (sig.at(upIndex) != 10000.0))
-                {
+                while ((isFilledVec[upIndex] == false) && (upIndex < numBins - 1) && (sig.at(upIndex) != 10000.0)) {
                     upIndex++;
                 }
 
-                if (isFilledVec[upIndex] == false)
-                {
+                if (isFilledVec[upIndex] == false) {
                     upFlag = true;
                 }
 
-                if ((downFlag == false) && (upFlag == false))
-                {
-                    baselineVec[j] = ((j - downIndex) * baselineVec[downIndex] +
-                                      (upIndex - j) * baselineVec[upIndex]) /
+                if ((downFlag == false) && (upFlag == false)) {
+                    baselineVec[j] = ((j - downIndex) * baselineVec[downIndex] + (upIndex - j) * baselineVec[upIndex]) /
                                      ((double) upIndex - downIndex);
                 }
-                else if ((downFlag == true) && (upFlag == false))
-                {
+                else if ((downFlag == true) && (upFlag == false)) {
                     baselineVec[j] = baselineVec[upIndex];
                 }
-                else if ((downFlag == false) && (upFlag == true))
-                {
+                else if ((downFlag == false) && (upFlag == true)) {
                     baselineVec[j] = baselineVec[downIndex];
                 }
-                else
-                {
+                else {
                     baselineVec[j] = 0.0;
                 }
             }
@@ -1011,17 +865,13 @@ bool Microboone::RawAdapativeBaselineAlg(WireCell::Waveform::realseq_t &sig)
 bool Microboone::RemoveFilterFlags(WireCell::Waveform::realseq_t &sig)
 {
     int numBins = sig.size();
-    for (int i = 0; i < numBins; i++)
-    {
+    for (int i = 0; i < numBins; i++) {
         double ADCval = sig.at(i);
-        if (ADCval > 4096.0)
-        {
-            if (ADCval > 10000.0)
-            {
+        if (ADCval > 4096.0) {
+            if (ADCval > 10000.0) {
                 sig.at(i) = ADCval - 20000.0;
             }
-            else
-            {
+            else {
                 sig.at(i) = 0.0;
             }
         }
@@ -1037,15 +887,13 @@ bool Microboone::RemoveFilterFlags(WireCell::Waveform::realseq_t &sig)
 /*
  * Configuration base class used for a couple filters
  */
-Microboone::ConfigFilterBase::ConfigFilterBase(const std::string &anode,
-                                               const std::string &noisedb)
+Microboone::ConfigFilterBase::ConfigFilterBase(const std::string &anode, const std::string &noisedb)
   : m_anode_tn(anode)
   , m_noisedb_tn(noisedb)
 {
 }
 Microboone::ConfigFilterBase::~ConfigFilterBase() {}
-void Microboone::ConfigFilterBase::configure(
-    const WireCell::Configuration &cfg)
+void Microboone::ConfigFilterBase::configure(const WireCell::Configuration &cfg)
 {
     m_anode_tn = get(cfg, "anode", m_anode_tn);
     m_anode = Factory::find_tn<IAnodePlane>(m_anode_tn);
@@ -1053,8 +901,7 @@ void Microboone::ConfigFilterBase::configure(
     m_noisedb = Factory::find_tn<IChannelNoiseDatabase>(m_noisedb_tn);
     // std::cerr << "ConfigFilterBase: \n" << cfg << "\n";
 }
-WireCell::Configuration
-Microboone::ConfigFilterBase::default_configuration() const
+WireCell::Configuration Microboone::ConfigFilterBase::default_configuration() const
 {
     Configuration cfg;
     cfg["anode"] = m_anode_tn;
@@ -1062,8 +909,7 @@ Microboone::ConfigFilterBase::default_configuration() const
     return cfg;
 }
 
-Microboone::CoherentNoiseSub::CoherentNoiseSub(const std::string &anode,
-                                               const std::string &noisedb,
+Microboone::CoherentNoiseSub::CoherentNoiseSub(const std::string &anode, const std::string &noisedb,
                                                float rms_threshold)
   : ConfigFilterBase(anode, noisedb)
   , m_rms_threshold(rms_threshold)
@@ -1071,8 +917,7 @@ Microboone::CoherentNoiseSub::CoherentNoiseSub(const std::string &anode,
 }
 Microboone::CoherentNoiseSub::~CoherentNoiseSub() {}
 
-WireCell::Waveform::ChannelMaskMap
-Microboone::CoherentNoiseSub::apply(channel_signals_t &chansig) const
+WireCell::Waveform::ChannelMaskMap Microboone::CoherentNoiseSub::apply(channel_signals_t &chansig) const
 {
     // std::cout << "Xin2: " << " " << chansig.size() << std::endl;
     // find the median among all
@@ -1094,18 +939,13 @@ Microboone::CoherentNoiseSub::apply(channel_signals_t &chansig) const
 
     // need to move these to data base, consult with Brett ...
     // also need to be time dependent ...
-    const float decon_limit =
-        m_noisedb->coherent_nf_decon_limit(achannel);  // 0.02;
-    const float decon_lf_cutoff =
-        m_noisedb->coherent_nf_decon_lf_cutoff(achannel);
-    const float adc_limit = m_noisedb->coherent_nf_adc_limit(achannel);  // 15;
-    const float decon_limit1 =
-        m_noisedb->coherent_nf_decon_limit1(achannel);  // 0.08; // loose filter
-    const float roi_min_max_ratio =
-        m_noisedb->coherent_nf_roi_min_max_ratio(achannel);  // 0.8 default
+    const float decon_limit = m_noisedb->coherent_nf_decon_limit(achannel);  // 0.02;
+    const float decon_lf_cutoff = m_noisedb->coherent_nf_decon_lf_cutoff(achannel);
+    const float adc_limit = m_noisedb->coherent_nf_adc_limit(achannel);                  // 15;
+    const float decon_limit1 = m_noisedb->coherent_nf_decon_limit1(achannel);            // 0.08; // loose filter
+    const float roi_min_max_ratio = m_noisedb->coherent_nf_roi_min_max_ratio(achannel);  // 0.8 default
 
-    const float protection_factor =
-        m_noisedb->coherent_nf_protection_factor(achannel);
+    const float protection_factor = m_noisedb->coherent_nf_protection_factor(achannel);
     const float min_adc_limit = m_noisedb->coherent_nf_min_adc_limit(achannel);
 
     // std::cout << decon_limit << " " << adc_limit << " " << protection_factor <<
@@ -1120,9 +960,9 @@ Microboone::CoherentNoiseSub::apply(channel_signals_t &chansig) const
     // std::cout << achannel << std::endl;
 
     // do the signal protection and adaptive baseline
-    std::vector<std::vector<int>> rois = Microboone::SignalProtection(
-        medians, respec, res_offset, pad_f, pad_b, decon_limit, decon_lf_cutoff,
-        adc_limit, protection_factor, min_adc_limit);
+    std::vector<std::vector<int>> rois =
+        Microboone::SignalProtection(medians, respec, res_offset, pad_f, pad_b, decon_limit, decon_lf_cutoff, adc_limit,
+                                     protection_factor, min_adc_limit);
 
     // if (achannel == 3840){
     // 	std::cout << "Xin1: " << rois.size() << std::endl;
@@ -1137,8 +977,7 @@ Microboone::CoherentNoiseSub::apply(channel_signals_t &chansig) const
     // std::endl;
 
     // calculate the scaling coefficient and subtract
-    Microboone::Subtract_WScaling(chansig, medians, respec, res_offset, rois,
-                                  decon_limit1, roi_min_max_ratio,
+    Microboone::Subtract_WScaling(chansig, medians, respec, res_offset, rois, decon_limit1, roi_min_max_ratio,
                                   m_rms_threshold);
 
     // WireCell::IChannelFilter::signal_t& signal = chansig.begin()->second;
@@ -1155,21 +994,18 @@ Microboone::CoherentNoiseSub::apply(channel_signals_t &chansig) const
 
     return WireCell::Waveform::ChannelMaskMap();  // not implemented
 }
-WireCell::Waveform::ChannelMaskMap
-Microboone::CoherentNoiseSub::apply(int channel, signal_t &sig) const
+WireCell::Waveform::ChannelMaskMap Microboone::CoherentNoiseSub::apply(int channel, signal_t &sig) const
 {
     return WireCell::Waveform::ChannelMaskMap();  // not implemented
 }
 
-void Microboone::CoherentNoiseSub::configure(
-    const WireCell::Configuration &cfg)
+void Microboone::CoherentNoiseSub::configure(const WireCell::Configuration &cfg)
 {
     ConfigFilterBase::configure(cfg);
 
     m_rms_threshold = get<float>(cfg, "rms_threshold", m_rms_threshold);
 }
-WireCell::Configuration
-Microboone::CoherentNoiseSub::default_configuration() const
+WireCell::Configuration Microboone::CoherentNoiseSub::default_configuration() const
 {
     Configuration cfg = ConfigFilterBase::default_configuration();
 
@@ -1178,8 +1014,7 @@ Microboone::CoherentNoiseSub::default_configuration() const
     return cfg;
 }
 
-Microboone::OneChannelNoise::OneChannelNoise(const std::string &anode,
-                                             const std::string &noisedb)
+Microboone::OneChannelNoise::OneChannelNoise(const std::string &anode, const std::string &noisedb)
   : ConfigFilterBase(anode, noisedb)
   , m_check_chirp()    // fixme, there are magic numbers hidden here
   , m_check_partial()  // fixme, here too.
@@ -1187,8 +1022,7 @@ Microboone::OneChannelNoise::OneChannelNoise(const std::string &anode,
 }
 Microboone::OneChannelNoise::~OneChannelNoise() {}
 
-WireCell::Waveform::ChannelMaskMap
-Microboone::OneChannelNoise::apply(int ch, signal_t &signal) const
+WireCell::Waveform::ChannelMaskMap Microboone::OneChannelNoise::apply(int ch, signal_t &signal) const
 {
     WireCell::Waveform::ChannelMaskMap ret;
 
@@ -1215,19 +1049,15 @@ Microboone::OneChannelNoise::apply(int ch, signal_t &signal) const
 
     // determine if chirping
     WireCell::Waveform::BinRange chirped_bins;
-    bool is_chirp =
-        m_check_chirp(signal_gc, chirped_bins.first, chirped_bins.second);
-    if (is_chirp)
-    {
+    bool is_chirp = m_check_chirp(signal_gc, chirped_bins.first, chirped_bins.second);
+    if (is_chirp) {
         ret["chirp"][ch].push_back(chirped_bins);
 
         auto wpid = m_anode->resolve(ch);
         const int iplane = wpid.index();
 
-        if (iplane != 2)
-        {  // not collection
-            if (chirped_bins.first > 0 || chirped_bins.second < int(signal.size()))
-            {
+        if (iplane != 2) {  // not collection
+            if (chirped_bins.first > 0 || chirped_bins.second < int(signal.size())) {
                 ret["lf_noisy"][ch].push_back(chirped_bins);
                 // std::cout << "Chirp " << ch << std::endl;
             }
@@ -1241,13 +1071,11 @@ Microboone::OneChannelNoise::apply(int ch, signal_t &signal) const
     bool is_partial = m_check_partial(spectrum);  // Xin's "IS_RC()"
 
     int nspec = 0;  // just catch any non-zero
-    if (!is_partial)
-    {
+    if (!is_partial) {
         auto const &spec = m_noisedb->rcrc(ch);
         WireCell::Waveform::shrink(spectrum, spec);
 
-        if (nsiglen != spec.size())
-        {
+        if (nsiglen != spec.size()) {
             ++nmismatchlen;
             nspec = spec.size();
         }
@@ -1257,8 +1085,7 @@ Microboone::OneChannelNoise::apply(int ch, signal_t &signal) const
         auto const &spec = m_noisedb->config(ch);
         WireCell::Waveform::scale(spectrum, spec);
 
-        if (nsiglen != spec.size())
-        {
+        if (nsiglen != spec.size()) {
             ++nmismatchlen;
             nspec = spec.size();
         }
@@ -1268,17 +1095,14 @@ Microboone::OneChannelNoise::apply(int ch, signal_t &signal) const
         auto const &spec = m_noisedb->noise(ch);
         WireCell::Waveform::scale(spectrum, spec);
 
-        if (nsiglen != spec.size())
-        {
+        if (nsiglen != spec.size()) {
             ++nmismatchlen;
             nspec = spec.size();
         }
     }
 
-    if (nmismatchlen)
-    {
-        std::cerr << "OneChannelNoise: WARNING: " << nmismatchlen
-                  << " config/data mismatches. "
+    if (nmismatchlen) {
+        std::cerr << "OneChannelNoise: WARNING: " << nmismatchlen << " config/data mismatches. "
                   << "#spec=" << nspec << ", #wave=" << nsiglen << ".\n"
                   << "\tResults may be suspect." << std::endl;
     }
@@ -1293,10 +1117,8 @@ Microboone::OneChannelNoise::apply(int ch, signal_t &signal) const
     // Now calculate the baseline ...
     std::pair<double, double> temp = WireCell::Waveform::mean_rms(signal);
     auto temp_signal = signal;
-    for (size_t i = 0; i != temp_signal.size(); i++)
-    {
-        if (fabs(temp_signal.at(i) - temp.first) > 6 * temp.second)
-        {
+    for (size_t i = 0; i != temp_signal.size(); i++) {
+        if (fabs(temp_signal.at(i) - temp.first) > 6 * temp.second) {
             temp_signal.at(i) = temp.first;
         }
     }
@@ -1308,16 +1130,13 @@ Microboone::OneChannelNoise::apply(int ch, signal_t &signal) const
     //*** specific and are basically copy-pasted from the prototype
 
     // Now do adaptive baseline for the chirping channels
-    if (is_chirp)
-    {
-        Microboone::Chirp_raise_baseline(signal, chirped_bins.first,
-                                         chirped_bins.second);
+    if (is_chirp) {
+        Microboone::Chirp_raise_baseline(signal, chirped_bins.first, chirped_bins.second);
         Microboone::SignalFilter(signal);
         Microboone::RawAdapativeBaselineAlg(signal);
     }
     // Now do the adaptive baseline for the bad RC channels
-    if (is_partial)
-    {
+    if (is_partial) {
         // add something
         WireCell::Waveform::BinRange temp_chirped_bins;
         temp_chirped_bins.first = 0;
@@ -1325,8 +1144,7 @@ Microboone::OneChannelNoise::apply(int ch, signal_t &signal) const
 
         auto wpid = m_anode->resolve(ch);
         const int iplane = wpid.index();
-        if (iplane != 2)
-        {  // not collection
+        if (iplane != 2) {  // not collection
             ret["lf_noisy"][ch].push_back(temp_chirped_bins);
             // std::cout << "Partial " << ch << std::endl;
         }
@@ -1350,8 +1168,7 @@ Microboone::OneChannelNoise::apply(int ch, signal_t &signal) const
     bool is_noisy = Microboone::NoisyFilterAlg(signal, min_rms, max_rms);
     Microboone::RemoveFilterFlags(signal);
 
-    if (is_noisy)
-    {
+    if (is_noisy) {
         // std::cerr << "OneChannelNoise: "<<ch
         //           <<" is_noisy="<<is_noisy
         //           <<", is_chirp="<<is_chirp
@@ -1362,25 +1179,20 @@ Microboone::OneChannelNoise::apply(int ch, signal_t &signal) const
         chirped_bins.second = signal.size();
         ret["noisy"][ch].push_back(chirped_bins);
 
-        if (ret.find("lf_noisy") != ret.end())
-        {
-            if (ret["lf_noisy"].find(ch) != ret["lf_noisy"].end())
-                ret["lf_noisy"].erase(ch);
+        if (ret.find("lf_noisy") != ret.end()) {
+            if (ret["lf_noisy"].find(ch) != ret["lf_noisy"].end()) ret["lf_noisy"].erase(ch);
         }
     }
 
     return ret;
 }
 
-WireCell::Waveform::ChannelMaskMap
-Microboone::OneChannelNoise::apply(channel_signals_t &chansig) const
+WireCell::Waveform::ChannelMaskMap Microboone::OneChannelNoise::apply(channel_signals_t &chansig) const
 {
     return WireCell::Waveform::ChannelMaskMap();
 }
 
-Microboone::ADCBitShift::ADCBitShift(int nbits, int exam_nticks,
-                                     double threshold_sigma,
-                                     double threshold_fix)
+Microboone::ADCBitShift::ADCBitShift(int nbits, int exam_nticks, double threshold_sigma, double threshold_fix)
   : m_nbits(nbits)
   , m_exam_nticks(exam_nticks)
   , m_threshold_sigma(threshold_sigma)
@@ -1393,8 +1205,7 @@ void Microboone::ADCBitShift::configure(const WireCell::Configuration &cfg)
 {
     m_nbits = get<int>(cfg, "Number_of_ADC_bits", m_nbits);
     m_exam_nticks = get<int>(cfg, "Exam_number_of_ticks_test", m_exam_nticks);
-    m_threshold_sigma =
-        get<double>(cfg, "Threshold_sigma_test", m_threshold_sigma);
+    m_threshold_sigma = get<double>(cfg, "Threshold_sigma_test", m_threshold_sigma);
     m_threshold_fix = get<double>(cfg, "Threshold_fix", m_threshold_fix);
     // std::cerr << "ADCBitShift: \n" << cfg << "\n";
 }
@@ -1409,55 +1220,45 @@ WireCell::Configuration Microboone::ADCBitShift::default_configuration() const
     return cfg;
 }
 
-WireCell::Waveform::ChannelMaskMap
-Microboone::ADCBitShift::apply(channel_signals_t &chansig) const
+WireCell::Waveform::ChannelMaskMap Microboone::ADCBitShift::apply(channel_signals_t &chansig) const
 {
     // No CMM's are produced.
     return WireCell::Waveform::ChannelMaskMap();
 }
 
 // ADC Bit Shift problem ...
-WireCell::Waveform::ChannelMaskMap
-Microboone::ADCBitShift::apply(int ch, signal_t &signal) const
+WireCell::Waveform::ChannelMaskMap Microboone::ADCBitShift::apply(int ch, signal_t &signal) const
 {
     std::vector<int> counter(m_nbits, 0);
     std::vector<int> s, s1(m_nbits, 0);
     int nbin = m_exam_nticks;
 
-    for (int i = 0; i != nbin; i++)
-    {
+    for (int i = 0; i != nbin; i++) {
         int x = signal.at(i);
         s.clear();
-        do
-        {
+        do {
             s.push_back((x & 1));
         } while (x >>= 1);
         s.resize(m_nbits);
 
-        for (int j = 0; j != m_nbits; j++)
-        {
+        for (int j = 0; j != m_nbits; j++) {
             counter.at(j) += abs(s.at(j) - s1.at(j));
         }
         s1 = s;
     }
 
     int nshift = 0;
-    for (int i = 0; i != m_nbits; i++)
-    {
-        if (counter.at(i) <
-            nbin / 2. - nbin / 2. * sqrt(1. / nbin) * m_threshold_sigma)
-        {
+    for (int i = 0; i != m_nbits; i++) {
+        if (counter.at(i) < nbin / 2. - nbin / 2. * sqrt(1. / nbin) * m_threshold_sigma) {
             nshift++;
         }
-        else
-        {
+        else {
             break;
         }
     }
 
     WireCell::Waveform::ChannelMaskMap ret;
-    if (nshift != 0 && nshift < 11)
-    {
+    if (nshift != 0 && nshift < 11) {
         WireCell::Waveform::BinRange ADC_bit_shifts;
         ADC_bit_shifts.first = nshift;
         ADC_bit_shifts.second = nshift;
@@ -1467,8 +1268,7 @@ Microboone::ADCBitShift::apply(int ch, signal_t &signal) const
         // do the correction ...
         const int nl = signal.size();
         std::vector<int> x(nl, 0), x_orig(nl, 0);
-        for (int i = 0; i != nl; i++)
-        {
+        for (int i = 0; i != nl; i++) {
             x_orig[i] = signal.at(i);
             x[i] = signal.at(i);
         }
@@ -1476,8 +1276,7 @@ Microboone::ADCBitShift::apply(int ch, signal_t &signal) const
         std::set<int> fillings;
         int filling;
         int mean = 0;
-        for (int i = 0; i != nl; i++)
-        {
+        for (int i = 0; i != nl; i++) {
             filling = WireCell::Bits::lowest_bits(x_orig[i], nshift);
             int y = WireCell::Bits::shift_right(x_orig[i], nshift, filling, 12);
             fillings.insert(filling);
@@ -1498,25 +1297,19 @@ Microboone::ADCBitShift::apply(int ch, signal_t &signal) const
         int next1_bin_content = mean;
         int curr_bin_content;
 
-        for (int i = 0; i < nl; i = i + 1)
-        {
+        for (int i = 0; i < nl; i = i + 1) {
             curr_bin_content = x[i];
             // when to judge if one is likely bad ...
-            if (abs(curr_bin_content - mean) > exp_diff &&
-                (abs(curr_bin_content - prev_bin_content) > exp_diff ||
-                 abs(curr_bin_content - next_bin_content) > exp_diff))
-            {
+            if (abs(curr_bin_content - mean) > exp_diff && (abs(curr_bin_content - prev_bin_content) > exp_diff ||
+                                                            abs(curr_bin_content - next_bin_content) > exp_diff)) {
                 int exp_value =
-                    ((2 * prev_bin_content - prev1_bin_content) +
-                     (prev_bin_content + next_bin_content) / 2. +
+                    ((2 * prev_bin_content - prev1_bin_content) + (prev_bin_content + next_bin_content) / 2. +
                      (prev_bin_content * 2. / 3. + next1_bin_content / 3.)) /
                     3.;
-                for (auto it = fillings.begin(); it != fillings.end(); it++)
-                {
+                for (auto it = fillings.begin(); it != fillings.end(); it++) {
                     int y = WireCell::Bits::shift_right(x_orig[i], nshift, (*it), 12);
                     // when to switch ...
-                    if (fabs(y - exp_value) < fabs(x[i] - exp_value))
-                    {
+                    if (fabs(y - exp_value) < fabs(x[i] - exp_value)) {
                         x[i] = y;  // hs->SetBinContent(i+1,y);
                     }
                 }
@@ -1524,36 +1317,30 @@ Microboone::ADCBitShift::apply(int ch, signal_t &signal) const
 
             prev1_bin_content = prev_bin_content;
             prev_bin_content = x[i];
-            if (i + 2 < nl)
-            {
+            if (i + 2 < nl) {
                 next_bin_content = x[i + 2];
             }
-            else
-            {
+            else {
                 next_bin_content = mean;
             }
-            if (i + 3 < nl)
-            {
+            if (i + 3 < nl) {
                 next1_bin_content = x[i + 3];
             }
-            else
-            {
+            else {
                 next1_bin_content = mean;
             }
         }
 
         // change the histogram ...
-        for (int i = 0; i != nl; i++)
-        {
+        for (int i = 0; i != nl; i++) {
             signal.at(i) = x[i];
         }
     }
     return ret;
 }
 
-Microboone::OneChannelStatus::OneChannelStatus(const std::string anode_tn,
-                                               double threshold, int window,
-                                               int nbins, double cut)
+Microboone::OneChannelStatus::OneChannelStatus(const std::string anode_tn, double threshold, int window, int nbins,
+                                               double cut)
   : m_anode_tn(anode_tn)
   , m_threshold(threshold)
   , m_window(window)
@@ -1563,8 +1350,7 @@ Microboone::OneChannelStatus::OneChannelStatus(const std::string anode_tn,
 }
 Microboone::OneChannelStatus::~OneChannelStatus() {}
 
-void Microboone::OneChannelStatus::configure(
-    const WireCell::Configuration &cfg)
+void Microboone::OneChannelStatus::configure(const WireCell::Configuration &cfg)
 {
     m_threshold = get<double>(cfg, "Threshold", m_threshold);
     m_window = get<int>(cfg, "Window", m_window);
@@ -1573,14 +1359,12 @@ void Microboone::OneChannelStatus::configure(
 
     m_anode_tn = get(cfg, "anode", m_anode_tn);
     m_anode = Factory::find_tn<IAnodePlane>(m_anode_tn);
-    if (!m_anode)
-    {
+    if (!m_anode) {
         THROW(KeyError() << errmsg{"failed to get IAnodePlane: " + m_anode_tn});
     }
     // std::cerr << "OneChannelStatus: \n" << cfg << "\n";
 }
-WireCell::Configuration
-Microboone::OneChannelStatus::default_configuration() const
+WireCell::Configuration Microboone::OneChannelStatus::default_configuration() const
 {
     Configuration cfg;
     cfg["Threshold"] = m_threshold;
@@ -1591,24 +1375,20 @@ Microboone::OneChannelStatus::default_configuration() const
     return cfg;
 }
 
-WireCell::Waveform::ChannelMaskMap
-Microboone::OneChannelStatus::apply(channel_signals_t &chansig) const
+WireCell::Waveform::ChannelMaskMap Microboone::OneChannelStatus::apply(channel_signals_t &chansig) const
 {
     return WireCell::Waveform::ChannelMaskMap();
 }
 
 // ADC Bit Shift problem ...
-WireCell::Waveform::ChannelMaskMap
-Microboone::OneChannelStatus::apply(int ch, signal_t &signal) const
+WireCell::Waveform::ChannelMaskMap Microboone::OneChannelStatus::apply(int ch, signal_t &signal) const
 {
     WireCell::Waveform::ChannelMaskMap ret;
     auto wpid = m_anode->resolve(ch);
     const int iplane = wpid.index();
-    if (iplane != 2)
-    {  // not collection
+    if (iplane != 2) {  // not collection
         // std::cout << ch << std::endl;
-        if (ID_lf_noisy(signal))
-        {
+        if (ID_lf_noisy(signal)) {
             WireCell::Waveform::BinRange temp_chirped_bins;
             temp_chirped_bins.first = 0;
             temp_chirped_bins.second = signal.size();
@@ -1634,27 +1414,20 @@ bool Microboone::OneChannelStatus::ID_lf_noisy(signal_t &sig) const
     double rms = sqrt((pow(val1 - mean, 2) + pow(val2 - mean, 2)) / 2.);
 
     double valid = 0;
-    for (int i = 0; i < int(sig.size()); i++)
-    {
-        if (sig.at(i) != 0)
-        {
+    for (int i = 0; i < int(sig.size()); i++) {
+        if (sig.at(i) != 0) {
             valid++;
         }
     }
-    if (!valid)
-    {
+    if (!valid) {
         return false;
     }
 
     signal_t temp_sig = sig;
-    for (int i = 0; i < int(sig.size()); i++)
-    {
-        if (fabs(sig.at(i) - mean) > m_threshold * rms)
-        {
-            for (int k = -m_window; k != m_window; k++)
-            {
-                if (k + i >= 0 && k + i < int(sig.size()))
-                    temp_sig.at(k + i) = mean;
+    for (int i = 0; i < int(sig.size()); i++) {
+        if (fabs(sig.at(i) - mean) > m_threshold * rms) {
+            for (int k = -m_window; k != m_window; k++) {
+                if (k + i >= 0 && k + i < int(sig.size())) temp_sig.at(k + i) = mean;
             }
         }
     }
@@ -1665,8 +1438,7 @@ bool Microboone::OneChannelStatus::ID_lf_noisy(signal_t &sig) const
     // }
     // do FFT
     Waveform::compseq_t sig_freq = Waveform::dft(temp_sig);
-    for (int i = 0; i != m_nbins; i++)
-    {
+    for (int i = 0; i != m_nbins; i++) {
         content += abs(sig_freq.at(i + 1));
     }
 
@@ -1675,8 +1447,7 @@ bool Microboone::OneChannelStatus::ID_lf_noisy(signal_t &sig) const
     // std::cout << m_threshold << " " << m_window << " " << m_nbins << " " <<
     // m_cut << std::endl;
 
-    if (content / valid > m_cut)
-    {
+    if (content / valid > m_cut) {
         // std::cerr << "OneChannelStatus::ID_lf_noisy: content=" << content << "
         // valid=" << valid << " m_cut="<<m_cut<< std::endl;
         return true;

@@ -22,12 +22,10 @@
 #include <unordered_set>
 #include <variant>  // C++17
 
-namespace WireCell
-{
+namespace WireCell {
     // VertexType must be hashable.
     template <typename VertexType>
-    class IndexedGraph
-    {
+    class IndexedGraph {
        public:
         typedef VertexType vertex_t;
         // The underlying graph inherently does not allow parallel
@@ -38,9 +36,7 @@ namespace WireCell
         // you need a smaller graph, make it with the nodes you want
         // to keep.  Seriously, don't call remove().  I know you want
         // to, just don't.
-        typedef boost::adjacency_list<boost::setS, boost::vecS, boost::undirectedS,
-                                      vertex_t>
-            graph_t;
+        typedef boost::adjacency_list<boost::setS, boost::vecS, boost::undirectedS, vertex_t> graph_t;
         typedef typename boost::graph_traits<graph_t>::vertex_descriptor vdesc_t;
         typedef typename boost::graph_traits<graph_t>::edge_descriptor edesc_t;
 
@@ -53,15 +49,13 @@ namespace WireCell
             vertex_map_t vmap;
             boost::associative_property_map<vertex_map_t> pmapindx(vmap);
             int count = 0;
-            for (auto v : boost::make_iterator_range(boost::vertices(g)))
-            {
+            for (auto v : boost::make_iterator_range(boost::vertices(g))) {
                 boost::put(pmapindx, v, count++);
             }
             boost::copy_graph(g, m_graph, boost::vertex_index_map(pmapindx));
 
             // make index
-            for (auto v : boost::make_iterator_range(boost::vertices(m_graph)))
-            {
+            for (auto v : boost::make_iterator_range(boost::vertices(m_graph))) {
                 m_index[m_graph[v]] = v;
             }
         }
@@ -71,14 +65,11 @@ namespace WireCell
         {
             std::vector<vertex_t> ret;
             auto it = m_index.find(obj);
-            if (it == m_index.end())
-            {
+            if (it == m_index.end()) {
                 return ret;
             }
             vdesc_t vd = it->second;
-            for (auto edge :
-                 boost::make_iterator_range(boost::out_edges(vd, m_graph)))
-            {
+            for (auto edge : boost::make_iterator_range(boost::out_edges(vd, m_graph))) {
                 vdesc_t neigh = boost::target(edge, m_graph);
                 ret.push_back(m_graph[neigh]);
             }
@@ -89,8 +80,7 @@ namespace WireCell
         bool has(vertex_t vobj) const
         {
             auto it = m_index.find(vobj);
-            if (it == m_index.end())
-            {
+            if (it == m_index.end()) {
                 return false;
             }
             return true;
@@ -109,8 +99,7 @@ namespace WireCell
         vdesc_t vertex(vertex_t vobj)
         {
             auto it = m_index.find(vobj);
-            if (it != m_index.end())
-            {
+            if (it != m_index.end()) {
                 return it->second;
             }
             vdesc_t vd = boost::add_vertex(vobj, m_graph);
@@ -140,11 +129,9 @@ namespace WireCell
         vertex_grouping_t groups()
         {
             std::unordered_map<vdesc_t, int> stripes;
-            boost::connected_components(m_graph,
-                                        boost::make_assoc_property_map(stripes));
+            boost::connected_components(m_graph, boost::make_assoc_property_map(stripes));
             vertex_grouping_t ret;
-            for (auto &vg : stripes)
-            {  // invert
+            for (auto &vg : stripes) {  // invert
                 ret[vg.second].push_back(m_graph[vg.first]);
             }
             return ret;

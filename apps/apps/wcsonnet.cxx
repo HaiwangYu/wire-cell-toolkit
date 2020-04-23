@@ -8,8 +8,7 @@ using namespace WireCell;
 
 int main(int argc, char *argv[])
 {
-    if (argc <= 1)
-    {
+    if (argc <= 1) {
         cout << "Simple command line Jsonnet->JSON compiler using WCT services\n"
              << "Likely you will need to set WIRECELL_PATH\n\n"
              << "  usage: wcsonnet file.jsonnet\n";

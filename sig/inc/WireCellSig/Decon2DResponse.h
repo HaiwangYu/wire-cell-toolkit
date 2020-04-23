@@ -8,12 +8,9 @@
 #include "WireCellIface/ITensorSetFilter.h"
 #include "WireCellUtil/Logging.h"
 
-namespace WireCell
-{
-    namespace Sig
-    {
-        class Decon2DResponse : public ITensorSetFilter, public IConfigurable
-        {
+namespace WireCell {
+    namespace Sig {
+        class Decon2DResponse : public ITensorSetFilter, public IConfigurable {
            public:
             Decon2DResponse();
             virtual ~Decon2DResponse() {}
@@ -23,8 +20,7 @@ namespace WireCell
             virtual WireCell::Configuration default_configuration() const;
 
             // ITensorSetFilter interface
-            virtual bool operator()(const ITensorSet::pointer &in,
-                                    ITensorSet::pointer &out);
+            virtual bool operator()(const ITensorSet::pointer &in, ITensorSet::pointer &out);
 
            private:
             Log::logptr_t l;

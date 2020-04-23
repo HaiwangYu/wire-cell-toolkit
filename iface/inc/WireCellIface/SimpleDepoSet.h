@@ -1,9 +1,7 @@
 #include "WireCellIface/IDepoSet.h"
 
-namespace WireCell
-{
-    class SimpleDepoSet : public IDepoSet
-    {
+namespace WireCell {
+    class SimpleDepoSet : public IDepoSet {
         int m_ident;
         IDepo::shared_vector m_depos;
 

@@ -5,13 +5,11 @@
 #include <vector>
 #include "WireCellRess/LinearModel.h"
 
-namespace WireCell
-{
-    class ElasticNetModel : public LinearModel
-    {
+namespace WireCell {
+    class ElasticNetModel : public LinearModel {
        public:
-        ElasticNetModel(double lambda = 1., double alpha = 1., int max_iter = 100000,
-                        double TOL = 1e-3, bool non_negtive = true);
+        ElasticNetModel(double lambda = 1., double alpha = 1., int max_iter = 100000, double TOL = 1e-3,
+                        bool non_negtive = true);
         ~ElasticNetModel();
 
         double lambda;  // regularization parameter
@@ -27,8 +25,7 @@ namespace WireCell
         void SetX(Eigen::MatrixXd X)
         {
             LinearModel::SetX(X);
-            SetLambdaWeight(Eigen::VectorXd::Zero(X.cols()) +
-                            Eigen::VectorXd::Constant(X.cols(), 1.));
+            SetLambdaWeight(Eigen::VectorXd::Zero(X.cols()) + Eigen::VectorXd::Constant(X.cols(), 1.));
         }
         virtual void Fit();
 

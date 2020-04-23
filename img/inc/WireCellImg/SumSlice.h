@@ -34,18 +34,14 @@
 
 #include <string>
 
-namespace WireCell
-{
-    namespace Img
-    {
-        namespace Data
-        {
+namespace WireCell {
+    namespace Img {
+        namespace Data {
             // ISlice class is held temporarily as concrete.
             class Slice;
         }  // namespace Data
 
-        class SumSliceBase : public IConfigurable
-        {
+        class SumSliceBase : public IConfigurable {
            public:
             SumSliceBase();
             virtual ~SumSliceBase();
@@ -64,8 +60,7 @@ namespace WireCell
             std::string m_tag;
         };
 
-        class SumSlicer : public SumSliceBase, public IFrameSlicer
-        {
+        class SumSlicer : public SumSliceBase, public IFrameSlicer {
            public:
             virtual ~SumSlicer();
 
@@ -73,8 +68,7 @@ namespace WireCell
             bool operator()(const input_pointer &in, output_pointer &out);
         };
 
-        class SumSlices : public SumSliceBase, public IFrameSlices
-        {
+        class SumSlices : public SumSliceBase, public IFrameSlices {
            public:
             virtual ~SumSlices();
 

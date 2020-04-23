@@ -23,37 +23,31 @@ WireCell::INode::pointer get_node(const std::string &node_desc)
 {
     using namespace WireCell;
 
-    if (node_desc == "source")
-    {  // note actual desc should be class or class:inst
+    if (node_desc == "source") {  // note actual desc should be class or class:inst
         return INode::pointer(new WireCellTbb::MockDepoSource);
     }
-    if (node_desc == "drift")
-    {  // note actual desc should be class or class:inst
+    if (node_desc == "drift") {  // note actual desc should be class or class:inst
         return INode::pointer(new WireCellTbb::MockDrifter);
     }
-    if (node_desc == "sink")
-    {  // note actual desc should be class or class:inst
+    if (node_desc == "sink") {  // note actual desc should be class or class:inst
         return INode::pointer(new WireCellTbb::MockDepoSink);
     }
     return nullptr;
 }
 
-WireCellTbb::Node make_node(tbb::flow::graph &graph,
-                            const std::string &node_desc)
+WireCellTbb::Node make_node(tbb::flow::graph &graph, const std::string &node_desc)
 {
     using namespace WireCell;
     using namespace WireCellTbb;
 
     INode::pointer wcnode = get_node(node_desc);
-    if (!wcnode)
-    {
+    if (!wcnode) {
         cerr << "Failed to get node for " << node_desc << endl;
         return nullptr;
     }
 
     cerr << "Getting node from category: " << wcnode->category() << endl;
-    switch (wcnode->category())
-    {
+    switch (wcnode->category()) {
     case INode::sourceNode:
         return Node(new SourceNodeWrapper(graph, wcnode));
     case INode::sinkNode:
@@ -68,10 +62,8 @@ WireCellTbb::Node make_node(tbb::flow::graph &graph,
     return nullptr;
 }
 
-bool connect(WireCellTbb::Node sender, WireCellTbb::Node receiver,
-             size_t sport = 0, size_t rport = 0);
-bool connect(WireCellTbb::Node sender, WireCellTbb::Node receiver, size_t sport,
-             size_t rport)
+bool connect(WireCellTbb::Node sender, WireCellTbb::Node receiver, size_t sport = 0, size_t rport = 0);
+bool connect(WireCellTbb::Node sender, WireCellTbb::Node receiver, size_t sport, size_t rport)
 {
     using namespace WireCellTbb;
 

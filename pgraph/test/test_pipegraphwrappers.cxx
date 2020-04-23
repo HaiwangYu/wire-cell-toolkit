@@ -32,8 +32,7 @@ int main()
         cfg["tracks"][0]["ray"]["head"]["x"] = 1 * units::cm;
         cfg["tracks"][0]["ray"]["head"]["y"] = 1 * units::cm;
         cfg["tracks"][0]["ray"]["head"]["z"] = 1 * units::cm;
-        cerr << "TrackDepos cfg:\n"
-             << cfg << endl;
+        cerr << "TrackDepos cfg:\n" << cfg << endl;
         obj->configure(cfg);
     }
     // DumpDepos needs no config.

@@ -56,12 +56,9 @@
 #include "WireCellPgraph/Graph.h"
 #include "WireCellUtil/Logging.h"
 
-namespace WireCell
-{
-    namespace Pgraph
-    {
-        class Pgrapher : public WireCell::IApplication, public WireCell::IConfigurable
-        {
+namespace WireCell {
+    namespace Pgraph {
+        class Pgrapher : public WireCell::IApplication, public WireCell::IConfigurable {
            public:
             Pgrapher();
             virtual ~Pgrapher();

@@ -14,12 +14,9 @@
 #include <unordered_set>
 #include <vector>
 
-namespace WireCell
-{
-    namespace SigProc
-    {
-        class ChannelSelector : public IFrameFilter, public IConfigurable
-        {
+namespace WireCell {
+    namespace SigProc {
+        class ChannelSelector : public IFrameFilter, public IConfigurable {
            public:
             ChannelSelector();
             virtual ~ChannelSelector();

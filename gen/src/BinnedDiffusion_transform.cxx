@@ -21,9 +21,9 @@ using namespace WireCell;
 //   return lhs->depo_time() < rhs->depo_time();
 // }
 
-Gen::BinnedDiffusion_transform::BinnedDiffusion_transform(
-    const Pimpos &pimpos, const Binning &tbins, double nsigma,
-    IRandom::pointer fluctuate, ImpactDataCalculationStrategy calcstrat)
+Gen::BinnedDiffusion_transform::BinnedDiffusion_transform(const Pimpos &pimpos, const Binning &tbins, double nsigma,
+                                                          IRandom::pointer fluctuate,
+                                                          ImpactDataCalculationStrategy calcstrat)
   : m_pimpos(pimpos)
   , m_tbins(tbins)
   , m_nsigma(nsigma)
@@ -35,8 +35,7 @@ Gen::BinnedDiffusion_transform::BinnedDiffusion_transform(
 {
 }
 
-bool Gen::BinnedDiffusion_transform::add(IDepo::pointer depo, double sigma_time,
-                                         double sigma_pitch)
+bool Gen::BinnedDiffusion_transform::add(IDepo::pointer depo, double sigma_time, double sigma_pitch)
 {
     const double center_time = depo->time();
     const double center_pitch = m_pimpos.distance(depo->pos());
@@ -47,8 +46,7 @@ bool Gen::BinnedDiffusion_transform::add(IDepo::pointer depo, double sigma_time,
         double nmax_sigma = time_desc.distance(m_tbins.max());
 
         double eff_nsigma = sigma_time > 0 ? m_nsigma : 0;
-        if (nmin_sigma > eff_nsigma || nmax_sigma < -eff_nsigma)
-        {
+        if (nmin_sigma > eff_nsigma || nmax_sigma < -eff_nsigma) {
             // std::cerr << "BinnedDiffusion_transform: depo too far away in time
             // sigma:"
             //           << " t_depo=" << center_time/units::ms << "ms not in:"
@@ -69,8 +67,7 @@ bool Gen::BinnedDiffusion_transform::add(IDepo::pointer depo, double sigma_time,
         double nmax_sigma = pitch_desc.distance(ibins.max());
 
         double eff_nsigma = sigma_pitch > 0 ? m_nsigma : 0;
-        if (nmin_sigma > eff_nsigma || nmax_sigma < -eff_nsigma)
-        {
+        if (nmin_sigma > eff_nsigma || nmax_sigma < -eff_nsigma) {
             // std::cerr << "BinnedDiffusion_transform: depo too far away in pitch
             // sigma: "
             //           << " p_depo=" << center_pitch/units::cm << "cm not in:"
@@ -134,16 +131,14 @@ bool Gen::BinnedDiffusion_transform::add(IDepo::pointer depo, double sigma_time,
 //     }
 // }
 
-void Gen::BinnedDiffusion_transform::get_charge_matrix(
-    std::vector<Eigen::SparseMatrix<float> *> &vec_spmatrix,
-    std::vector<int> &vec_impact)
+void Gen::BinnedDiffusion_transform::get_charge_matrix(std::vector<Eigen::SparseMatrix<float> *> &vec_spmatrix,
+                                                       std::vector<int> &vec_impact)
 {
     const auto ib = m_pimpos.impact_binning();
 
     // map between reduced impact # to array #
     std::map<int, int> map_redimp_vec;
-    for (size_t i = 0; i != vec_impact.size(); i++)
-    {
+    for (size_t i = 0; i != vec_impact.size(); i++) {
         map_redimp_vec[vec_impact[i]] = int(i);
     }
 
@@ -154,12 +149,10 @@ void Gen::BinnedDiffusion_transform::get_charge_matrix(
     std::map<int, int> map_imp_redimp;
 
     // std::cout << ib.nbins() << " " << rb.nbins() << std::endl;
-    for (int wireind = 0; wireind != rb.nbins(); wireind++)
-    {
+    for (int wireind = 0; wireind != rb.nbins(); wireind++) {
         int wire_imp_no = m_pimpos.wire_impact(wireind);
         std::pair<int, int> imps_range = m_pimpos.wire_impacts(wireind);
-        for (int imp_no = imps_range.first; imp_no != imps_range.second; imp_no++)
-        {
+        for (int imp_no = imps_range.first; imp_no != imps_range.second; imp_no++) {
             map_imp_ch[imp_no] = wireind;
             map_imp_redimp[imp_no] = imp_no - wire_imp_no;
 
@@ -174,8 +167,7 @@ void Gen::BinnedDiffusion_transform::get_charge_matrix(
     int min_imp = 0;
     int max_imp = ib.nbins();
 
-    for (auto diff : m_diffs)
-    {
+    for (auto diff : m_diffs) {
         //    std::cout << diff->depo()->time() << std::endl
         // diff->set_sampling(m_tbins, ib, m_nsigma, 0, m_calcstrat);
         diff->set_sampling(m_tbins, ib, m_nsigma, m_fluctuate, m_calcstrat);
@@ -190,15 +182,12 @@ void Gen::BinnedDiffusion_transform::get_charge_matrix(
         const int np = patch.rows();
         const int nt = patch.cols();
 
-        for (int pbin = 0; pbin != np; pbin++)
-        {
+        for (int pbin = 0; pbin != np; pbin++) {
             int abs_pbin = pbin + poffset_bin;
-            if (abs_pbin < min_imp || abs_pbin >= max_imp)
-                continue;
+            if (abs_pbin < min_imp || abs_pbin >= max_imp) continue;
             double weight = qweight[pbin];
 
-            for (int tbin = 0; tbin != nt; tbin++)
-            {
+            for (int tbin = 0; tbin != nt; tbin++) {
                 int abs_tbin = tbin + toffset_bin;
                 double charge = patch(pbin, tbin);
 
@@ -206,8 +195,8 @@ void Gen::BinnedDiffusion_transform::get_charge_matrix(
                 // map_redimp_vec[map_imp_redimp[abs_pbin]+1] << " " << abs_tbin << " "
                 // << map_imp_ch[abs_pbin] << std::endl;
 
-                vec_spmatrix.at(map_redimp_vec[map_imp_redimp[abs_pbin]])
-                    ->coeffRef(abs_tbin, map_imp_ch[abs_pbin]) += charge * weight;
+                vec_spmatrix.at(map_redimp_vec[map_imp_redimp[abs_pbin]])->coeffRef(abs_tbin, map_imp_ch[abs_pbin]) +=
+                    charge * weight;
                 vec_spmatrix.at(map_redimp_vec[map_imp_redimp[abs_pbin] + 1])
                     ->coeffRef(abs_tbin, map_imp_ch[abs_pbin]) += charge * (1 - weight);
 
@@ -241,16 +230,14 @@ void Gen::BinnedDiffusion_transform::get_charge_matrix(
         // need to figure out wire #, time #, charge, and weight ...
     }
 
-    for (auto it = vec_spmatrix.begin(); it != vec_spmatrix.end(); it++)
-    {
+    for (auto it = vec_spmatrix.begin(); it != vec_spmatrix.end(); it++) {
         (*it)->makeCompressed();
     }
 }
 
 // a new function to generate the result for the entire frame ...
 void Gen::BinnedDiffusion_transform::get_charge_vec(
-    std::vector<std::vector<std::tuple<int, int, double>>> &vec_vec_charge,
-    std::vector<int> &vec_impact)
+    std::vector<std::vector<std::tuple<int, int, double>>> &vec_vec_charge, std::vector<int> &vec_impact)
 {
     const auto ib = m_pimpos.impact_binning();
 
@@ -258,8 +245,7 @@ void Gen::BinnedDiffusion_transform::get_charge_vec(
 
     std::map<int, int> map_redimp_vec;
     std::vector<std::unordered_map<long int, int>> vec_map_pair_pos;
-    for (size_t i = 0; i != vec_impact.size(); i++)
-    {
+    for (size_t i = 0; i != vec_impact.size(); i++) {
         map_redimp_vec[vec_impact[i]] = int(i);
         std::unordered_map<long int, int> map_pair_pos;
         vec_map_pair_pos.push_back(map_pair_pos);
@@ -272,12 +258,10 @@ void Gen::BinnedDiffusion_transform::get_charge_vec(
     std::map<int, int> map_imp_redimp;
 
     // std::cout << ib.nbins() << " " << rb.nbins() << std::endl;
-    for (int wireind = 0; wireind != rb.nbins(); wireind++)
-    {
+    for (int wireind = 0; wireind != rb.nbins(); wireind++) {
         int wire_imp_no = m_pimpos.wire_impact(wireind);
         std::pair<int, int> imps_range = m_pimpos.wire_impacts(wireind);
-        for (int imp_no = imps_range.first; imp_no != imps_range.second; imp_no++)
-        {
+        for (int imp_no = imps_range.first; imp_no != imps_range.second; imp_no++) {
             map_imp_ch[imp_no] = wireind;
             map_imp_redimp[imp_no] = imp_no - wire_imp_no;
 
@@ -308,8 +292,7 @@ void Gen::BinnedDiffusion_transform::get_charge_vec(
     //    m_diffs1.insert(diff);
     // }
 
-    for (auto diff : m_diffs)
-    {
+    for (auto diff : m_diffs) {
         //    std::cout << diff->depo()->time() << std::endl
         // diff->set_sampling(m_tbins, ib, m_nsigma, 0, m_calcstrat);
         diff->set_sampling(m_tbins, ib, m_nsigma, m_fluctuate, m_calcstrat);
@@ -326,11 +309,9 @@ void Gen::BinnedDiffusion_transform::get_charge_vec(
 
         // std::cout << np << " " << nt << std::endl;
 
-        for (int pbin = 0; pbin != np; pbin++)
-        {
+        for (int pbin = 0; pbin != np; pbin++) {
             int abs_pbin = pbin + poffset_bin;
-            if (abs_pbin < min_imp || abs_pbin >= max_imp)
-                continue;
+            if (abs_pbin < min_imp || abs_pbin >= max_imp) continue;
             double weight = qweight[pbin];
             auto const channel = map_imp_ch[abs_pbin];
             auto const redimp = map_imp_redimp[abs_pbin];
@@ -343,8 +324,7 @@ void Gen::BinnedDiffusion_transform::get_charge_vec(
             auto &vec_charge = vec_vec_charge.at(array_num_redimp);
             auto &next_vec_charge = vec_vec_charge.at(next_array_num_redimp);
 
-            for (int tbin = 0; tbin != nt; tbin++)
-            {
+            for (int tbin = 0; tbin != nt; tbin++) {
                 int abs_tbin = tbin + toffset_bin;
                 double charge = patch(pbin, tbin);
 
@@ -353,7 +333,7 @@ void Gen::BinnedDiffusion_transform::get_charge_vec(
                 //   << charge << " " << std::endl;
                 // }
                 //	std::cout << pbin << " " << tbin << " " << patch(pbin,tbin) <<
-                //std::endl;
+                // std::endl;
                 // figure out how to convert the abs_pbin to fine position
                 // figure out how to use the weight given the above ???
                 // the other side
@@ -364,25 +344,20 @@ void Gen::BinnedDiffusion_transform::get_charge_vec(
 
                 long int index1 = channel * 100000 + abs_tbin;
                 auto it = map_pair_pos.find(index1);
-                if (it == map_pair_pos.end())
-                {
+                if (it == map_pair_pos.end()) {
                     map_pair_pos[index1] = vec_charge.size();
                     vec_charge.emplace_back(channel, abs_tbin, charge * weight);
                 }
-                else
-                {
+                else {
                     std::get<2>(vec_charge.at(it->second)) += charge * weight;
                 }
 
                 auto it1 = next_map_pair_pos.find(index1);
-                if (it1 == next_map_pair_pos.end())
-                {
+                if (it1 == next_map_pair_pos.end()) {
                     next_map_pair_pos[index1] = next_vec_charge.size();
-                    next_vec_charge.emplace_back(channel, abs_tbin,
-                                                 charge * (1 - weight));
+                    next_vec_charge.emplace_back(channel, abs_tbin, charge * (1 - weight));
                 }
-                else
-                {
+                else {
                     std::get<2>(next_vec_charge.at(it1->second)) += charge * (1 - weight);
                 }
 
@@ -412,8 +387,7 @@ void Gen::BinnedDiffusion_transform::get_charge_vec(
             }
         }
 
-        if (counter % 5000 == 0)
-        {
+        if (counter % 5000 == 0) {
             // std::vector<std::tuple<int,int,int> > del_keys;
             // for (auto it  = map_tuple_pos.begin(); it!=map_tuple_pos.end(); it++){
             // 	if (get<2>(it->first) < toffset_bin - 60){
@@ -424,9 +398,7 @@ void Gen::BinnedDiffusion_transform::get_charge_vec(
             // 	map_tuple_pos.erase(*it);
             // }
             // map_tuple_pos.clear();
-            for (auto it = vec_map_pair_pos.begin(); it != vec_map_pair_pos.end();
-                 it++)
-            {
+            for (auto it = vec_map_pair_pos.begin(); it != vec_map_pair_pos.end(); it++) {
                 it->clear();
             }
         }
@@ -462,19 +434,16 @@ void Gen::BinnedDiffusion_transform::get_charge_vec(
 //     return idptr;
 // }
 
-static std::pair<double, double>
-gausdesc_range(const std::vector<Gen::GausDesc> gds, double nsigma)
+static std::pair<double, double> gausdesc_range(const std::vector<Gen::GausDesc> gds, double nsigma)
 {
     int ncount = -1;
     double vmin = 0, vmax = 0;
-    for (auto gd : gds)
-    {
+    for (auto gd : gds) {
         ++ncount;
 
         const double lvmin = gd.center - gd.sigma * nsigma;
         const double lvmax = gd.center + gd.sigma * nsigma;
-        if (!ncount)
-        {
+        if (!ncount) {
             vmin = lvmin;
             vmax = lvmax;
             continue;
@@ -485,41 +454,33 @@ gausdesc_range(const std::vector<Gen::GausDesc> gds, double nsigma)
     return std::make_pair(vmin, vmax);
 }
 
-std::pair<double, double>
-Gen::BinnedDiffusion_transform::pitch_range(double nsigma) const
+std::pair<double, double> Gen::BinnedDiffusion_transform::pitch_range(double nsigma) const
 {
     std::vector<Gen::GausDesc> gds;
-    for (auto diff : m_diffs)
-    {
+    for (auto diff : m_diffs) {
         gds.push_back(diff->pitch_desc());
     }
     return gausdesc_range(gds, nsigma);
 }
 
-std::pair<int, int>
-Gen::BinnedDiffusion_transform::impact_bin_range(double nsigma) const
+std::pair<int, int> Gen::BinnedDiffusion_transform::impact_bin_range(double nsigma) const
 {
     const auto ibins = m_pimpos.impact_binning();
     auto mm = pitch_range(nsigma);
-    return std::make_pair(std::max(ibins.bin(mm.first), 0),
-                          std::min(ibins.bin(mm.second) + 1, ibins.nbins()));
+    return std::make_pair(std::max(ibins.bin(mm.first), 0), std::min(ibins.bin(mm.second) + 1, ibins.nbins()));
 }
 
-std::pair<double, double>
-Gen::BinnedDiffusion_transform::time_range(double nsigma) const
+std::pair<double, double> Gen::BinnedDiffusion_transform::time_range(double nsigma) const
 {
     std::vector<Gen::GausDesc> gds;
-    for (auto diff : m_diffs)
-    {
+    for (auto diff : m_diffs) {
         gds.push_back(diff->time_desc());
     }
     return gausdesc_range(gds, nsigma);
 }
 
-std::pair<int, int>
-Gen::BinnedDiffusion_transform::time_bin_range(double nsigma) const
+std::pair<int, int> Gen::BinnedDiffusion_transform::time_bin_range(double nsigma) const
 {
     auto mm = time_range(nsigma);
-    return std::make_pair(std::max(m_tbins.bin(mm.first), 0),
-                          std::min(m_tbins.bin(mm.second) + 1, m_tbins.nbins()));
+    return std::make_pair(std::max(m_tbins.bin(mm.first), 0), std::min(m_tbins.bin(mm.second) + 1, m_tbins.nbins()));
 }

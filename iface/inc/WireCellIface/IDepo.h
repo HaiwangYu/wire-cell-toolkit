@@ -7,12 +7,10 @@
 
 #include <set>
 
-namespace WireCell
-{
+namespace WireCell {
     /** An interface to information about a deposition of charge.
- */
-    class IDepo : public IData<IDepo>
-    {
+     */
+    class IDepo : public IData<IDepo> {
        public:
         virtual ~IDepo();
 
@@ -59,8 +57,7 @@ namespace WireCell
     /// velocity.  Note: if drifting is toward a "back" face of an
     /// anode then the drift speed should be negative in order to
     /// indicate drift is in the postitive X direction..
-    struct IDepoDriftCompare
-    {
+    struct IDepoDriftCompare {
         double drift_speed;
         IDepoDriftCompare(double drift_speed = 1.6 * units::mm / units::microsecond)
           : drift_speed(drift_speed){};
@@ -68,8 +65,7 @@ namespace WireCell
         {
             double t1 = lhs->time() + lhs->pos().x() / drift_speed;
             double t2 = rhs->time() + rhs->pos().x() / drift_speed;
-            if (t1 == t2)
-            {
+            if (t1 == t2) {
                 // make sure there are no ties due to precision!
                 return lhs.get() < rhs.get();
             }
@@ -79,13 +75,11 @@ namespace WireCell
     typedef std::set<IDepo::pointer, IDepoDriftCompare> DepoTauSortedSet;
 
     /// Compare two IDepo::pointer by time (ascending).  x is used to break tie
-    bool ascending_time(const WireCell::IDepo::pointer &lhs,
-                        const WireCell::IDepo::pointer &rhs);
+    bool ascending_time(const WireCell::IDepo::pointer &lhs, const WireCell::IDepo::pointer &rhs);
 
     /// Compare two IDepo::pointers for by time, descending.   x is used to break
     /// tie
-    bool descending_time(const WireCell::IDepo::pointer &lhs,
-                         const WireCell::IDepo::pointer &rhs);
+    bool descending_time(const WireCell::IDepo::pointer &lhs, const WireCell::IDepo::pointer &rhs);
 
 }  // namespace WireCell
 

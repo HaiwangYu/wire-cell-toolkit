@@ -19,12 +19,9 @@
 
 class TFile;
 
-namespace WireCell
-{
-    namespace Root
-    {
-        class MagnifySink : public IFrameFilter, public IConfigurable
-        {
+namespace WireCell {
+    namespace Root {
+        class MagnifySink : public IFrameFilter, public IConfigurable {
            public:
             MagnifySink();
             virtual ~MagnifySink();

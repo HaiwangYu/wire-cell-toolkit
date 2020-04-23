@@ -17,12 +17,9 @@
 
 #include <functional>
 
-namespace WireCell
-{
-    namespace Gen
-    {
-        class MultiDuctor : public IDuctor, public IConfigurable
-        {
+namespace WireCell {
+    namespace Gen {
+        class MultiDuctor : public IDuctor, public IConfigurable {
            public:
             MultiDuctor(const std::string anode = "AnodePlane");
             virtual ~MultiDuctor();
@@ -45,13 +42,11 @@ namespace WireCell
             bool m_continuous;
             bool m_eos;
 
-            struct SubDuctor
-            {
+            struct SubDuctor {
                 std::string name;
                 std::function<bool(IDepo::pointer depo)> check;
                 IDuctor::pointer ductor;
-                SubDuctor(const std::string &tn, std::function<bool(IDepo::pointer depo)> f,
-                          IDuctor::pointer d)
+                SubDuctor(const std::string &tn, std::function<bool(IDepo::pointer depo)> f, IDuctor::pointer d)
                   : name(tn)
                   , check(f)
                   , ductor(d)
@@ -85,8 +80,7 @@ namespace WireCell
             // processing.  Will set start time if in continuous mode.
             bool start_processing(const input_pointer &depo);
 
-            void dump_frame(const IFrame::pointer frame,
-                            std::string msg = "Gen::MultiDuctor:");
+            void dump_frame(const IFrame::pointer frame, std::string msg = "Gen::MultiDuctor:");
         };
     }  // namespace Gen
 }  // namespace WireCell

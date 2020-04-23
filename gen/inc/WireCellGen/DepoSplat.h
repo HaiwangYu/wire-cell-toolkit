@@ -8,21 +8,17 @@
 
 #include "WireCellGen/Ductor.h"
 
-namespace WireCell
-{
-    namespace Gen
-    {
+namespace WireCell {
+    namespace Gen {
         // DepoSplat inherits from Ductor, replacing the heavy lifting
         // with some lightweight laziness.
-        class DepoSplat : public Ductor
-        {
+        class DepoSplat : public Ductor {
            public:
             DepoSplat();
             virtual ~DepoSplat();
 
            protected:
-            virtual ITrace::vector process_face(IAnodeFace::pointer face,
-                                                const IDepo::vector &depos);
+            virtual ITrace::vector process_face(IAnodeFace::pointer face, const IDepo::vector &depos);
 
             /// SPD logger
             Log::logptr_t l;

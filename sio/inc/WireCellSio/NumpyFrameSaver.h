@@ -7,21 +7,16 @@
 #include "WireCellIface/IFrameFilter.h"
 #include "WireCellUtil/Logging.h"
 
-namespace WireCell
-{
-    namespace Sio
-    {
+namespace WireCell {
+    namespace Sio {
         // This saver immediately saves each frame.
-        class NumpyFrameSaver : public virtual WireCell::IFrameFilter,
-                                public WireCell::IConfigurable
-        {
+        class NumpyFrameSaver : public virtual WireCell::IFrameFilter, public WireCell::IConfigurable {
            public:
             NumpyFrameSaver();
             virtual ~NumpyFrameSaver();
 
             /// IFrameFilter
-            virtual bool operator()(const WireCell::IFrame::pointer &inframe,
-                                    WireCell::IFrame::pointer &outframe);
+            virtual bool operator()(const WireCell::IFrame::pointer &inframe, WireCell::IFrame::pointer &outframe);
 
             /// IConfigurable
             virtual WireCell::Configuration default_configuration() const;

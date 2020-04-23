@@ -2,8 +2,7 @@
 
 using namespace WireCell;
 
-SimpleDepo::SimpleDepo(double t, const WireCell::Point &pos, double charge,
-                       IDepo::pointer prior, double extent_long,
+SimpleDepo::SimpleDepo(double t, const WireCell::Point &pos, double charge, IDepo::pointer prior, double extent_long,
                        double extent_tran, int id, int pdg, double energy)
 
   : m_time(t)

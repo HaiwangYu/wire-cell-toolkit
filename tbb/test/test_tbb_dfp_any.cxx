@@ -11,16 +11,14 @@
 using namespace std;
 
 // mock INode categories
-enum NodeCategory
-{
+enum NodeCategory {
     unknownCat,
     sourceCat,
     sinkCat,
     functionCat,
 };
 
-class MockNode
-{
+class MockNode {
    public:
     virtual ~MockNode() {}
     virtual NodeCategory category() = 0;
@@ -30,8 +28,7 @@ class MockNode
 // mock an INode::pointer
 typedef std::shared_ptr<MockNode> mock_node_pointer;
 
-class MockSource : public MockNode
-{
+class MockSource : public MockNode {
     int m_count;
     const int m_maxcount;
 
@@ -46,8 +43,7 @@ class MockSource : public MockNode
     virtual bool extract(boost::any &out)
     {
         cerr << "Source: " << m_count << endl;
-        if (m_count > m_maxcount)
-        {
+        if (m_count > m_maxcount) {
             cerr << "ModeSource drained\n";
             return false;
         }
@@ -57,8 +53,7 @@ class MockSource : public MockNode
     }
 };
 
-class MockFunction : public MockNode
-{
+class MockFunction : public MockNode {
     std::deque<int> m_numbers;
 
    public:
@@ -72,8 +67,7 @@ class MockFunction : public MockNode
     }
     virtual bool extract(boost::any &anyout)
     {
-        if (m_numbers.empty())
-        {
+        if (m_numbers.empty()) {
             return false;
         }
         anyout = m_numbers.front();
@@ -82,8 +76,7 @@ class MockFunction : public MockNode
     }
 };
 
-class MockSink : public MockNode
-{
+class MockSink : public MockNode {
    public:
     virtual ~MockSink() {}
     virtual NodeCategory category() { return sinkCat; }
@@ -99,16 +92,13 @@ class MockSink : public MockNode
 // empty c'tor and use configuration.
 mock_node_pointer get_node(const std::string &node_desc)
 {
-    if (node_desc == "source")
-    {  // note actual desc should be class or class:inst
+    if (node_desc == "source") {  // note actual desc should be class or class:inst
         return mock_node_pointer(new MockSource);
     }
-    if (node_desc == "drift")
-    {  // note actual desc should be class or class:inst
+    if (node_desc == "drift") {  // note actual desc should be class or class:inst
         return mock_node_pointer(new MockFunction);
     }
-    if (node_desc == "sink")
-    {  // note actual desc should be class or class:inst
+    if (node_desc == "sink") {  // note actual desc should be class or class:inst
         return mock_node_pointer(new MockSink);
     }
     return nullptr;
@@ -125,16 +115,12 @@ typedef tbb::flow::source_node<boost::any> source_node;
 typedef tbb::flow::function_node<boost::any> sink_node;
 
 // base facade, expose sender/receiver ports and provide initialize hook
-class TbbNodeWrapper
-{
+class TbbNodeWrapper {
    public:
     virtual ~TbbNodeWrapper() {}
 
     virtual sender_port_vector sender_ports() { return sender_port_vector(); }
-    virtual receiver_port_vector receiver_ports()
-    {
-        return receiver_port_vector();
-    }
+    virtual receiver_port_vector receiver_ports() { return receiver_port_vector(); }
 
     // call before running graph
     virtual void initialize() {}
@@ -148,8 +134,7 @@ typedef std::shared_ptr<TbbNodeWrapper> TbbNode;
 //
 
 // adapter to convert from WC source node to TBB source node body.
-class TbbSourceBody
-{
+class TbbSourceBody {
    public:
     TbbSourceBody(mock_node_pointer wcnode)
     {
@@ -182,8 +167,7 @@ class TbbSourceBody
 };
 
 // implement facade to access ports for source nodes
-class TbbSourceNodeWrapper : public TbbNodeWrapper
-{
+class TbbSourceNodeWrapper : public TbbNodeWrapper {
    public:
     TbbSourceNodeWrapper(tbb::flow::graph &graph, mock_node_pointer wcnode)
       : m_tbbnode(new source_node(graph, TbbSourceBody(wcnode), false))
@@ -212,8 +196,7 @@ class TbbSourceNodeWrapper : public TbbNodeWrapper
 //
 
 // adapter to convert from WC sink node to TBB sink node body.
-class TbbSinkBody
-{
+class TbbSinkBody {
    public:
     TbbSinkBody(mock_node_pointer wcnode)
     {
@@ -247,12 +230,10 @@ class TbbSinkBody
 };
 
 // implement facade to access ports for sink nodes
-class TbbSinkNodeWrapper : public TbbNodeWrapper
-{
+class TbbSinkNodeWrapper : public TbbNodeWrapper {
    public:
     TbbSinkNodeWrapper(tbb::flow::graph &graph, mock_node_pointer wcnode)
-      : m_tbbnode(
-            new sink_node(graph, wcnode->concurrency(), TbbSinkBody(wcnode)))
+      : m_tbbnode(new sink_node(graph, wcnode->concurrency(), TbbSinkBody(wcnode)))
     {
     }
 
@@ -270,15 +251,13 @@ class TbbSinkNodeWrapper : public TbbNodeWrapper
 TbbNode make_node(tbb::flow::graph &graph, const std::string &node_desc)
 {
     mock_node_pointer wcnode = get_node(node_desc);
-    if (!wcnode)
-    {
+    if (!wcnode) {
         cerr << "Failed to get node for " << node_desc << endl;
         return nullptr;
     }
 
     cerr << "Getting node from category: " << wcnode->category() << endl;
-    switch (wcnode->category())
-    {
+    switch (wcnode->category()) {
     case sourceCat:
         return TbbNode(new TbbSourceNodeWrapper(graph, wcnode));
     case sinkCat:
@@ -291,8 +270,7 @@ TbbNode make_node(tbb::flow::graph &graph, const std::string &node_desc)
     return nullptr;
 }
 
-bool connect(TbbNode sender, TbbNode receiver, size_t sport = 0,
-             size_t rport = 0);
+bool connect(TbbNode sender, TbbNode receiver, size_t sport = 0, size_t rport = 0);
 bool connect(TbbNode sender, TbbNode receiver, size_t sport, size_t rport)
 {
     Assert(sender);

@@ -5,10 +5,8 @@
 #ifndef WIRECELL_SYSTEM_OF_UNITS_H
 #define WIRECELL_SYSTEM_OF_UNITS_H
 
-namespace WireCell
-{
-    namespace units
-    {
+namespace WireCell {
+    namespace units {
         //
         //
         //
@@ -158,16 +156,14 @@ namespace WireCell
         //
         // Pressure [E][L^-3]
         //
-        static const double pascal = newton / m2;   // pascal = 6.24150 e+3 * MeV/mm3
-        static const double bar = 100000 * pascal;  // bar    = 6.24150 e+8 * MeV/mm3
-        static const double atmosphere =
-            101325 * pascal;  // atm    = 6.32420 e+8 * MeV/mm3
+        static const double pascal = newton / m2;          // pascal = 6.24150 e+3 * MeV/mm3
+        static const double bar = 100000 * pascal;         // bar    = 6.24150 e+8 * MeV/mm3
+        static const double atmosphere = 101325 * pascal;  // atm    = 6.32420 e+8 * MeV/mm3
 
         //
         // Electric current [Q][T^-1]
         //
-        static const double ampere =
-            coulomb / second;  // ampere = 6.24150 e+9 * eplus/ns
+        static const double ampere = coulomb / second;  // ampere = 6.24150 e+9 * eplus/ns
         static const double milliampere = 1.e-3 * ampere;
         static const double microampere = 1.e-6 * ampere;
         static const double nanoampere = 1.e-9 * ampere;
@@ -186,14 +182,12 @@ namespace WireCell
         //
         // Electric resistance [E][T][Q^-2]
         //
-        static const double ohm =
-            volt / ampere;  // ohm = 1.60217e-16*(MeV/eplus)/(eplus/ns)
+        static const double ohm = volt / ampere;  // ohm = 1.60217e-16*(MeV/eplus)/(eplus/ns)
 
         //
         // Electric capacitance [Q^2][E^-1]
         //
-        static const double farad =
-            coulomb / volt;  // farad = 6.24150e+24 * eplus/Megavolt
+        static const double farad = coulomb / volt;  // farad = 6.24150e+24 * eplus/Megavolt
         static const double millifarad = 1.e-3 * farad;
         static const double microfarad = 1.e-6 * farad;
         static const double nanofarad = 1.e-9 * farad;
@@ -207,8 +201,7 @@ namespace WireCell
         //
         // Magnetic Field [T][E][Q^-1][L^-2]
         //
-        static const double tesla =
-            volt * second / meter2;  // tesla =0.001*megavolt*ns/mm2
+        static const double tesla = volt * second / meter2;  // tesla =0.001*megavolt*ns/mm2
 
         static const double gauss = 1.e-4 * tesla;
         static const double kilogauss = 1.e-1 * tesla;
@@ -216,8 +209,7 @@ namespace WireCell
         //
         // Inductance [T^2][E][Q^-2]
         //
-        static const double henry =
-            weber / ampere;  // henry = 1.60217e-7*MeV*(ns/eplus)**2
+        static const double henry = weber / ampere;  // henry = 1.60217e-7*MeV*(ns/eplus)**2
 
         //
         // Temperature

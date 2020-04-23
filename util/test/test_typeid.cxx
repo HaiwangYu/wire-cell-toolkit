@@ -25,28 +25,22 @@
 
 using namespace std;
 
-struct IPort
-{
+struct IPort {
     virtual ~IPort(){};
     virtual std::string port_type_name() const = 0;
 };
 
 template <typename T>
-struct Port : public IPort
-{
+struct Port : public IPort {
     typedef T port_type;
     virtual ~Port() {}
-    virtual std::string port_type_name() const
-    {
-        return typeid(port_type).name();
-    }
+    virtual std::string port_type_name() const { return typeid(port_type).name(); }
     virtual bool put(const port_type &in) { return false; }
     virtual bool get(port_type &out) const { return false; }
     virtual T make() const { return 0; }
 };
 
-struct SubI : public Port<int>
-{
+struct SubI : public Port<int> {
     virtual ~SubI() {}
     virtual bool get(port_type &out) const
     {
@@ -55,8 +49,7 @@ struct SubI : public Port<int>
         return true;
     }
 };
-struct SubF : public Port<float>
-{
+struct SubF : public Port<float> {
     virtual ~SubF() {}
     virtual bool get(port_type &out) const
     {
@@ -66,8 +59,7 @@ struct SubF : public Port<float>
     }
 };
 
-struct SubFIn : public Port<float>
-{
+struct SubFIn : public Port<float> {
     virtual ~SubFIn() {}
     virtual bool put(const port_type &in)
     {
@@ -81,8 +73,7 @@ struct SubFIn : public Port<float>
     }
 };
 
-struct SubFOut : public Port<float>
-{
+struct SubFOut : public Port<float> {
     virtual ~SubFOut() {}
     virtual bool put(const port_type &in)
     {
@@ -100,38 +91,32 @@ struct SubFOut : public Port<float>
 template <typename A, typename B>
 bool transfer(const A &a, B &b)
 {
-    cerr << "transfer: " << typeid(A).name() << "<->" << typeid(a).name() << " "
-         << typeid(B).name() << "<->" << typeid(b).name() << endl;
+    cerr << "transfer: " << typeid(A).name() << "<->" << typeid(a).name() << " " << typeid(B).name() << "<->"
+         << typeid(b).name() << endl;
 
-    if (a.port_type_name() != b.port_type_name())
-    {
-        cerr << "Port type mismatch: " << a.port_type_name()
-             << " != " << b.port_type_name() << endl;
+    if (a.port_type_name() != b.port_type_name()) {
+        cerr << "Port type mismatch: " << a.port_type_name() << " != " << b.port_type_name() << endl;
         return false;
     }
     typename A::port_type dat;
-    if (!a.get(dat))
-    {
+    if (!a.get(dat)) {
         cerr << "Failed to get output of type " << a.port_type_name() << endl;
         return false;
     }
-    if (!b.put(dat))
-    {
+    if (!b.put(dat)) {
         cerr << "Failed to put input of type " << b.port_type_name() << endl;
         return false;
     }
     return true;
 }
 
-struct CallTransfer
-{
+struct CallTransfer {
     virtual ~CallTransfer() {}
     virtual bool call(const IPort &a, IPort &b) = 0;
 };
 
 template <typename T>
-struct CallTransferT : public CallTransfer
-{
+struct CallTransferT : public CallTransfer {
     typedef T port_type;
     virtual ~CallTransferT() {}
     std::string port_type_name() const { return typeid(port_type).name(); }
@@ -155,8 +140,7 @@ void register_caller()
 CallTransfer *get_caller(const IPort &comp)
 {
     const IPort *port = dynamic_cast<const IPort *>(&comp);
-    if (!port)
-    {
+    if (!port) {
         return nullptr;
     }
     return callers[port->port_type_name()];
@@ -178,14 +162,10 @@ int main()
     cout << "typeid(sfi) = " << typeid(sfi).name() << endl;
     cout << "typeid(*sfi) = " << typeid(*sfi).name() << endl;
 
-    cout << "typeid(SubI::port_type) = " << typeid(SubI::port_type).name()
-         << endl;
-    cout << "typeid(SubF::port_type) = " << typeid(SubF::port_type).name()
-         << endl;
-    cout << "typeid(SubFOut::port_type) = " << typeid(SubFOut::port_type).name()
-         << endl;
-    cout << "typeid(SubFIn::port_type) = " << typeid(SubFIn::port_type).name()
-         << endl;
+    cout << "typeid(SubI::port_type) = " << typeid(SubI::port_type).name() << endl;
+    cout << "typeid(SubF::port_type) = " << typeid(SubF::port_type).name() << endl;
+    cout << "typeid(SubFOut::port_type) = " << typeid(SubFOut::port_type).name() << endl;
+    cout << "typeid(SubFIn::port_type) = " << typeid(SubFIn::port_type).name() << endl;
 
     cout << "si->type_name() = " << si->port_type_name() << endl;
     cout << "sf->type_name() = " << sf->port_type_name() << endl;

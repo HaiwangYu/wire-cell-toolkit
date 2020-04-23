@@ -16,17 +16,14 @@
 #include <set>
 #include <string>
 
-namespace WireCell
-{
-    struct FactoryException : virtual public Exception
-    {
+namespace WireCell {
+    struct FactoryException : virtual public Exception {
     };
 
     /** A templated factory of objects of type Type that associates a
- * name to an object, returning a preexisting one if it exists. */
+     * name to an object, returning a preexisting one if it exists. */
     template <class Type>
-    class NamedFactory : public WireCell::INamedFactory
-    {
+    class NamedFactory : public WireCell::INamedFactory {
        public:
         /// Remember the underlying type.
         typedef Type type;
@@ -43,8 +40,7 @@ namespace WireCell
         Interface::pointer find(const std::string &name)
         {
             auto it = m_objects.find(name);
-            if (it == m_objects.end())
-            {
+            if (it == m_objects.end()) {
                 return nullptr;
             }
             return it->second;
@@ -55,8 +51,7 @@ namespace WireCell
         Interface::pointer create(const std::string &name)
         {
             auto it = m_objects.find(name);
-            if (it == m_objects.end())
-            {
+            if (it == m_objects.end()) {
                 pointer_type p(new Type);
                 m_objects[name] = p;
                 return p;
@@ -73,10 +68,9 @@ namespace WireCell
     };
 
     /** A registry of factories that produce instances which implement
- * a given interface. */
+     * a given interface. */
     template <class IType>
-    class NamedFactoryRegistry
-    {
+    class NamedFactoryRegistry {
         Log::logptr_t l;
 
        public:
@@ -108,16 +102,13 @@ namespace WireCell
         /// Look up an existing factory by the name of the "class" it can create.
         factory_ptr lookup_factory(const std::string &classname)
         {
-            if (classname == "")
-            {
-                l->error("no class name given for type \"{}\"",
-                         demangle(typeid(IType).name()));
+            if (classname == "") {
+                l->error("no class name given for type \"{}\"", demangle(typeid(IType).name()));
                 return nullptr;
             }
 
             auto it = m_lookup.find(classname);
-            if (it != m_lookup.end())
-            {
+            if (it != m_lookup.end()) {
                 return it->second;
             }
 
@@ -127,24 +118,21 @@ namespace WireCell
 
             std::string factory_maker = "make_" + classname + "_factory";
             auto plugin = pm.find(factory_maker.c_str());
-            if (!plugin)
-            {
+            if (!plugin) {
                 l->error("no plugin for \"{}\"", classname);
                 return nullptr;
             }
 
             typedef void *(*maker_function)();
             maker_function mf;
-            if (!plugin->symbol(factory_maker.c_str(), mf))
-            {
+            if (!plugin->symbol(factory_maker.c_str(), mf)) {
                 l->error("no factory maker symbol for \"{}\"", classname);
                 return nullptr;
             }
 
             void *fac_void_ptr = mf();
 
-            if (!fac_void_ptr)
-            {
+            if (!fac_void_ptr) {
                 l->error("no factory for \"{}\"", classname);
                 return nullptr;
             }
@@ -158,53 +146,42 @@ namespace WireCell
         /// If create is true, create the instance if it does not
         /// exist. If nullok is true return nullptr if it does not
         /// exist else throw by default.
-        interface_ptr instance(const std::string &classname,
-                               const std::string &instname = "", bool create = true,
+        interface_ptr instance(const std::string &classname, const std::string &instname = "", bool create = true,
                                bool nullok = false)
         {
             factory_ptr fac = lookup_factory(classname);
-            if (!fac)
-            {
-                if (nullok)
-                {
+            if (!fac) {
+                if (nullok) {
                     return nullptr;
                 }
-                l->error("no factory for class \"{}\" (instance \"{}\")", classname,
-                         instname);
-                std::cerr << "WireCell::NamedFactory: no factory for class \""
-                          << classname << "\", (instance \"" << instname << "\"\n";
+                l->error("no factory for class \"{}\" (instance \"{}\")", classname, instname);
+                std::cerr << "WireCell::NamedFactory: no factory for class \"" << classname << "\", (instance \""
+                          << instname << "\"\n";
 
                 THROW(FactoryException() << errmsg{"No factory for class " + classname});
             }
             WireCell::Interface::pointer iptr;
             std::string action = "";
-            if (create)
-            {
+            if (create) {
                 iptr = fac->create(instname);
                 action = "create";
             }
-            else
-            {
+            else {
                 iptr = fac->find(instname);
                 action = "find";
             }
-            if (!iptr)
-            {
-                if (nullok)
-                {
+            if (!iptr) {
+                if (nullok) {
                     return nullptr;
                 }
-                std::string msg =
-                    "NamedFactory: Failed to " + action + " instance \"" + instname;
+                std::string msg = "NamedFactory: Failed to " + action + " instance \"" + instname;
                 msg += "\" of class \"" + classname + "\"";
                 l->error(msg);
                 THROW(FactoryException() << errmsg{msg});
             }
             interface_ptr uptype = std::dynamic_pointer_cast<interface_type>(iptr);
-            if (!uptype)
-            {
-                if (nullok)
-                {
+            if (!uptype) {
+                if (nullok) {
                     return nullptr;
                 }
                 std::string msg = "NamedFactory: Failed to cast instance: " + instname;
@@ -223,8 +200,7 @@ namespace WireCell
         std::vector<std::string> known_classes()
         {
             std::vector<std::string> ret;
-            for (auto it : m_lookup)
-            {
+            for (auto it : m_lookup) {
                 ret.push_back(it.first);
             }
             return ret;
@@ -236,17 +212,14 @@ namespace WireCell
     };
 
     /// Singleton interface
-    namespace Factory
-    {
+    namespace Factory {
         /// Associate a factory with the type it makes.
         template <class IType>
         bool associate(const std::string &classname, WireCell::INamedFactory *factory)
         {
-            NamedFactoryRegistry<IType> &nfr =
-                WireCell::Singleton<NamedFactoryRegistry<IType>>::Instance();
+            NamedFactoryRegistry<IType> &nfr = WireCell::Singleton<NamedFactoryRegistry<IType>>::Instance();
             bool ok = nfr.associate(classname, factory);
-            if (ok)
-            {
+            if (ok) {
                 return ok;
             }
             THROW(FactoryException() << errmsg{"Failed to associate class " + classname});
@@ -256,15 +229,12 @@ namespace WireCell
         template <class IType>
         WireCell::INamedFactory *lookup_factory(const std::string &classname)
         {
-            NamedFactoryRegistry<IType> &nfr =
-                WireCell::Singleton<NamedFactoryRegistry<IType>>::Instance();
+            NamedFactoryRegistry<IType> &nfr = WireCell::Singleton<NamedFactoryRegistry<IType>>::Instance();
             WireCell::INamedFactory *ret = nfr.lookup_factory(classname);
-            if (ret)
-            {
+            if (ret) {
                 return ret;
             }
-            THROW(FactoryException() << errmsg{"Failed to lookup factory for " +
-                                               classname});
+            THROW(FactoryException() << errmsg{"Failed to lookup factory for " + classname});
         }
 
         /// Lookup an interface by a type and optional name.  If
@@ -272,39 +242,31 @@ namespace WireCell
         /// true return nullptr if can not create.  See also
         /// find<IType>().
         template <class IType>
-        std::shared_ptr<IType> lookup(const std::string &classname,
-                                      const std::string &instname = "",
+        std::shared_ptr<IType> lookup(const std::string &classname, const std::string &instname = "",
                                       bool create = true, bool nullok = false)
         {
-            NamedFactoryRegistry<IType> &nfr =
-                WireCell::Singleton<NamedFactoryRegistry<IType>>::Instance();
-            std::shared_ptr<IType> ret =
-                nfr.instance(classname, instname, create, nullok);
-            if (ret)
-            {
+            NamedFactoryRegistry<IType> &nfr = WireCell::Singleton<NamedFactoryRegistry<IType>>::Instance();
+            std::shared_ptr<IType> ret = nfr.instance(classname, instname, create, nullok);
+            if (ret) {
                 return ret;
             }
-            if (nullok)
-            {
+            if (nullok) {
                 return nullptr;
             }
-            THROW(FactoryException() << errmsg{"Failed to lookup instance for " +
-                                               classname + " " + instname});
+            THROW(FactoryException() << errmsg{"Failed to lookup instance for " + classname + " " + instname});
         }
 
         /// Return existing instance of given classname with instname
         /// Throws on failure.
         template <class IType>
-        std::shared_ptr<IType> find(const std::string &classname,
-                                    const std::string &instname = "")
+        std::shared_ptr<IType> find(const std::string &classname, const std::string &instname = "")
         {
             std::shared_ptr<IType> ret = lookup<IType>(classname, instname, false, false);
             return ret;
         }
         /// As above but quietly returns nullptr on failure
         template <class IType>
-        std::shared_ptr<IType> find_maybe(const std::string &classname,
-                                          const std::string &instname = "")
+        std::shared_ptr<IType> find_maybe(const std::string &classname, const std::string &instname = "")
         {
             std::shared_ptr<IType> ret = lookup<IType>(classname, instname, false, true);
             return ret;
@@ -312,13 +274,10 @@ namespace WireCell
 
         /// Lookup an interface by a type:name pair.
         template <class IType>
-        std::shared_ptr<IType> lookup_tn(const std::string &tn, bool create = true,
-                                         bool nullok = false)
+        std::shared_ptr<IType> lookup_tn(const std::string &tn, bool create = true, bool nullok = false)
         {
-            if (tn.empty())
-            {
-                if (nullok)
-                {
+            if (tn.empty()) {
+                if (nullok) {
                     return nullptr;
                 }
                 THROW(FactoryException() << errmsg{"Empty type:name string"});
@@ -348,15 +307,13 @@ namespace WireCell
         template <class IType>
         std::vector<std::string> known_classes()
         {
-            NamedFactoryRegistry<IType> &nfr =
-                WireCell::Singleton<NamedFactoryRegistry<IType>>::Instance();
+            NamedFactoryRegistry<IType> &nfr = WireCell::Singleton<NamedFactoryRegistry<IType>>::Instance();
             return nfr.known_classes();
         }
         template <class IType>
         std::vector<std::string> known_types()
         {
-            NamedFactoryRegistry<IType> &nfr =
-                WireCell::Singleton<NamedFactoryRegistry<IType>>::Instance();
+            NamedFactoryRegistry<IType> &nfr = WireCell::Singleton<NamedFactoryRegistry<IType>>::Instance();
             auto ktset = nfr.known_types();
             std::vector<std::string> ret(ktset.begin(), ktset.end());
             return ret;
@@ -369,13 +326,10 @@ template <class Concrete, class... Interface>
 void *make_named_factory_factory(std::string name)
 {
     static void *void_factory = nullptr;
-    if (!void_factory)
-    {
+    if (!void_factory) {
         void_factory = new WireCell::NamedFactory<Concrete>;
-        WireCell::NamedFactory<Concrete> *factory =
-            reinterpret_cast<WireCell::NamedFactory<Concrete> *>(void_factory);
-        std::vector<bool> ret{
-            WireCell::Factory::associate<Interface>(name, factory)...};
+        WireCell::NamedFactory<Concrete> *factory = reinterpret_cast<WireCell::NamedFactory<Concrete> *>(void_factory);
+        std::vector<bool> ret{WireCell::Factory::associate<Interface>(name, factory)...};
     }
     return void_factory;
 }
@@ -383,21 +337,14 @@ void *make_named_factory_factory(std::string name)
 template <class Concrete, class... Interface>
 size_t namedfactory_hello(std::string name)
 {
-    std::vector<size_t> ret{
-        WireCell::Singleton<WireCell::NamedFactoryRegistry<Interface>>::Instance()
-            .hello(name)...};
+    std::vector<size_t> ret{WireCell::Singleton<WireCell::NamedFactoryRegistry<Interface>>::Instance().hello(name)...};
     return ret.size();
 }
 
-#define WIRECELL_FACTORY(NAME, CONCRETE, ...)                                \
-    static size_t hello_##NAME##_me =                                        \
-        namedfactory_hello<CONCRETE, __VA_ARGS__>(#NAME);                    \
-    extern "C"                                                               \
-    {                                                                        \
-        void *make_##NAME##_factory()                                        \
-        {                                                                    \
-            return make_named_factory_factory<CONCRETE, __VA_ARGS__>(#NAME); \
-        }                                                                    \
+#define WIRECELL_FACTORY(NAME, CONCRETE, ...)                                                          \
+    static size_t hello_##NAME##_me = namedfactory_hello<CONCRETE, __VA_ARGS__>(#NAME);                \
+    extern "C" {                                                                                       \
+    void *make_##NAME##_factory() { return make_named_factory_factory<CONCRETE, __VA_ARGS__>(#NAME); } \
     }
 
 #endif

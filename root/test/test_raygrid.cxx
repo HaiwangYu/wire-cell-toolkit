@@ -40,8 +40,7 @@ void draw_text(const Point &p, std::string text)
     t.SetTextSize(0.03);
     t.DrawText(p.z(), p.y(), text.c_str());
 }
-void draw_zero_crossing(const Coordinates &rg, layer_index_t il,
-                        layer_index_t im)
+void draw_zero_crossing(const Coordinates &rg, layer_index_t il, layer_index_t im)
 {
     auto p = rg.zero_crossing(il, im);
     draw_point(p, 1, 24);
@@ -75,8 +74,7 @@ void draw_segments(const Coordinates &rg)
 
     const Vector ecks(1, 0, 0);
 
-    for (int lind = 2; lind < rg.nlayers(); ++lind)
-    {
+    for (int lind = 2; lind < rg.nlayers(); ++lind) {
         const auto &center = rg.centers()[lind];
         const auto &pdir = rg.pitch_dirs()[lind];
         const double pmag = rg.pitch_mags()[lind];
@@ -85,49 +83,40 @@ void draw_segments(const Coordinates &rg)
         Point next_center = center;
 
         int pind = -1;
-        while (true)
-        {
+        while (true) {
             ++pind;
 
             const auto pc = next_center;
             const double d0 = p0.dot(pc - c0);
             const double d1 = p1.dot(pc - c1);
-            if (d0 < 0 or d0 > pm0)
-            {
+            if (d0 < 0 or d0 > pm0) {
                 break;
             }
-            if (d1 < 0 or d1 > pm1)
-            {
+            if (d1 < 0 or d1 > pm1) {
                 break;
             }
             // handle anyt parallel layers special.
 
             Point pa, pb;
-            if (1.0 - p0.dot(pdir) < 0.001)
-            {  // layer 0 is parallel
+            if (1.0 - p0.dot(pdir) < 0.001) {  // layer 0 is parallel
                 pa = rg.ray_crossing({1, 0}, {lind, pind});
                 pb = rg.ray_crossing({1, 1}, {lind, pind});
             }
-            else if (1.0 - p1.dot(pdir) < 0.001)
-            {  // layer 1 is parallel
+            else if (1.0 - p1.dot(pdir) < 0.001) {  // layer 1 is parallel
                 pa = rg.ray_crossing({0, 0}, {lind, pind});
                 pb = rg.ray_crossing({0, 1}, {lind, pind});
             }
-            else
-            {
+            else {
                 // normally, center is inside the "box" so sorting by
                 // dot product of a vector from center to crossing
                 // point and the ray direction means middle two are
                 // closest.
-                std::vector<Vector> crossings{rg.ray_crossing({0, 0}, {lind, pind}),
-                                              rg.ray_crossing({0, 1}, {lind, pind}),
-                                              rg.ray_crossing({1, 0}, {lind, pind}),
-                                              rg.ray_crossing({1, 1}, {lind, pind})};
+                std::vector<Vector> crossings{
+                    rg.ray_crossing({0, 0}, {lind, pind}), rg.ray_crossing({0, 1}, {lind, pind}),
+                    rg.ray_crossing({1, 0}, {lind, pind}), rg.ray_crossing({1, 1}, {lind, pind})};
 
                 sort(crossings.begin(), crossings.end(),
-                     [&](const Vector &a, const Vector &b) {
-                         return rdir.dot(a - pc) < rdir.dot(b - pc);
-                     });
+                     [&](const Vector &a, const Vector &b) { return rdir.dot(a - pc) < rdir.dot(b - pc); });
                 pa = crossings[1];
                 pb = crossings[2];
             }
@@ -142,28 +131,24 @@ void draw_segments(const Coordinates &rg)
 
 void draw_pairs(const ray_pair_vector_t &raypairs)
 {
-    for (const auto &rp : raypairs)
-    {
+    for (const auto &rp : raypairs) {
         draw_ray(rp.first);
         draw_ray(rp.second);
     }
 }
 
-TH1F *draw_frame(TCanvas &canvas, std::string title, double xmin = -110,
-                 double ymin = -110, double xmax = +110, double ymax = +110)
+TH1F *draw_frame(TCanvas &canvas, std::string title, double xmin = -110, double ymin = -110, double xmax = +110,
+                 double ymax = +110)
 {
     auto *frame = canvas.DrawFrame(xmin, ymin, xmax, ymax);
     frame->SetTitle(title.c_str());
     return frame;
 }
 
-void draw(std::string fname, const Coordinates &rg,
-          const ray_pair_vector_t &raypairs)
+void draw(std::string fname, const Coordinates &rg, const ray_pair_vector_t &raypairs)
 {
     TCanvas canvas("test_raygrid", "Ray Grid", 500, 500);
-    auto draw_print = [&](std::string extra = "") {
-        canvas.Print((fname + extra).c_str(), "pdf");
-    };
+    auto draw_print = [&](std::string extra = "") { canvas.Print((fname + extra).c_str(), "pdf"); };
 
     draw_print("[");
 
@@ -173,27 +158,20 @@ void draw(std::string fname, const Coordinates &rg,
 
     const int nbounds = raypairs.size();
 
-    for (layer_index_t il = 0; il < nbounds; ++il)
-    {
-        for (layer_index_t im = 0; im < nbounds; ++im)
-        {
-            if (il < im)
-            {
+    for (layer_index_t il = 0; il < nbounds; ++il) {
+        for (layer_index_t im = 0; im < nbounds; ++im) {
+            if (il < im) {
                 draw_frame(canvas, Form("LAYER (%d,%d)", (int) il, (int) im));
                 draw_pairs(raypairs);
                 draw_zero_crossing(rg, il, im);
 
-                for (grid_index_t ip = 0; ip < 100; ++ip)
-                {
-                    for (grid_index_t jp = 0; jp < 100; ++jp)
-                    {
+                for (grid_index_t ip = 0; ip < 100; ++ip) {
+                    for (grid_index_t jp = 0; jp < 100; ++jp) {
                         coordinate_t one{il, ip}, two{im, jp};
                         auto p = rg.ray_crossing(one, two);
                         // cheat about knowing the bounds
-                        if (p.z() < 0.0 or p.z() > 100.0)
-                            continue;
-                        if (p.y() < 0.0 or p.y() > 100.0)
-                            continue;
+                        if (p.z() < 0.0 or p.z() > 100.0) continue;
+                        if (p.y() < 0.0 or p.y() > 100.0) continue;
                         draw_point(p, 1, 7);
                     }
                 }
@@ -215,13 +193,10 @@ void dump(std::string msg, const tensor_t &ar)
     ss << "Dimensions: " << shape[0] << " " << shape[1] << " " << shape[2];
     info(ss.str());
 
-    for (size_t i = 0; i < shape[0]; ++i)
-    {
-        for (size_t j = 0; j < shape[1]; ++j)
-        {
+    for (size_t i = 0; i < shape[0]; ++i) {
+        for (size_t j = 0; j < shape[1]; ++j) {
             std::string line = "\t";
-            for (size_t k = 0; k < shape[2]; ++k)
-            {
+            for (size_t k = 0; k < shape[2]; ++k) {
                 line += Form("%.1f", ar[i][j][k]);
             }
             info(line);
@@ -236,10 +211,8 @@ void test_012(const Coordinates &rg)
     dump("b", rg.b());
 
     std::vector<double> ps;
-    for (int a = 0; a < 2; ++a)
-    {
-        for (int b = 0; b < 2; ++b)
-        {
+    for (int a = 0; a < 2; ++a) {
+        for (int b = 0; b < 2; ++b) {
             const double p = rg.pitch_location({0, a}, {1, b}, 2);
             info("a={} b={} p={}", a, b, p);
             ps.push_back(p);
@@ -261,11 +234,9 @@ int main(int argc, char *argv[])
 
     Assert(rg.nlayers() == (int) raypairs.size());
 
-    for (int ind = 0; ind < rg.nlayers(); ++ind)
-    {
-        info("{} r1={} r2={} p={}[{}] c={}", ind, raypairs[ind].first,
-             raypairs[ind].second, rg.pitch_dirs().at(ind), rg.pitch_mags().at(ind),
-             rg.centers().at(ind));
+    for (int ind = 0; ind < rg.nlayers(); ++ind) {
+        info("{} r1={} r2={} p={}[{}] c={}", ind, raypairs[ind].first, raypairs[ind].second, rg.pitch_dirs().at(ind),
+             rg.pitch_mags().at(ind), rg.centers().at(ind));
     }
 
     std::string fname = argv[0];

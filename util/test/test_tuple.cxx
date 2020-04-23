@@ -16,8 +16,7 @@ int main()
     IFDCS_shqed ifdcs_shqed;
 
     std::vector<std::string> typenames = ifdcs_helper.type_names();
-    for (auto tn : typenames)
-    {
+    for (auto tn : typenames) {
         std::cerr << tn << std::endl;
     }
 
@@ -40,8 +39,7 @@ int main()
 
     auto any_q = ifdcs_shqed.as_any_queue(qs);
     Assert(any_q.size() == 5);
-    for (auto q : any_q)
-    {
+    for (auto q : any_q) {
         Assert(q.size() == 1);
     }
 
@@ -68,6 +66,5 @@ int main()
     std::get<4>(vs).push_back(std::string("foo"));
 
     type_repeater<3, std::string>::type ahahah("one", "two", "three");
-    std::cerr << std::get<0>(ahahah) << " " << std::get<1>(ahahah) << " "
-              << std::get<2>(ahahah) << "\n";
+    std::cerr << std::get<0>(ahahah) << " " << std::get<1>(ahahah) << " " << std::get<2>(ahahah) << "\n";
 }

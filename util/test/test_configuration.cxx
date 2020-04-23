@@ -49,8 +49,7 @@ int main()
     Assert(get<int>(cfg, "my_struct.x") == 1);
 
     auto nums = get<vector<string>>(cfg, "my_array");
-    for (auto anum : nums)
-    {
+    for (auto anum : nums) {
         cerr << anum << endl;
     }
 
@@ -60,10 +59,8 @@ int main()
     Configuration other;
     update(other, cfg);
     Configuration last = update(other, extra_cfg);
-    cerr << "other:\n"
-         << other << endl;
-    cerr << "last:\n"
-         << last << endl;
+    cerr << "other:\n" << other << endl;
+    cerr << "last:\n" << last << endl;
     Assert(last["a"]["b"]["c"] == 42);
     Assert(last["data3"]["data4"] == 4);
 

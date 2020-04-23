@@ -19,10 +19,7 @@ void *Plugin::raw(const std::string &symbol_name)
     return ret;
 }
 
-bool Plugin::contains(const std::string &symbol_name)
-{
-    return nullptr != raw(symbol_name);
-}
+bool Plugin::contains(const std::string &symbol_name) { return nullptr != raw(symbol_name); }
 
 PluginManager &WireCell::PluginManager::instance()
 {
@@ -30,41 +27,34 @@ PluginManager &WireCell::PluginManager::instance()
     return inst;
 }
 
-WireCell::Plugin *WireCell::PluginManager::add(const std::string &plugin_name,
-                                               const std::string &libname)
+WireCell::Plugin *WireCell::PluginManager::add(const std::string &plugin_name, const std::string &libname)
 {
     Plugin *plugin = get(plugin_name);
-    if (plugin)
-    {
+    if (plugin) {
         l->debug("already have plugin {}", plugin_name);
         return plugin;
     }
 
     std::string exts[2] = {".so", ".dylib"};
-    for (int ind = 0; ind < 2; ++ind)
-    {
+    for (int ind = 0; ind < 2; ++ind) {
         std::string ext = exts[ind];
         string lname = "";
-        if (libname == "")
-        {
+        if (libname == "") {
             lname = "lib";
             lname += plugin_name;
             lname += ext;
         }
-        else
-        {
+        else {
             lname = libname;
         }
         void *lib = dlopen(lname.c_str(), RTLD_NOW);
-        if (!lib)
-        {
+        if (!lib) {
             l->error("Failed to load {}: {}", lname, dlerror());
             continue;
         }
 
         m_plugins[plugin_name] = new Plugin(lib);
-        l->debug("loaded plugin #{} \"{}\" from library \"{}\": {}",
-                 m_plugins.size(), plugin_name, lname,
+        l->debug("loaded plugin #{} \"{}\" from library \"{}\": {}", m_plugins.size(), plugin_name, lname,
                  (void *) m_plugins[plugin_name]);
         return m_plugins[plugin_name];
     }
@@ -76,21 +66,17 @@ WireCell::Plugin *WireCell::PluginManager::add(const std::string &plugin_name,
 WireCell::Plugin *WireCell::PluginManager::get(const std::string &plugin_name)
 {
     auto pit = m_plugins.find(plugin_name);
-    if (pit == m_plugins.end())
-    {
+    if (pit == m_plugins.end()) {
         return nullptr;
     }
     return pit->second;
 }
 
-WireCell::Plugin *
-WireCell::PluginManager::find(const std::string &symbol_name)
+WireCell::Plugin *WireCell::PluginManager::find(const std::string &symbol_name)
 {
-    for (auto pit : m_plugins)
-    {
+    for (auto pit : m_plugins) {
         Plugin *maybe = pit.second;
-        if (maybe->contains(symbol_name))
-        {
+        if (maybe->contains(symbol_name)) {
             return maybe;
         }
     }
@@ -103,8 +89,7 @@ WireCell::PluginManager::PluginManager()
 }
 WireCell::PluginManager::~PluginManager()
 {
-    for (auto pit : m_plugins)
-    {
+    for (auto pit : m_plugins) {
         delete pit.second;
         pit.second = nullptr;
     }

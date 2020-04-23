@@ -3,8 +3,7 @@
 using namespace WireCell;
 using namespace WireCell::RayGrid;
 
-Coordinates::Coordinates(const ray_pair_vector_t &rays, int normal_axis,
-                         double normal_location)
+Coordinates::Coordinates(const ray_pair_vector_t &rays, int normal_axis, double normal_location)
   : m_nlayers(rays.size())
   , m_pitch_mag(m_nlayers, 0.0)
   , m_pitch_dir(m_nlayers)
@@ -23,8 +22,7 @@ Coordinates::Coordinates(const ray_pair_vector_t &rays, int normal_axis,
     // must go through 1, 2 and 3 combonations
 
     // First, find the per-layer things
-    for (layer_index_t ilayer = 0; ilayer < m_nlayers; ++ilayer)
-    {
+    for (layer_index_t ilayer = 0; ilayer < m_nlayers; ++ilayer) {
         const auto &rpair = rays[ilayer];
         const auto &r0 = rpair.first;
         const auto &r1 = rpair.second;
@@ -43,10 +41,8 @@ Coordinates::Coordinates(const ray_pair_vector_t &rays, int normal_axis,
     }
 
     // Next find cross-layer things
-    for (layer_index_t il = 0; il < m_nlayers; ++il)
-    {
-        for (layer_index_t im = 0; im < m_nlayers; ++im)
-        {
+    for (layer_index_t il = 0; il < m_nlayers; ++il) {
+        for (layer_index_t im = 0; im < m_nlayers; ++im) {
             // ray pairs for layer l and m
             const auto &rpl = rays[il];
             const auto &rpm = rays[im];
@@ -57,8 +53,7 @@ Coordinates::Coordinates(const ray_pair_vector_t &rays, int normal_axis,
             const auto &rm1 = rpm.second;
 
             // Iterate only over triangle of indices to avoid extra work.
-            if (il < im)
-            {
+            if (il < im) {
                 const auto r00 = ray_pitch(rl0, rm0);
                 const auto &pl0 = r00.first;
                 const auto &pm0 = r00.second;
@@ -80,8 +75,7 @@ Coordinates::Coordinates(const ray_pair_vector_t &rays, int normal_axis,
                     m_ray_jump(im, il) = jump;
                 }
             }
-            if (il == im)
-            {
+            if (il == im) {
                 m_zero_crossing(il, im).invalidate();
                 m_ray_jump(il, im).invalidate();
             }
@@ -90,23 +84,18 @@ Coordinates::Coordinates(const ray_pair_vector_t &rays, int normal_axis,
 
     // Finally, find triple-layer things (coefficients for
     // P^{lmn}_{ij}).  Needs some of the above completed.
-    for (layer_index_t in = 0; in < m_nlayers; ++in)
-    {
+    for (layer_index_t in = 0; in < m_nlayers; ++in) {
         const auto &pn = m_pitch_dir[in];
         const double cp = m_center[in].dot(pn);
 
-        for (layer_index_t il = 0; il < m_nlayers; ++il)
-        {
-            if (il == in)
-            {
+        for (layer_index_t il = 0; il < m_nlayers; ++il) {
+            if (il == in) {
                 continue;
             }
 
             // triangle iteration
-            for (layer_index_t im = 0; im < il; ++im)
-            {
-                if (im == in)
-                {
+            for (layer_index_t im = 0; im < il; ++im) {
+                if (im == in) {
                     continue;
                 }
 
@@ -127,13 +116,9 @@ Coordinates::Coordinates(const ray_pair_vector_t &rays, int normal_axis,
     }
 }
 
-Vector Coordinates::zero_crossing(layer_index_t one, layer_index_t two) const
-{
-    return m_zero_crossing(one, two);
-}
+Vector Coordinates::zero_crossing(layer_index_t one, layer_index_t two) const { return m_zero_crossing(one, two); }
 
-Vector Coordinates::ray_crossing(const coordinate_t &one,
-                                 const coordinate_t &two) const
+Vector Coordinates::ray_crossing(const coordinate_t &one, const coordinate_t &two) const
 {
     const layer_index_t l = one.layer, m = two.layer;
     const auto r00 = m_zero_crossing(l, m);
@@ -144,9 +129,7 @@ Vector Coordinates::ray_crossing(const coordinate_t &one,
     return res;
 }
 
-double Coordinates::pitch_location(const coordinate_t &one,
-                                   const coordinate_t &two,
-                                   layer_index_t other) const
+double Coordinates::pitch_location(const coordinate_t &one, const coordinate_t &two, layer_index_t other) const
 {
     const tensor_t::index il = one.layer, im = two.layer, in = other;
     const tensor_t::index i = one.grid, j = two.grid;

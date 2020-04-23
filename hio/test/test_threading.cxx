@@ -16,8 +16,7 @@ std::mutex myMutex;
 void hello(int id, int max)
 {
     std::lock_guard<std::mutex> guard(myMutex);
-    for (int i = 0; i < max; ++i)
-    {
+    for (int i = 0; i < max; ++i) {
         std::this_thread::sleep_for(std::chrono::milliseconds(20));
         cout << "\033[1;31mhello " << id << "\033[0m ";
     }
@@ -25,8 +24,7 @@ void hello(int id, int max)
 void world(int id, int max)
 {
     std::lock_guard<std::mutex> guard(myMutex);
-    for (int i = 0; i < max; ++i)
-    {
+    for (int i = 0; i < max; ++i) {
         std::this_thread::sleep_for(std::chrono::milliseconds(20));
         cout << "world " << id << " ";
     }

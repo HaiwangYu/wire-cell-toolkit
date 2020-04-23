@@ -13,10 +13,8 @@
 #include <Eigen/Core>
 #include <unsupported/Eigen/FFT>
 
-namespace WireCell
-{
-    namespace Waveform
-    {
+namespace WireCell {
+    namespace Waveform {
         /// The type for the signal in each bin.
         typedef float real_t;
 
@@ -56,8 +54,7 @@ namespace WireCell
         typedef std::map<std::string, ChannelMasks> ChannelMaskMap;
 
         // merge second maskmap into the first maskmap
-        void merge(ChannelMaskMap &one, ChannelMaskMap &two,
-                   std::map<std::string, std::string> &name_map);
+        void merge(ChannelMaskMap &one, ChannelMaskMap &two, std::map<std::string, std::string> &name_map);
 
         /// A range of time
         typedef std::pair<double, double> Period;
@@ -71,45 +68,34 @@ namespace WireCell
         typedef std::pair<double, double> Domain;
         /// Return the number of samples needed to cover the domain with sample size
         /// width.
-        inline int sample_count(const Domain &domain, double width)
-        {
-            return (domain.second - domain.first) / width;
-        }
+        inline int sample_count(const Domain &domain, double width) { return (domain.second - domain.first) / width; }
         /// Return the sample size if domain is equally sampled with given number of
         /// samples
-        inline double sample_width(const Domain &domain, int count)
-        {
-            return (domain.second - domain.first) / count;
-        }
+        inline double sample_width(const Domain &domain, int count) { return (domain.second - domain.first) / count; }
 
         /// Return the begin/end sample numbers inside the a subdomain of a domain with
         /// nsamples total.
-        std::pair<int, int> sub_sample(const Domain &domain, int nsamples,
-                                       const Domain &subdomain);
+        std::pair<int, int> sub_sample(const Domain &domain, int nsamples, const Domain &subdomain);
 
         /// Return a new sequence resampled and interpolated from the
         /// original wave defined over the domain to a new domain of
         /// nsamples.
         template <typename Val>
-        Sequence<Val> resample(const Sequence<Val> &wave, const Domain &domain,
-                               int nsamples, const Domain &newdomain)
+        Sequence<Val> resample(const Sequence<Val> &wave, const Domain &domain, int nsamples, const Domain &newdomain)
         {
             const int oldnsamples = wave.size();
             const double oldstep = sample_width(domain, oldnsamples);
             const double step = sample_width(newdomain, nsamples);
             Sequence<Val> ret;
-            for (int ind = 0; ind < nsamples; ++ind)
-            {
+            for (int ind = 0; ind < nsamples; ++ind) {
                 double cursor = newdomain.first + ind * step;
                 double oldfracsteps = (cursor - domain.first) / oldstep;
                 int oldind = int(oldfracsteps);
-                if (cursor <= domain.first || oldind <= 0)
-                {
+                if (cursor <= domain.first || oldind <= 0) {
                     ret.push_back(wave[0]);
                     continue;
                 }
-                if (cursor >= domain.second or oldind + 1 >= oldnsamples)
-                {
+                if (cursor >= domain.second or oldind + 1 >= oldnsamples) {
                     ret.push_back(wave[oldnsamples - 1]);
                     continue;
                 }
@@ -134,47 +120,36 @@ namespace WireCell
         template <typename Val>
         void increase(Sequence<Val> &seq, Val scalar)
         {
-            std::transform(seq.begin(), seq.end(), seq.begin(),
-                           [scalar](Val x) { return x + scalar; });
+            std::transform(seq.begin(), seq.end(), seq.begin(), [scalar](Val x) { return x + scalar; });
         }
-        inline void increase(Sequence<float> &seq, double scalar)
-        {
-            increase(seq, (float) scalar);
-        }
+        inline void increase(Sequence<float> &seq, double scalar) { increase(seq, (float) scalar); }
 
         /// Increase (shift) sequence values by values in another sequence
         template <typename Val>
         void increase(Sequence<Val> &seq, const Sequence<Val> &other)
         {
-            std::transform(seq.begin(), seq.end(), other.begin(), seq.begin(),
-                           std::plus<Val>());
+            std::transform(seq.begin(), seq.end(), other.begin(), seq.begin(), std::plus<Val>());
         }
 
         /// Scale (multiply) sequence values by scalar
         template <typename Val>
         void scale(Sequence<Val> &seq, Val scalar)
         {
-            std::transform(seq.begin(), seq.end(), seq.begin(),
-                           [scalar](Val x) { return x * scalar; });
+            std::transform(seq.begin(), seq.end(), seq.begin(), [scalar](Val x) { return x * scalar; });
         }
-        inline void scale(Sequence<float> &seq, double scalar)
-        {
-            scale(seq, (float) scalar);
-        }
+        inline void scale(Sequence<float> &seq, double scalar) { scale(seq, (float) scalar); }
 
         /// Scale (multiply) seq values by values from the other sequence.
         template <typename Val>
         void scale(Sequence<Val> &seq, const Sequence<Val> &other)
         {
-            std::transform(seq.begin(), seq.end(), other.begin(), seq.begin(),
-                           std::multiplies<Val>());
+            std::transform(seq.begin(), seq.end(), other.begin(), seq.begin(), std::multiplies<Val>());
         }
         /// Shrink (divide) seq values by values from the other sequence.
         template <typename Val>
         void shrink(Sequence<Val> &seq, const Sequence<Val> &other)
         {
-            std::transform(seq.begin(), seq.end(), other.begin(), seq.begin(),
-                           std::divides<Val>());
+            std::transform(seq.begin(), seq.end(), other.begin(), seq.begin(), std::divides<Val>());
         }
 
         /// Return a pair of indices into wave which bound non-zero
@@ -194,9 +169,8 @@ namespace WireCell
         template <typename Val>
         Val sum2(const Sequence<Val> &seq)
         {
-            return std::accumulate(
-                seq.begin(), seq.end(), Val(),
-                [](const Val &bucket, Val x) { return bucket + x * x; });
+            return std::accumulate(seq.begin(), seq.end(), Val(),
+                                   [](const Val &bucket, Val x) { return bucket + x * x; });
         }
 
         // Return the mean and (population) RMS over a waveform signal.
@@ -221,15 +195,14 @@ namespace WireCell
         // truncate is false then the returned sequence will be
         // truncated to length that of the first input.  Otherwise the
         // function is symmetric between the two inputs.
-        realseq_t linear_convolve(Waveform::realseq_t in1, Waveform::realseq_t in2,
-                                  bool truncate = true);
+        realseq_t linear_convolve(Waveform::realseq_t in1, Waveform::realseq_t in2, bool truncate = true);
 
         // Replace old response in wave with new response.  If
         // truncate is false then the returned sequence will be the
         // length required for linear convolution.  This is the sum of
         // the sizes of all input less one and less the smallest.
-        realseq_t replace_convolve(Waveform::realseq_t wave, Waveform::realseq_t newres,
-                                   Waveform::realseq_t oldres, bool truncate = true);
+        realseq_t replace_convolve(Waveform::realseq_t wave, Waveform::realseq_t newres, Waveform::realseq_t oldres,
+                                   bool truncate = true);
 
         /// Inverse, discrete Fourier transform.  Expects full
         /// spectrum (twice Nyquist frequency).  Applies the
@@ -239,8 +212,7 @@ namespace WireCell
         /// Return the smallest, most frequent value to appear in vector.
         short most_frequent(const std::vector<short> &vals);
 
-        class FFT
-        {
+        class FFT {
            public:
             FFT() {}
             inline compseq_t dft(realseq_t wave)

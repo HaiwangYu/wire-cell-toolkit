@@ -18,11 +18,9 @@ int main(int argc, char *argv[])
     const int nbins = 500;
     const int narrays = 100;
     Json::Value jroot;
-    for (int ind = 0; ind < narrays; ++ind)
-    {
+    for (int ind = 0; ind < narrays; ++ind) {
         Json::Value jarr;
-        for (int ibin = 0; ibin < nbins; ++ibin)
-        {
+        for (int ibin = 0; ibin < nbins; ++ibin) {
             auto number = uni();
             jarr.append(number);
         }

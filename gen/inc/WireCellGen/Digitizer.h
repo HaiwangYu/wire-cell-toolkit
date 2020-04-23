@@ -15,27 +15,22 @@
 #include "WireCellUtil/Logging.h"
 #include "WireCellUtil/Units.h"
 
-namespace WireCell
-{
-    namespace Gen
-    {
-        class Digitizer : public IFrameFilter, public IConfigurable
-        {
+namespace WireCell {
+    namespace Gen {
+        class Digitizer : public IFrameFilter, public IConfigurable {
            public:
             Digitizer(const std::string &anode_tn = "AnodePlane",
                       int resolution = 12,  // bits of resolution
                       double gain = -1.0,   // input gain
                       std::vector<double> fullscale = {0.0, 2.0 * units::volt},
-                      std::vector<double> baselines = {900 * units::mV, 900 * units::mV,
-                                                       200 * units::mV});
+                      std::vector<double> baselines = {900 * units::mV, 900 * units::mV, 200 * units::mV});
             virtual ~Digitizer();
 
             virtual void configure(const WireCell::Configuration &config);
             virtual WireCell::Configuration default_configuration() const;
 
             // Voltage frame goes in, ADC frame comes out.
-            virtual bool operator()(const input_pointer &inframe,
-                                    output_pointer &outframe);
+            virtual bool operator()(const input_pointer &inframe, output_pointer &outframe);
 
             // implementation method.  Return a "floating point ADC"
             // value for the given voltage assumed to have been lifted

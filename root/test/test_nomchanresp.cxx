@@ -58,11 +58,9 @@ int main(int argc, char *argv[])
 
     std::vector<TGraph *> graphs;
 
-    for (auto gain : gains)
-    {
+    for (auto gain : gains) {
         cfg["gain"] = gain;
-        for (auto shape : shapes)
-        {
+        for (auto shape : shapes) {
             cfg["shaping"] = shape;
 
             /// WARNING: user code should never call configure().  We
@@ -75,8 +73,7 @@ int main(int argc, char *argv[])
             cerr << nbins << " " << binning.nbins() << endl;
             Assert(nbins == binning.nbins());
             TGraph *g = new TGraph(binning.nbins());
-            for (int ind = 0; ind < binning.nbins(); ++ind)
-            {
+            for (int ind = 0; ind < binning.nbins(); ++ind) {
                 g->SetPoint(ind, binning.center(ind) / us, wave[ind] / GU);
             }
             graphs.push_back(g);
@@ -89,8 +86,7 @@ int main(int argc, char *argv[])
     frame->SetTitle("Nominal Channel Response various gains/shaping");
     frame->GetXaxis()->SetTitle("time [us]");
     frame->GetYaxis()->SetTitle("gain [mV/fC]");
-    for (size_t ind = 0; ind < graphs.size(); ++ind)
-    {
+    for (size_t ind = 0; ind < graphs.size(); ++ind) {
         TGraph *g = graphs[ind];
         g->SetLineColor(colors[ind % 4]);
         g->SetMarkerColor(colors[ind % 4]);

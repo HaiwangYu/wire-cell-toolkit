@@ -7,12 +7,10 @@
 
 #include <vector>
 
-namespace WireCell
-{
+namespace WireCell {
     // little helper to give something that looks like a 2D array of objects.
     template <typename Thing>
-    class ObjectArray2d
-    {
+    class ObjectArray2d {
        public:
         typedef std::vector<Thing> store_t;
         typedef typename store_t::iterator iterator;
@@ -22,8 +20,7 @@ namespace WireCell
           : m_nrows(nrows)
           , m_ncols(ncols)
         {
-            if (nrows and ncols)
-            {
+            if (nrows and ncols) {
                 m_things.resize(nrows * ncols);
             }
         }
@@ -41,14 +38,8 @@ namespace WireCell
             m_things.resize(m_nrows * m_ncols);
         }
 
-        const Thing &operator()(size_t irow, size_t icol) const
-        {
-            return m_things.at(icol + m_ncols * irow);
-        }
-        Thing &operator()(size_t irow, size_t icol)
-        {
-            return m_things.at(icol + m_ncols * irow);
-        }
+        const Thing &operator()(size_t irow, size_t icol) const { return m_things.at(icol + m_ncols * irow); }
+        Thing &operator()(size_t irow, size_t icol) { return m_things.at(icol + m_ncols * irow); }
 
         // range based access to the underlying things
         iterator begin() { return m_things.begin(); }

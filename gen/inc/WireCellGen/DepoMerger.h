@@ -4,12 +4,9 @@
 #include "WireCellIface/IConfigurable.h"
 #include "WireCellIface/IDepoMerger.h"
 
-namespace WireCell
-{
-    namespace Gen
-    {
-        class DepoMerger : public IDepoMerger, public IConfigurable
-        {
+namespace WireCell {
+    namespace Gen {
+        class DepoMerger : public IDepoMerger, public IConfigurable {
            public:
             DepoMerger();
             virtual ~DepoMerger();

@@ -4,26 +4,19 @@
 #include "WireCellIface/INode.h"
 #include "WireCellTbb/NodeWrapper.h"
 
-namespace WireCellTbb
-{
+namespace WireCellTbb {
     // Make a node wrapper for every type of node category
-    struct WrapperMaker
-    {
+    struct WrapperMaker {
         virtual ~WrapperMaker() {}
         virtual Node operator()(tbb::flow::graph &g, WireCell::INode::pointer n) = 0;
     };
     template <class Wrapper>
-    struct WrapperMakerT : public WrapperMaker
-    {
+    struct WrapperMakerT : public WrapperMaker {
         virtual ~WrapperMakerT() {}
-        virtual Node operator()(tbb::flow::graph &g, WireCell::INode::pointer n)
-        {
-            return Node(new Wrapper(g, n));
-        }
+        virtual Node operator()(tbb::flow::graph &g, WireCell::INode::pointer n) { return Node(new Wrapper(g, n)); }
     };
 
-    class WrapperFactory
-    {
+    class WrapperFactory {
        public:
         WrapperFactory(tbb::flow::graph &graph);
 

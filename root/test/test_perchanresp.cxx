@@ -32,8 +32,7 @@ using namespace std;
 int main(int argc, char *argv[])
 {
     std::string detector = "uboone";
-    if (argc > 1)
-    {
+    if (argc > 1) {
         detector = argv[1];
     }
     auto anode_tns = anode_loader(detector);
@@ -57,14 +56,11 @@ int main(int argc, char *argv[])
 
     auto bins = cr->channel_response_binning();
     cerr << "PerChannelResponse with binning: " << bins.nbins() << " bins "
-         << " with sample period " << bins.binsize() / units::us
-         << " us and bounds:"
-         << "[" << bins.min() / units::us << "," << bins.max() / units::us
-         << "]us\n";
+         << " with sample period " << bins.binsize() / units::us << " us and bounds:"
+         << "[" << bins.min() / units::us << "," << bins.max() / units::us << "]us\n";
 
     std::vector<int> planechans[3];  // fixme: will break with DUNE
-    for (auto ch : ap->channels())
-    {
+    for (auto ch : ap->channels()) {
         auto wpid = ap->resolve(ch);
         planechans[wpid.index()].push_back(ch);
     }
@@ -78,8 +74,7 @@ int main(int argc, char *argv[])
     // Desired gain units for showing in the plot
     const double GU = units::mV / units::fC;
 
-    for (int iplane = 0; iplane < 3; ++iplane)
-    {
+    for (int iplane = 0; iplane < 3; ++iplane) {
         auto &channels = planechans[iplane];
         std::sort(channels.begin(), channels.end());
 
@@ -92,17 +87,14 @@ int main(int argc, char *argv[])
         Assert(nsamps > 0);
         Assert(nchans > 0);
 
-        TH2F *hist = new TH2F(Form("hist%d", iplane),
-                              Form("Per Channel Response Plane %d [mV/fC]", iplane),
-                              nsamps, mintus, maxtus, nchans, 0, nchans);
+        TH2F *hist = new TH2F(Form("hist%d", iplane), Form("Per Channel Response Plane %d [mV/fC]", iplane), nsamps,
+                              mintus, maxtus, nchans, 0, nchans);
         hist->GetXaxis()->SetTitle("sample time (us)");
         hist->GetYaxis()->SetTitle("channel indices");
 
-        for (int ich = 0; ich < nchans; ++ich)
-        {
+        for (int ich = 0; ich < nchans; ++ich) {
             const auto &resp = cr->channel_response(channels[ich]);
-            for (int isamp = 0; isamp < nsamps; ++isamp)
-            {
+            for (int isamp = 0; isamp < nsamps; ++isamp) {
                 const double Tus = bins.center(isamp) / units::us;
                 hist->Fill(Tus, ich + 0.5, resp[isamp] / GU);
             }

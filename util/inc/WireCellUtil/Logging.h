@@ -16,10 +16,8 @@
 
 #include <string>
 
-namespace WireCell
-{
-    namespace Log
-    {
+namespace WireCell {
+    namespace Log {
         typedef std::shared_ptr<spdlog::logger> logptr_t;
         typedef std::shared_ptr<spdlog::sinks::sink> sinkptr_t;
 

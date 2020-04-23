@@ -6,12 +6,10 @@
 #include <boost/any.hpp>
 #include <vector>
 
-namespace WireCell
-{
+namespace WireCell {
     /** A node which acts as a simple function.
- */
-    class IFunctionNodeBase : public INode
-    {
+     */
+    class IFunctionNodeBase : public INode {
        public:
         typedef std::shared_ptr<IFunctionNodeBase> pointer;
 
@@ -27,8 +25,7 @@ namespace WireCell
     };
 
     template <typename InputType, typename OutputType>
-    class IFunctionNode : public IFunctionNodeBase
-    {
+    class IFunctionNode : public IFunctionNodeBase {
        public:
         typedef InputType input_type;
         typedef OutputType output_type;
@@ -46,8 +43,7 @@ namespace WireCell
             const input_pointer &in = boost::any_cast<const input_pointer &>(anyin);
             output_pointer out;
             bool ok = (*this)(in, out);
-            if (!ok)
-                return false;
+            if (!ok) return false;
             anyout = out;
             return true;
         }
@@ -56,15 +52,9 @@ namespace WireCell
         virtual bool operator()(const input_pointer &in, output_pointer &out) = 0;
 
         // Return the names of the types this node takes as input.
-        virtual std::vector<std::string> input_types()
-        {
-            return std::vector<std::string>{typeid(input_type).name()};
-        }
+        virtual std::vector<std::string> input_types() { return std::vector<std::string>{typeid(input_type).name()}; }
         // Return the names of the types this node produces as output.
-        virtual std::vector<std::string> output_types()
-        {
-            return std::vector<std::string>{typeid(output_type).name()};
-        }
+        virtual std::vector<std::string> output_types() { return std::vector<std::string>{typeid(output_type).name()}; }
     };
 
 }  // namespace WireCell

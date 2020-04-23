@@ -3,8 +3,7 @@
 #include <iostream>
 
 template <class T, class Policies>
-std::ostream &operator<<(std::ostream &os,
-                         const boost::numeric::interval<T, Policies> &x)
+std::ostream &operator<<(std::ostream &os, const boost::numeric::interval<T, Policies> &x)
 {
     os << "[" << x.lower() << ", " << x.upper() << "]";
     return os;

@@ -9,12 +9,9 @@
 #include "WireCellUtil/Logging.h"
 #include "WireCellZio/FlowConfigurable.h"
 
-namespace WireCell
-{
-    namespace Zio
-    {
-        class ZioTensorSetSource : public ITensorSetSource, public FlowConfigurable
-        {
+namespace WireCell {
+    namespace Zio {
+        class ZioTensorSetSource : public ITensorSetSource, public FlowConfigurable {
            public:
             ZioTensorSetSource();
             virtual ~ZioTensorSetSource();

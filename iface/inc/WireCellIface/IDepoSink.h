@@ -4,12 +4,10 @@
 #include "WireCellIface/IDepo.h"
 #include "WireCellIface/ISinkNode.h"
 
-namespace WireCell
-{
+namespace WireCell {
     /** A depo sink is a node that consumes IDepo objects.
- */
-    class IDepoSink : public ISinkNode<IDepo>
-    {
+     */
+    class IDepoSink : public ISinkNode<IDepo> {
        public:
         virtual ~IDepoSink();
 

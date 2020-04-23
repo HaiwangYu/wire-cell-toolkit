@@ -68,61 +68,50 @@ int main(int argc, char *argv[])
     std::uniform_real_distribution<double> position(0, std::max(width, height));
     std::normal_distribution<double> spread(0.0, gaussian);
     std::vector<Point> points;
-    for (int idepo = 0; idepo < ndepos; ++idepo)
-    {
+    for (int idepo = 0; idepo < ndepos; ++idepo) {
         Point cp(0, position(generator), position(generator));
-        for (int iele = 0; iele < neles; ++iele)
-        {
+        for (int iele = 0; iele < neles; ++iele) {
             Point delta(0, spread(generator), spread(generator));
             points.push_back(cp + delta);
         }
     }
 
     draw_frame(print.canvas, "Points and Activity");
-    for (size_t ipt = 0; ipt < points.size(); ++ipt)
-    {
+    for (size_t ipt = 0; ipt < points.size(); ++ipt) {
         const auto &p = points[ipt];
         draw_point(p, 1, 24, ipt + 1);
-        for (int ilayer = 0; ilayer < nlayers; ++ilayer)
-        {
+        for (int ilayer = 0; ilayer < nlayers; ++ilayer) {
             // pimpos normally would help here to find pitch location of arb point
             const auto &pit = pitches[ilayer];
             const auto &cen = centers[ilayer];
             const auto rel = p - cen;
             const int pit_ind = pit.dot(rel) / pitch_mags[ilayer];
             auto &m = measures[ilayer];
-            if ((int) m.size() <= pit_ind)
-            {
+            if ((int) m.size() <= pit_ind) {
                 m.resize(pit_ind + 1, 0.0);
             }
 
             m[pit_ind] += 1.0;
         }
     }
-    for (int ilayer = 0; ilayer < nlayers; ++ilayer)
-    {
-        draw_layer(coords, ilayer, pitch_mags[ilayer], pitches[ilayer],
-                   centers[ilayer], measures[ilayer]);
+    for (int ilayer = 0; ilayer < nlayers; ++ilayer) {
+        draw_layer(coords, ilayer, pitch_mags[ilayer], pitches[ilayer], centers[ilayer], measures[ilayer]);
     }
     print();
 
     blobs_t blobs;
 
     draw_frame(print.canvas, "Points and Strips");
-    for (size_t ipt = 0; ipt < points.size(); ++ipt)
-    {
+    for (size_t ipt = 0; ipt < points.size(); ++ipt) {
         const auto &p = points[ipt];
         draw_point(p, 1, 24, ipt + 1);
     }
     activities_t activities;
-    for (int ilayer = 0; ilayer < nlayers; ++ilayer)
-    {
+    for (int ilayer = 0; ilayer < nlayers; ++ilayer) {
         auto &m = measures[ilayer];
 
-        for (size_t ind = 0; ind < m.size(); ++ind)
-        {
-            if (m[ind] <= 0.0)
-            {
+        for (size_t ind = 0; ind < m.size(); ++ind) {
+            if (m[ind] <= 0.0) {
                 continue;
             }
             info("L{} [{}] {}", ilayer, ind, m[ind]);
@@ -139,20 +128,15 @@ int main(int argc, char *argv[])
     }
     print();
 
-    for (int ilayer = 0; ilayer < nlayers; ++ilayer)
-    {
+    for (int ilayer = 0; ilayer < nlayers; ++ilayer) {
         const auto &activity = activities[ilayer];
-        info("Tiling layer {} with {} blobs: {}", ilayer, blobs.size(),
-             activity.as_string());
-        if (blobs.empty())
-        {
+        info("Tiling layer {} with {} blobs: {}", ilayer, blobs.size(), activity.as_string());
+        if (blobs.empty()) {
             blobs = tiling(activity);
         }
-        else
-        {
+        else {
             blobs = tiling(blobs, activity);
-            if (blobs.empty())
-            {
+            if (blobs.empty()) {
                 warn("lost m'blobs!");
                 return -1;
             }
@@ -164,8 +148,7 @@ int main(int argc, char *argv[])
     }
 
     draw_points_blobs(coords, print, points, blobs);
-    for (const auto &activity : activities)
-    {
+    for (const auto &activity : activities) {
         auto strips = activity.make_strips();
         draw_strips(coords, strips, false);
     }
@@ -177,19 +160,16 @@ int main(int argc, char *argv[])
     // Skip the first two horiz/vert layers bounding sensitivity.  In
     // principle, they can be included but just add fully degenerate
     // terms.
-    for (int ilayer = 2; ilayer < nlayers; ++ilayer)
-    {
+    for (int ilayer = 2; ilayer < nlayers; ++ilayer) {
         Grouping grouping;
         auto &m = measures[ilayer];
 
         // Load up the "channels" and their associated "wires".  In
         // this test we have a simple one-to-one mapping between both
         // based on a common index.
-        for (size_t mind = 0; mind < m.size(); ++mind)
-        {
+        for (size_t mind = 0; mind < m.size(); ++mind) {
             const float meas = m[mind];
-            if (meas <= 0)
-            {
+            if (meas <= 0) {
                 continue;
             }
             Grouping::ident_t ident = make_ident(mind, ilayer);
@@ -198,19 +178,14 @@ int main(int argc, char *argv[])
         }
 
         // Load up the "blobs" and their associated "wires" for the current layer
-        for (size_t bind = 0; bind < blobs.size(); ++bind)
-        {
+        for (size_t bind = 0; bind < blobs.size(); ++bind) {
             const auto &blob = blobs[bind];
             std::vector<Grouping::ident_t> wids;
-            for (const auto &strip : blob.strips())
-            {
-                if (strip.layer != ilayer)
-                {
+            for (const auto &strip : blob.strips()) {
+                if (strip.layer != ilayer) {
                     continue;
                 }
-                for (auto wind = strip.bounds.first; wind < strip.bounds.second;
-                     ++wind)
-                {
+                for (auto wind = strip.bounds.first; wind < strip.bounds.second; ++wind) {
                     wids.push_back(make_ident(wind, ilayer));
                 }
             }
@@ -224,16 +199,13 @@ int main(int argc, char *argv[])
         auto labels = [&](std::ostream &out, const auto &vtx) {
             char typ = g[vtx].ntype;
             int lid = g[vtx].ident % 1000;  // l'il ID, erase face and layer
-            if (typ == 's')
-            {
+            if (typ == 's') {
                 out << "[label=\"s" << lid << "\"]";
             }
-            if (typ == 'm')
-            {
+            if (typ == 'm') {
                 out << "[label=\"m" << lid << "=" << g[vtx].value << "\"]";
             }
-            if (typ == 'w')
-            {
+            if (typ == 'w') {
                 out << "[label=\"w" << lid << "\"]";
             }
         };
@@ -249,21 +221,17 @@ int main(int argc, char *argv[])
 
     auto solution = solving.solve();
 
-    for (const auto &it : solution)
-    {
+    for (const auto &it : solution) {
         std::cerr << it.first << ": " << it.second << std::endl;
     }
 
     const auto &g = solving.graph();
     auto labels = [&](std::ostream &out, const auto &vtx) {
         char typ = g[vtx].ntype;
-        if (typ == 's')
-        {
-            out << "[label=\"s" << g[vtx].ident << "=" << Form("%.1f", g[vtx].value)
-                << "\"]";
+        if (typ == 's') {
+            out << "[label=\"s" << g[vtx].ident << "=" << Form("%.1f", g[vtx].value) << "\"]";
         }
-        if (typ == 'm')
-        {
+        if (typ == 'm') {
             out << "[label=\"m"
                 << "=" << g[vtx].value << "\"]";
         }

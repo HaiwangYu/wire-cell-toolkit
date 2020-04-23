@@ -5,11 +5,8 @@
 #include "WireCellIface/IConfigurable.h"
 #include "WireCellUtil/Configuration.h"
 
-namespace WireCellApps
-{
-    class NodeDumper : public WireCell::IApplication,
-                       public WireCell::IConfigurable
-    {
+namespace WireCellApps {
+    class NodeDumper : public WireCell::IApplication, public WireCell::IConfigurable {
         WireCell::Configuration m_cfg;
 
        public:

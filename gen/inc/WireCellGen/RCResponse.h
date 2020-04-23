@@ -8,12 +8,9 @@
 #include "WireCellIface/IWaveform.h"
 #include "WireCellUtil/Units.h"
 
-namespace WireCell
-{
-    namespace Gen
-    {
-        class RCResponse : public IWaveform, public IConfigurable
-        {
+namespace WireCell {
+    namespace Gen {
+        class RCResponse : public IWaveform, public IConfigurable {
            public:
             RCResponse(int nticks = 10000, double t0 = 0, double width = 1.0 * units::ms,
                        double tick = 0.5 * units::us);

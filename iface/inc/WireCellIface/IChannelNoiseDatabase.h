@@ -6,14 +6,11 @@
 
 #include <vector>
 
-namespace WireCell
-{
+namespace WireCell {
     // FIXME: this needs to be simplified into a Noise Subtraction
     // Service interface.  All these details need to be subsumed into
     // an implementation!
-    class IChannelNoiseDatabase
-      : public WireCell::IComponent<IChannelNoiseDatabase>
-    {
+    class IChannelNoiseDatabase : public WireCell::IComponent<IChannelNoiseDatabase> {
        public:
         /// The data type for all frequency-space, multiplicative filters.
         typedef WireCell::Waveform::compseq_t filter_t;

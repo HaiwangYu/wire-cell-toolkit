@@ -3,12 +3,10 @@
 
 #include "WireCellUtil/Point.h"
 
-namespace WireCell
-{
+namespace WireCell {
     /** A bounding box parallel to the Cartesian axes.
- */
-    class BoundingBox
-    {
+     */
+    class BoundingBox {
         Ray m_bounds;
         bool m_initialized = false;
 
@@ -26,8 +24,7 @@ namespace WireCell
         template <typename RayOrPointIterator>
         BoundingBox(const RayOrPointIterator &begin, const RayOrPointIterator &end)
         {
-            for (auto it = begin; it != end; ++it)
-            {
+            for (auto it = begin; it != end; ++it) {
                 (*this)(*it);
             }
         }
@@ -45,11 +42,9 @@ namespace WireCell
         void operator()(const Ray &r);
 
         template <typename RayOrPointIterator>
-        void operator()(const RayOrPointIterator &begin,
-                        const RayOrPointIterator &end)
+        void operator()(const RayOrPointIterator &begin, const RayOrPointIterator &end)
         {
-            for (auto it = begin; it != end; ++it)
-            {
+            for (auto it = begin; it != end; ++it) {
                 (*this)(*it);
             }
         }

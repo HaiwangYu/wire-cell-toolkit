@@ -13,18 +13,15 @@ int main(int argc, char *argv[])
     Main m;
     int rc = 0;
 
-    try
-    {
+    try {
         rc = m.cmdline(argc, argv);
-        if (rc)
-        {
+        if (rc) {
             return rc;
         }
         m.initialize();
         m();
     }
-    catch (Exception &e)
-    {
+    catch (Exception &e) {
         cerr << errstr(e) << endl;
         return 1;
     }

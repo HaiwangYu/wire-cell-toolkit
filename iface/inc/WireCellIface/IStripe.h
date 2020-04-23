@@ -8,24 +8,22 @@
 
 #include <vector>
 
-namespace WireCell
-{
+namespace WireCell {
     /** An interface to information about a "stripe" of channels.
- *
- * A stripe is an ordered and "contiguous" set of channels.
- *
- * Order and conent of the set of channels is application
- * dependent.  Typically, and why this interface is named as
- * "stripe", the set will consist of the channels that are
- * attached to wires (and as always it means wire segments) that
- * when taken together form a contiguous strip on the faces of the
- * anode plane.  For wrapped wire planes the strip is like that of
- * a flattened helix.  For unwrapped wire planes one might better
- * call this a "strip" (and indeed "strip" used in the context of
- * IBlob to refer to a contiguous region on a single face).
- */
-    class IStripe : public IData<IStripe>
-    {
+     *
+     * A stripe is an ordered and "contiguous" set of channels.
+     *
+     * Order and conent of the set of channels is application
+     * dependent.  Typically, and why this interface is named as
+     * "stripe", the set will consist of the channels that are
+     * attached to wires (and as always it means wire segments) that
+     * when taken together form a contiguous strip on the faces of the
+     * anode plane.  For wrapped wire planes the strip is like that of
+     * a flattened helix.  For unwrapped wire planes one might better
+     * call this a "strip" (and indeed "strip" used in the context of
+     * IBlob to refer to a contiguous region on a single face).
+     */
+    class IStripe : public IData<IStripe> {
        public:
         virtual ~IStripe();
 

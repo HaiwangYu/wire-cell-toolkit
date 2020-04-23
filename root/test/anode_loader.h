@@ -25,10 +25,8 @@ using namespace std;
 std::vector<std::string> known_dets = {"uboone", "apa", "protodune-larsoft"};
 void known_det(std::string maybe)
 {
-    for (auto det : known_dets)
-    {
-        if (maybe == det)
-        {
+    for (auto det : known_dets) {
+        if (maybe == det) {
             return;
         }
     }
@@ -44,18 +42,15 @@ std::vector<std::string> anode_loader(std::string detector)
         // Note: these files must be located via WIRECELL_PATH
         std::string ws_fname = "microboone-celltree-wires-v2.1.json.bz2";
         std::string fr_fname = "ub-10-half.json.bz2";
-        if (detector == "uboone")
-        {
+        if (detector == "uboone") {
             ws_fname = "microboone-celltree-wires-v2.1.json.bz2";
             fr_fname = "ub-10-half.json.bz2";
         }
-        if (detector == "apa")
-        {
+        if (detector == "apa") {
             ws_fname = "apa-wires.json.bz2";
             fr_fname = "garfield-1d-3planes-21wires-6impacts-dune-v1.json.bz2";
         }
-        if (detector == "protodune-larsoft")
-        {
+        if (detector == "protodune-larsoft") {
             ws_fname = "protodune-wires-larsoft-v1.json.bz2";
             fr_fname = "garfield-1d-3planes-21wires-6impacts-dune-v1.json.bz2";
             nanodes = 6;
@@ -81,8 +76,7 @@ std::vector<std::string> anode_loader(std::string detector)
             icfg->configure(cfg);
         }
 
-        for (int ianode = 0; ianode < nanodes; ++ianode)
-        {
+        for (int ianode = 0; ianode < nanodes; ++ianode) {
             std::string tn = String::format("AnodePlane:%d", ianode);
             ret.push_back(tn);
             cerr << "Configuring: " << tn << "\n";

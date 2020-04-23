@@ -7,8 +7,7 @@
 typedef std::tuple<WireCell::IDepo, WireCell::IDepo> in_tuple_t;
 typedef std::tuple<WireCell::IDepo> out_tuple_t;
 
-class MyDepoSrc : public WireCell::IDepoSource
-{
+class MyDepoSrc : public WireCell::IDepoSource {
    public:
     virtual ~MyDepoSrc() {}
     virtual bool operator()(WireCell::IDepo::pointer &depo)
@@ -18,22 +17,19 @@ class MyDepoSrc : public WireCell::IDepoSource
         std::cerr << "Running instance of " << demangle(signature()) << "\n";
 
         std::cerr << "input types:\n";
-        for (auto tn : input_types())
-        {
+        for (auto tn : input_types()) {
             std::cerr << "\t" << demangle(tn) << "\n";
         }
 
         std::cerr << "output types:\n";
-        for (auto tn : output_types())
-        {
+        for (auto tn : output_types()) {
             std::cerr << "\t" << demangle(tn) << "\n";
         }
         return true;
     }
 };
 
-class MyHydra : public WireCell::IHydraNode<in_tuple_t, out_tuple_t>
-{
+class MyHydra : public WireCell::IHydraNode<in_tuple_t, out_tuple_t> {
    public:
     virtual ~MyHydra() {}
 
@@ -42,20 +38,16 @@ class MyHydra : public WireCell::IHydraNode<in_tuple_t, out_tuple_t>
         using namespace WireCell;
 
         std::cerr << "Running instance of " << demangle(signature()) << "\n";
-        std::cerr << "input_queues_type:\n\t"
-                  << demangle(typeid(input_queues_type).name()) << "\n";
-        std::cerr << "output_queues_type:\n\t"
-                  << demangle(typeid(output_queues_type).name()) << "\n";
+        std::cerr << "input_queues_type:\n\t" << demangle(typeid(input_queues_type).name()) << "\n";
+        std::cerr << "output_queues_type:\n\t" << demangle(typeid(output_queues_type).name()) << "\n";
 
         std::cerr << "input types:\n";
-        for (auto tn : input_types())
-        {
+        for (auto tn : input_types()) {
             std::cerr << "\t" << demangle(tn) << "\n";
         }
 
         std::cerr << "output types:\n";
-        for (auto tn : output_types())
-        {
+        for (auto tn : output_types()) {
             std::cerr << "\t" << demangle(tn) << "\n";
         }
 

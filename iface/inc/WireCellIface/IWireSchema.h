@@ -14,10 +14,8 @@
 #include "WireCellUtil/IComponent.h"
 #include "WireCellUtil/WireSchema.h"
 
-namespace WireCell
-{
-    class IWireSchema : public IComponent<IWireSchema>
-    {
+namespace WireCell {
+    class IWireSchema : public IComponent<IWireSchema> {
        public:
         virtual ~IWireSchema();
 

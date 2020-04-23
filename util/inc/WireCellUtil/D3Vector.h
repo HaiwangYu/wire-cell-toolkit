@@ -11,17 +11,15 @@
 #include <iostream>  // for ostream
 #include <vector>
 
-namespace WireCell
-{
+namespace WireCell {
     /** Dimension-3 vector class.
- *
- * Adapted in laziness from:
- * http://rosettacode.org/wiki/Vector_products#C.2B.2B
- *
- */
+     *
+     * Adapted in laziness from:
+     * http://rosettacode.org/wiki/Vector_products#C.2B.2B
+     *
+     */
     template <class T>
-    class D3Vector
-    {
+    class D3Vector {
         template <class U>
         friend std::ostream &operator<<(std::ostream &, const D3Vector<U> &);
 
@@ -104,8 +102,7 @@ namespace WireCell
         D3Vector norm() const
         {
             T m = this->magnitude();
-            if (m <= 0)
-            {
+            if (m <= 0) {
                 return D3Vector();
             }
             return D3Vector(x() / m, y() / m, z() / m);
@@ -122,21 +119,15 @@ namespace WireCell
         }
 
         /// Return the triple cross product of this vector and the other two.
-        D3Vector triplevec(D3Vector &a, D3Vector &b) const
-        {
-            return cross(a.cross(b));
-        }
+        D3Vector triplevec(D3Vector &a, D3Vector &b) const { return cross(a.cross(b)); }
         /// Return the dot-cross product of this vector and the other two.
         T triplescal(D3Vector &a, D3Vector &b) const { return dot(a.cross(b)); }
 
         bool operator<(const D3Vector &rhs) const
         {
-            if (z() < rhs.z())
-                return true;
-            if (y() < rhs.y())
-                return true;
-            if (x() < rhs.x())
-                return true;
+            if (z() < rhs.z()) return true;
+            if (y() < rhs.y()) return true;
+            if (x() < rhs.x()) return true;
             return false;
         }
 

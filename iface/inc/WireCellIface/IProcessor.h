@@ -3,12 +3,10 @@
 
 #include "WireCellUtil/Interface.h"
 
-namespace WireCell
-{
+namespace WireCell {
     /** Base interface for any DFP graph vertex.
- */
-    class IProcessor : virtual public Interface
-    {
+     */
+    class IProcessor : virtual public Interface {
        public:
         virtual ~IProcessor();
 

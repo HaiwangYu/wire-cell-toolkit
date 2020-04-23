@@ -8,8 +8,7 @@
 #include <set>
 #include <vector>
 
-namespace WireCell
-{
+namespace WireCell {
     /// A 3D Cartesian point in double precision.
 
     typedef D3Vector<double> Point;
@@ -40,8 +39,7 @@ namespace WireCell
     typedef std::vector<PointValue> PointValueVector;
 
     /// Return true if lhs<rhs w/in tolerance.
-    struct ComparePoints
-    {
+    struct ComparePoints {
         bool operator()(const Point &lhs, const Point &rhs) const;
     };
     typedef std::set<Point, ComparePoints> PointSet;
@@ -51,20 +49,20 @@ namespace WireCell
     typedef D3Vector<float> PointF;
 
     /** Return true if point is contained in a rectangular solid
- * described by the ray bounds running between diagonally opposed
- * corners.*/
+     * described by the ray bounds running between diagonally opposed
+     * corners.*/
     bool point_contained(const Point &point, const Ray &bounds);
 
     /** Return true if point is contained by the bounding box along
- * the given axis (x=0, y=1, z=2) of the bounding box. */
+     * the given axis (x=0, y=1, z=2) of the bounding box. */
     bool point_contained(const Point &point, const Ray &bounds, int axis);
 
     /** Return the angle from axis vector to vector. This is just
- * acos(dot).*/
+     * acos(dot).*/
     double point_angle(const Vector &axis, const Vector &vector);
 
     /** Return a ray representing the points of closest approach
- * between the two lines colinear with the two rays. */
+     * between the two lines colinear with the two rays. */
     Ray ray_pitch(const Ray &ray1, const Ray &ray2);
 
     /** Return the distance from the tail to the head of the ray. */
@@ -74,15 +72,15 @@ namespace WireCell
     Vector ray_vector(const Ray &ray);
 
     /** Return a unit vector pointing in the direction from the tail
- * to the head of the ray. */
+     * to the head of the ray. */
     Vector ray_unit(const Ray &ray);
 
     /** Return the distance from the tail of the ray to the point
- * projected onto the ray's direction. */
+     * projected onto the ray's direction. */
     double ray_dist(const Ray &ray, const Point &point);
 
     /** Return the volume of a box aligned with axes and with the ray
- * at opposite corners. */
+     * at opposite corners. */
     double ray_volume(const Ray &ray);
 
     /** Return the ray representing the intersection of two BoundingBox. */
@@ -91,19 +89,16 @@ namespace WireCell
     template <>
     inline  // fixme: ignores default
         WireCell::Point
-        convert<WireCell::Point>(const Configuration &cfg,
-                                 const WireCell::Point &def)
+        convert<WireCell::Point>(const Configuration &cfg, const WireCell::Point &def)
     {
-        return Point(get<double>(cfg, "x"), get<double>(cfg, "y"),
-                     get<double>(cfg, "z"));
+        return Point(get<double>(cfg, "x"), get<double>(cfg, "y"), get<double>(cfg, "z"));
     }
     template <>
     inline  // fixme: ignores default
         WireCell::Ray
         convert<WireCell::Ray>(const Configuration &cfg, const WireCell::Ray &def)
     {
-        return Ray(get<WireCell::Point>(cfg, "tail"),
-                   get<WireCell::Point>(cfg, "head"));
+        return Ray(get<WireCell::Point>(cfg, "tail"), get<WireCell::Point>(cfg, "head"));
     }
 
     // std::ostream& operator<<(std::ostream& os, const WireCell::Ray& ray);

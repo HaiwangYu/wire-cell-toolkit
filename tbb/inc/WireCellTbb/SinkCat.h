@@ -4,11 +4,9 @@
 #include "WireCellIface/ISinkNode.h"
 #include "WireCellTbb/NodeWrapper.h"
 
-namespace WireCellTbb
-{
+namespace WireCellTbb {
     // adapter to convert from WC sink node to TBB sink node body.
-    class SinkBody
-    {
+    class SinkBody {
         WireCell::ISinkNodeBase::pointer m_wcnode;
 
        public:
@@ -27,14 +25,12 @@ namespace WireCellTbb
     };
 
     // implement facade to access ports for sink nodes
-    class SinkNodeWrapper : public NodeWrapper
-    {
+    class SinkNodeWrapper : public NodeWrapper {
         sink_node *m_tbbnode;
 
        public:
         SinkNodeWrapper(tbb::flow::graph &graph, WireCell::INode::pointer wcnode)
-          : m_tbbnode(
-                new sink_node(graph, wcnode->concurrency(), SinkBody(wcnode)))
+          : m_tbbnode(new sink_node(graph, wcnode->concurrency(), SinkBody(wcnode)))
         {
         }
         ~SinkNodeWrapper() { delete m_tbbnode; }

@@ -4,14 +4,11 @@
 
 #include "WireCellUtil/NamedFactory.h"
 
-WIRECELL_FACTORY(NominalChannelResponse,
-                 WireCell::SigProc::NominalChannelResponse,
-                 WireCell::IChannelResponse, WireCell::IConfigurable)
+WIRECELL_FACTORY(NominalChannelResponse, WireCell::SigProc::NominalChannelResponse, WireCell::IChannelResponse,
+                 WireCell::IConfigurable)
 
 using namespace WireCell;
-SigProc::NominalChannelResponse::NominalChannelResponse(double gain,
-                                                        double shaping,
-                                                        const Binning &binning)
+SigProc::NominalChannelResponse::NominalChannelResponse(double gain, double shaping, const Binning &binning)
   : m_gain(gain)
   , m_shaping(shaping)
   , m_bins(binning)
@@ -20,8 +17,7 @@ SigProc::NominalChannelResponse::NominalChannelResponse(double gain,
 
 SigProc::NominalChannelResponse::~NominalChannelResponse() {}
 
-WireCell::Configuration
-SigProc::NominalChannelResponse::default_configuration() const
+WireCell::Configuration SigProc::NominalChannelResponse::default_configuration() const
 {
     Configuration cfg;
     cfg["gain"] = m_gain;
@@ -32,8 +28,7 @@ SigProc::NominalChannelResponse::default_configuration() const
     return cfg;
 }
 
-void SigProc::NominalChannelResponse::configure(
-    const WireCell::Configuration &cfg)
+void SigProc::NominalChannelResponse::configure(const WireCell::Configuration &cfg)
 {
     m_gain = get(cfg, "gain", m_gain);
     m_shaping = get(cfg, "shaping", m_shaping);
@@ -43,20 +38,11 @@ void SigProc::NominalChannelResponse::configure(
     Response::ColdElec ce(m_gain, m_shaping);
     m_bins = Binning(nbins, tmin, tmax);
     m_cr = ce.generate(m_bins);
-    if (m_cr.empty())
-    {
-        THROW(ValueError() << errmsg{
-                  "Failed to generate any nominal channel response"});
+    if (m_cr.empty()) {
+        THROW(ValueError() << errmsg{"Failed to generate any nominal channel response"});
     }
 }
 
-const Waveform::realseq_t &
-SigProc::NominalChannelResponse::channel_response(int channel_ident) const
-{
-    return m_cr;
-}
+const Waveform::realseq_t &SigProc::NominalChannelResponse::channel_response(int channel_ident) const { return m_cr; }
 
-Binning SigProc::NominalChannelResponse::channel_response_binning() const
-{
-    return m_bins;
-}
+Binning SigProc::NominalChannelResponse::channel_response_binning() const { return m_bins; }

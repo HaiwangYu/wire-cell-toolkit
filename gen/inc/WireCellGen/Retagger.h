@@ -33,12 +33,9 @@
 #include "WireCellIface/IFrameFilter.h"
 #include "WireCellUtil/TagRules.h"
 
-namespace WireCell
-{
-    namespace Gen
-    {
-        class Retagger : public IFrameFilter, public IConfigurable
-        {
+namespace WireCell {
+    namespace Gen {
+        class Retagger : public IFrameFilter, public IConfigurable {
            public:
             Retagger();
             virtual ~Retagger();
@@ -46,8 +43,7 @@ namespace WireCell
             virtual void configure(const WireCell::Configuration &config);
             virtual WireCell::Configuration default_configuration() const;
 
-            virtual bool operator()(const input_pointer &inframe,
-                                    output_pointer &outframe);
+            virtual bool operator()(const input_pointer &inframe, output_pointer &outframe);
 
            private:
             tagrules::Context m_trctx;

@@ -1,8 +1,7 @@
 #include <memory>
 #include "WireCellUtil/IComponent.h"
 
-class IFunctor : public WireCell::IComponent<IFunctor>
-{
+class IFunctor : public WireCell::IComponent<IFunctor> {
    public:
     virtual ~IFunctor() {}
 
@@ -10,8 +9,7 @@ class IFunctor : public WireCell::IComponent<IFunctor>
 };
 
 template <typename InputType, typename OutputType>
-class IFunctorT : public IFunctor
-{
+class IFunctorT : public IFunctor {
    public:
     typedef InputType input_type;
     typedef OutputType output_type;
@@ -21,31 +19,26 @@ class IFunctorT : public IFunctor
 
     virtual std::string signature() { return typeid(this_type).name(); }
 
-    virtual bool operator()(const std::shared_ptr<const input_type> &in,
-                            std::shared_ptr<const output_type> &out) = 0;
+    virtual bool operator()(const std::shared_ptr<const input_type> &in, std::shared_ptr<const output_type> &out) = 0;
 };
 
-class IMyIFConverter : public IFunctorT<int, float>
-{
+class IMyIFConverter : public IFunctorT<int, float> {
    public:
     virtual ~IMyIFConverter() {}
 };
 
-class MyIFConverter : public IMyIFConverter
-{
+class MyIFConverter : public IMyIFConverter {
    public:
     virtual ~MyIFConverter() {}
 
-    virtual bool operator()(const std::shared_ptr<const input_type> &in,
-                            std::shared_ptr<const output_type> &out)
+    virtual bool operator()(const std::shared_ptr<const input_type> &in, std::shared_ptr<const output_type> &out)
     {
         out = std::make_shared<const float>(*in);
         return true;
     }
 };
 
-class INode : public WireCell::IComponent<INode>
-{
+class INode : public WireCell::IComponent<INode> {
    public:
     virtual ~INode() {}
 

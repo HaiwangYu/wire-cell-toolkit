@@ -13,36 +13,27 @@
 
 #include <iostream>
 
-namespace
-{
+namespace {
 }
-namespace WireCell
-{
-    namespace Aux
-    {
+namespace WireCell {
+    namespace Aux {
         // TODO this function seems too complicated...
         template <typename ElementType>
-        inline std::string dump(const WireCell::ITensor::pointer iten,
-                                std::vector<size_t> loc, const size_t limit = 10)
+        inline std::string dump(const WireCell::ITensor::pointer iten, std::vector<size_t> loc, const size_t limit = 10)
         {
             std::stringstream ss;
             auto shape = iten->shape();
-            if (shape.size() > loc.size())
-            {
+            if (shape.size() > loc.size()) {
                 loc.push_back(0);
                 ss << "[";
                 bool skip = false;
-                if (shape[loc.size() - 1] > limit)
-                {
+                if (shape[loc.size() - 1] > limit) {
                     skip = true;
                 }
-                for (size_t i = 0; i < shape[loc.size() - 1]; ++i)
-                {
-                    if (i >= limit / 2 && skip == true)
-                    {
+                for (size_t i = 0; i < shape[loc.size() - 1]; ++i) {
+                    if (i >= limit / 2 && skip == true) {
                         ss << " ... ";
-                        if (loc.size() != shape.size())
-                        {
+                        if (loc.size() != shape.size()) {
                             ss << "\n";
                         }
                         i = shape[loc.size() - 1] - limit / 2;
@@ -52,37 +43,29 @@ namespace WireCell
                     ss << dump<ElementType>(iten, loc, limit);
                 }
                 ss << "]";
-                if (loc.size() == 1 && loc[0] == shape[0] - 1)
-                {
+                if (loc.size() == 1 && loc[0] == shape[0] - 1) {
                     return ss.str();
                 }
-                if (loc[loc.size() - 2] != shape[loc.size() - 2] - 1)
-                {
-                    for (int i = 0; i < (int) shape.size() - (int) loc.size() + 1; ++i)
-                    {
+                if (loc[loc.size() - 2] != shape[loc.size() - 2] - 1) {
+                    for (int i = 0; i < (int) shape.size() - (int) loc.size() + 1; ++i) {
                         ss << "\n";
                     }
                 }
             }
-            else if (shape.size() == loc.size())
-            {
+            else if (shape.size() == loc.size()) {
                 auto data = (ElementType *) iten->data();
                 auto ind = loc.back();
-                for (size_t d = 0; d < loc.size() - 1; ++d)
-                {
+                for (size_t d = 0; d < loc.size() - 1; ++d) {
                     size_t plus = loc[d];
-                    for (size_t i = d + 1; i < shape.size(); ++i)
-                    {
+                    for (size_t i = d + 1; i < shape.size(); ++i) {
                         plus *= shape[i];
                     }
                     ind += plus;
                 }
                 ss << data[ind] << " ";
             }
-            else
-            {
-                THROW(WireCell::ValueError()
-                      << WireCell::errmsg{"shape.size() < loc.size()"});
+            else {
+                THROW(WireCell::ValueError() << WireCell::errmsg{"shape.size() < loc.size()"});
             }
             return ss.str();
         }
@@ -94,8 +77,7 @@ namespace WireCell
             ss << "ITensor: ";
             Json::FastWriter jwriter;
             ss << "shape: [";
-            for (auto l : iten->shape())
-            {
+            for (auto l : iten->shape()) {
                 ss << l << " ";
             }
             ss << "]\n";
@@ -106,24 +88,22 @@ namespace WireCell
         }
 
         template <typename ElementType>
-        inline Eigen::Array<ElementType, Eigen::Dynamic, Eigen::Dynamic>
-        itensor_to_eigen_array(const ITensor::pointer iten)
+        inline Eigen::Array<ElementType, Eigen::Dynamic, Eigen::Dynamic> itensor_to_eigen_array(
+            const ITensor::pointer iten)
         {
-            if (!iten)
-            {
+            if (!iten) {
                 THROW(ValueError() << errmsg{"(iten == null"});
             }
 
-            if (iten->shape().size() != 2)
-            {
+            if (iten->shape().size() != 2) {
                 THROW(ValueError() << errmsg{"iten->shape().size()!=2"});
             }
 
             // Eigen storage is col major by default
             auto nrows = iten->shape()[1];
             auto ncols = iten->shape()[0];
-            Eigen::Map<const Eigen::Array<ElementType, Eigen::Dynamic, Eigen::Dynamic>>
-                arr((const ElementType *) iten->data(), nrows, ncols);
+            Eigen::Map<const Eigen::Array<ElementType, Eigen::Dynamic, Eigen::Dynamic>> arr(
+                (const ElementType *) iten->data(), nrows, ncols);
 
             return arr;
         }

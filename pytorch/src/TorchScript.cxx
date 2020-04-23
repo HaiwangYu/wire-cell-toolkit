@@ -3,8 +3,7 @@
 #include "WireCellUtil/NamedFactory.h"
 #include "WireCellUtil/String.h"
 
-WIRECELL_FACTORY(TorchScript, WireCell::Pytorch::TorchScript,
-                 WireCell::ITensorSetFilter, WireCell::IConfigurable)
+WIRECELL_FACTORY(TorchScript, WireCell::Pytorch::TorchScript, WireCell::ITensorSetFilter, WireCell::IConfigurable)
 
 using namespace WireCell;
 
@@ -36,14 +35,12 @@ void Pytorch::TorchScript::configure(const WireCell::Configuration &cfg)
     const bool gpu = get<bool>(m_cfg, "gpu", false);
 
     auto model_path = m_cfg["model"].asString();
-    if (model_path.empty())
-    {
+    if (model_path.empty()) {
         THROW(ValueError() << errmsg{"Must provide output model to TorchScript"});
     }
 
     // load Torch Script Model
-    try
-    {
+    try {
         // Deserialize the ScriptModule from a file using torch::jit::load().
         m_module = torch::jit::load(m_cfg["model"].asString());
         if (gpu)
@@ -52,18 +49,15 @@ void Pytorch::TorchScript::configure(const WireCell::Configuration &cfg)
             m_module.to(at::kCPU);
         l->info("Model: {} loaded", m_cfg["model"].asString());
     }
-    catch (const c10::Error &e)
-    {
+    catch (const c10::Error &e) {
         l->critical("error loading model: {}", m_cfg["model"].asString());
         exit(0);
     }
 }
 
-bool Pytorch::TorchScript::operator()(const ITensorSet::pointer &in,
-                                      ITensorSet::pointer &out)
+bool Pytorch::TorchScript::operator()(const ITensorSet::pointer &in, ITensorSet::pointer &out)
 {
-    if (!in)
-    {
+    if (!in) {
         out = nullptr;
         return true;
     }
@@ -74,18 +68,15 @@ bool Pytorch::TorchScript::operator()(const ITensorSet::pointer &in,
 
     // for(int iloop=0; iloop<m_cfg["nloop"].asInt();++iloop) {
     bool success = false;
-    while (!success)
-    {
-        try
-        {
+    while (!success) {
+        try {
             auto iival = Pytorch::from_itensor(in, gpu);
             auto oival = m_module.forward(iival);
             out = Pytorch::to_itensor({oival});
 
             success = true;
         }
-        catch (...)
-        {
+        catch (...) {
             std::this_thread::sleep_for(std::chrono::milliseconds(wait_time));
             thread_wait_time += wait_time;
         }

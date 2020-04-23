@@ -5,21 +5,18 @@
 
 using namespace std;
 
-struct IName
-{
+struct IName {
     virtual std::string name() const = 0;
     virtual ~IName() {}
 };
 
 template <typename T>
-struct INameT : public IName
-{
+struct INameT : public IName {
     virtual std::string name() const { return typeid(T).name(); }
     virtual ~INameT() {}
 };
 
-struct A : public INameT<int>, public INameT<float>
-{
+struct A : public INameT<int>, public INameT<float> {
     virtual ~A() {}
 };
 
@@ -41,8 +38,7 @@ int main()
 
     cerr << "Via bases" << endl;
     vector<IName *> named{ai, af};
-    for (auto n : named)
-    {
+    for (auto n : named) {
         cerr << n->name() << endl;
     }
 

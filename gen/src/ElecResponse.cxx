@@ -5,14 +5,12 @@
 
 #include <iostream>
 
-WIRECELL_FACTORY(ElecResponse, WireCell::Gen::ElecResponse, WireCell::IWaveform,
-                 WireCell::IConfigurable)
+WIRECELL_FACTORY(ElecResponse, WireCell::Gen::ElecResponse, WireCell::IWaveform, WireCell::IConfigurable)
 
 using namespace std;
 using namespace WireCell;
 
-Gen::ElecResponse::ElecResponse(int nticks, double t0, double gain,
-                                double shaping, double postgain, double tick)
+Gen::ElecResponse::ElecResponse(int nticks, double t0, double gain, double shaping, double postgain, double tick)
 {
     m_cfg["gain"] = gain;
     m_cfg["shaping"] = shaping;
@@ -21,10 +19,7 @@ Gen::ElecResponse::ElecResponse(int nticks, double t0, double gain,
     m_cfg["tick"] = tick;
     m_cfg["nticks"] = nticks;
 }
-WireCell::Configuration Gen::ElecResponse::default_configuration() const
-{
-    return m_cfg;
-}
+WireCell::Configuration Gen::ElecResponse::default_configuration() const { return m_cfg; }
 void Gen::ElecResponse::configure(const WireCell::Configuration &cfg)
 {
     m_cfg = cfg;
@@ -38,17 +33,8 @@ void Gen::ElecResponse::configure(const WireCell::Configuration &cfg)
     Waveform::scale(m_wave, m_cfg["postgain"].asDouble());
 }
 
-double Gen::ElecResponse::waveform_start() const
-{
-    return m_cfg["start"].asDouble();
-}
+double Gen::ElecResponse::waveform_start() const { return m_cfg["start"].asDouble(); }
 
-double Gen::ElecResponse::waveform_period() const
-{
-    return m_cfg["tick"].asDouble();
-}
+double Gen::ElecResponse::waveform_period() const { return m_cfg["tick"].asDouble(); }
 
-const IWaveform::sequence_type &Gen::ElecResponse::waveform_samples() const
-{
-    return m_wave;
-}
+const IWaveform::sequence_type &Gen::ElecResponse::waveform_samples() const { return m_wave; }

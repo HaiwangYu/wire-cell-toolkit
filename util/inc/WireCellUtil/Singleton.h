@@ -1,11 +1,9 @@
 #ifndef WIRECELL_SINGLETON
 #define WIRECELL_SINGLETON
 
-namespace WireCell
-{
+namespace WireCell {
     template <class T>
-    class Singleton
-    {
+    class Singleton {
        public:
         static T &Instance()
         {

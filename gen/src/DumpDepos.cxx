@@ -18,17 +18,14 @@ DumpDepos::~DumpDepos() {}
 
 bool DumpDepos::operator()(const IDepo::pointer &depo)
 {
-    if (!depo)
-    {
+    if (!depo) {
         cerr << "DumpDepos see EOS after " << m_nin << " depos\n";
         return true;
     }
 
-    stringstream
-        msg;  // reduce footprint for having stream split between different threads
+    stringstream msg;  // reduce footprint for having stream split between different threads
     msg << "Depo: (" << (void *) depo.get() << ")"
-        << " t=" << depo->time() << "\tq=" << depo->charge()
-        << "\tr=" << depo->pos() << "\tn=" << m_nin << "\n";
+        << " t=" << depo->time() << "\tq=" << depo->charge() << "\tr=" << depo->pos() << "\tn=" << m_nin << "\n";
     ++m_nin;
 
     cerr << msg.str();

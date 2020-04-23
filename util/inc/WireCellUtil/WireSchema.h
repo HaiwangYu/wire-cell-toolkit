@@ -13,45 +13,37 @@
 #include "WireCellUtil/Point.h"
 #include "WireCellUtil/String.h"
 
-namespace WireCell
-{
-    namespace WireSchema
-    {
+namespace WireCell {
+    namespace WireSchema {
         // IWire
-        struct Wire
-        {
+        struct Wire {
             int ident;
             int channel;
             int segment;
             Point tail, head;  // end points, direction of signal to channel
         };
 
-        struct Plane
-        {
+        struct Plane {
             int ident;
             std::vector<int> wires;
         };
 
-        struct Face
-        {
+        struct Face {
             int ident;
             std::vector<int> planes;
         };
 
-        struct Anode
-        {
+        struct Anode {
             int ident;
             std::vector<int> faces;
         };
 
-        struct Detector
-        {
+        struct Detector {
             int ident;
             std::vector<int> anodes;
         };
 
-        struct StoreDB
-        {
+        struct StoreDB {
             std::vector<Detector> detectors;
             std::vector<Anode> anodes;
             std::vector<Face> faces;
@@ -63,8 +55,7 @@ namespace WireCell
         typedef std::shared_ptr<const StoreDB> StoreDBPtr;
 
         // Bolt on some const functions to the underlying and shared store.
-        class Store
-        {
+        class Store {
             StoreDBPtr m_db;
 
            public:

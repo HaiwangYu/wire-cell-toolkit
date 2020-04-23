@@ -1,8 +1,7 @@
 #include <boost/signals2.hpp>
 #include <iostream>
 
-struct CountOutLoud
-{
+struct CountOutLoud {
     int count;
     CountOutLoud(int c = 0)
       : count(c)

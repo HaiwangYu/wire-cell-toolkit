@@ -18,10 +18,8 @@
 #include <map>
 #include <vector>
 
-namespace WireCell
-{
-    namespace RayGrid
-    {
+namespace WireCell {
+    namespace RayGrid {
         // A ray grid layer associates the set of parallel rays
         // generated from the seeding pair.  All layers in a ray grid
         // are considered co-planar.
@@ -34,8 +32,7 @@ namespace WireCell
 
         // A ray is located in the ray grid through its layer and its
         // grid indices.
-        struct coordinate_t
-        {
+        struct coordinate_t {
             layer_index_t layer;
             grid_index_t grid;
         };
@@ -63,12 +60,10 @@ namespace WireCell
         typedef std::vector<crossing_t> crossings_t;
 
         // was class RayGrid
-        class Coordinates
-        {
+        class Coordinates {
            public:
             // Create a ray grid by specifying the axis of projection.
-            Coordinates(const ray_pair_vector_t &rays, int normal_axis = 0,
-                        double normal_location = 0.0);
+            Coordinates(const ray_pair_vector_t &rays, int normal_axis = 0, double normal_location = 0.0);
 
             // Return the crossing point of the index=0 rays for two layers.
             Vector zero_crossing(layer_index_t one, layer_index_t two) const;
@@ -78,13 +73,9 @@ namespace WireCell
 
             // Return the pitch location measured in an other layer give of the crossing
             // point of two rays
-            double pitch_location(const coordinate_t &one, const coordinate_t &two,
-                                  layer_index_t other) const;
+            double pitch_location(const coordinate_t &one, const coordinate_t &two, layer_index_t other) const;
 
-            int pitch_index(double pitch, layer_index_t layer) const
-            {
-                return std::floor(pitch / m_pitch_mag[layer]);
-            }
+            int pitch_index(double pitch, layer_index_t layer) const { return std::floor(pitch / m_pitch_mag[layer]); }
 
             int nlayers() const { return m_nlayers; }
             const std::vector<double> &pitch_mags() const { return m_pitch_mag; }
@@ -123,8 +114,7 @@ namespace WireCell
             tensor_t m_a, m_b;
         };
 
-        inline std::ostream &operator<<(std::ostream &os,
-                                        const WireCell::RayGrid::coordinate_t &ra)
+        inline std::ostream &operator<<(std::ostream &os, const WireCell::RayGrid::coordinate_t &ra)
         {
             os << "<rayaddr {L" << ra.layer << ",G" << ra.grid << "}>";
             return os;

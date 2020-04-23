@@ -3,12 +3,9 @@
 
 #include "WireCellIface/IAnodeFace.h"
 
-namespace WireCell
-{
-    namespace Gen
-    {
-        class AnodeFace : public IAnodeFace
-        {
+namespace WireCell {
+    namespace Gen {
+        class AnodeFace : public IAnodeFace {
            public:
             AnodeFace(int ident, IWirePlane::vector planes, const BoundingBox &sensvol);
 

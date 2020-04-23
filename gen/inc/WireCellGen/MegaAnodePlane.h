@@ -11,12 +11,9 @@
 #include "WireCellIface/IAnodePlane.h"
 #include "WireCellIface/IConfigurable.h"
 
-namespace WireCell
-{
-    namespace Gen
-    {
-        class MegaAnodePlane : public IAnodePlane, public IConfigurable
-        {
+namespace WireCell {
+    namespace Gen {
+        class MegaAnodePlane : public IAnodePlane, public IConfigurable {
            public:
             // MegaAnodePlane();
             virtual ~MegaAnodePlane() {}

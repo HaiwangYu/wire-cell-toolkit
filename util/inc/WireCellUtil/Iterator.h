@@ -4,16 +4,14 @@
 #include <iterator>
 #include "WireCellUtil/IteratorBase.h"
 
-namespace WireCell
-{
+namespace WireCell {
     /** This iterator provides a facade over a WireCell::IteratorBase<ValueType>.
- *
- * This facade can be passed by value without slicing the abstract
- * base iterator.
- */
+     *
+     * This facade can be passed by value without slicing the abstract
+     * base iterator.
+     */
     template <typename ValueType>
-    class Iterator : public std::iterator<std::forward_iterator_tag, ValueType>
-    {
+    class Iterator : public std::iterator<std::forward_iterator_tag, ValueType> {
        public:
         typedef WireCell::IteratorBase<ValueType> BaseIteratorType;
 
@@ -26,8 +24,7 @@ namespace WireCell
         Iterator(const Iterator &other)
           : base_itr(0)
         {
-            if (other.base_itr)
-            {
+            if (other.base_itr) {
                 base_itr = other.base_itr->clone();
             }
         }
@@ -38,8 +35,7 @@ namespace WireCell
         }
         ~Iterator()
         {
-            if (base_itr)
-            {
+            if (base_itr) {
                 delete base_itr;
             }
             base_itr = 0;
@@ -47,16 +43,13 @@ namespace WireCell
 
         bool operator==(const Iterator &rhs) const
         {
-            if (base_itr == rhs.base_itr)
-                return true;
-            if (!base_itr || !rhs.base_itr)
-                return false;
+            if (base_itr == rhs.base_itr) return true;
+            if (!base_itr || !rhs.base_itr) return false;
             return *base_itr == *rhs.base_itr;
         }
         bool operator!=(const Iterator &rhs) const
         {
-            if (base_itr && rhs.base_itr)
-            {
+            if (base_itr && rhs.base_itr) {
                 return *base_itr != *rhs.base_itr;
             }
             return base_itr != rhs.base_itr;
@@ -72,8 +65,7 @@ namespace WireCell
 
         Iterator &operator=(const Iterator &rhs)
         {
-            if (base_itr)
-            {
+            if (base_itr) {
                 delete base_itr;
             }
             base_itr = rhs.base_itr->clone();

@@ -2,8 +2,8 @@
 
 using namespace WireCell;
 
-Pimpos::Pimpos(int nwires, double minwirepitch, double maxwirepitch,
-               const Vector &wire, const Vector &pitch, const Point &origin,
+Pimpos::Pimpos(int nwires, double minwirepitch, double maxwirepitch, const Vector &wire, const Vector &pitch,
+               const Point &origin,
                int nbins)  // default=10
   : m_nimpbins_per_wire(nbins)
   , m_origin(origin)
@@ -39,16 +39,12 @@ std::pair<int, int> Pimpos::closest(double pitch) const
     return std::make_pair(iwire, irelimp);
 }
 
-int Pimpos::wire_impact(int wireind) const
-{
-    return (0.5 + wireind) * m_nimpbins_per_wire;
-}
+int Pimpos::wire_impact(int wireind) const { return (0.5 + wireind) * m_nimpbins_per_wire; }
 
 std::pair<int, int> Pimpos::wire_impacts(int wireind) const
 {
     const int wi = wire_impact(wireind);
-    return std::make_pair(wi - m_nimpbins_per_wire / 2,
-                          wi + m_nimpbins_per_wire / 2);
+    return std::make_pair(wi - m_nimpbins_per_wire / 2, wi + m_nimpbins_per_wire / 2);
 }
 
 int Pimpos::reflect(int wireind, int impind) const
@@ -60,17 +56,13 @@ int Pimpos::reflect(int wireind, int impind) const
 
 Vector Pimpos::relative(const Point &pt) const { return pt - m_origin; }
 
-double Pimpos::distance(const Point &pt, int axis) const
-{
-    return m_axis[axis].dot(relative(pt));
-}
+double Pimpos::distance(const Point &pt, int axis) const { return m_axis[axis].dot(relative(pt)); }
 
 Point Pimpos::transform(const Point &pt) const
 {
     const Vector v = relative(pt);
     Point ret;
-    for (int axis = 0; axis < 3; ++axis)
-    {
+    for (int axis = 0; axis < 3; ++axis) {
         ret[axis] = m_axis[axis].dot(v);
     }
     return ret;

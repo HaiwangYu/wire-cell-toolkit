@@ -18,16 +18,14 @@ thread_local static Eigen::FFT<float> gEigenFFT_dft_c2r_1d;  // c2r inv
 
 // http://stackoverflow.com/a/33636445
 
-WireCell::Array::array_xxc
-WireCell::Array::dft(const WireCell::Array::array_xxf &arr)
+WireCell::Array::array_xxc WireCell::Array::dft(const WireCell::Array::array_xxf &arr)
 {
     const int nrows = arr.rows();
     const int ncols = arr.cols();
 
     Eigen::MatrixXcf matc(nrows, ncols);
 
-    for (int irow = 0; irow < nrows; ++irow)
-    {
+    for (int irow = 0; irow < nrows; ++irow) {
         Eigen::VectorXcf fspec(ncols);  // frequency spectrum
         // gEigenFFT wants vectors, also input arr is const
         Eigen::VectorXf tmp = arr.row(irow);
@@ -35,8 +33,7 @@ WireCell::Array::dft(const WireCell::Array::array_xxf &arr)
         matc.row(irow) = fspec;
     }
 
-    for (int icol = 0; icol < ncols; ++icol)
-    {
+    for (int icol = 0; icol < ncols; ++icol) {
         Eigen::VectorXcf pspec(nrows);                // periodicity spectrum
         gEigenFFT_dft_1d.fwd(pspec, matc.col(icol));  // c2c
         matc.col(icol) = pspec;
@@ -45,28 +42,23 @@ WireCell::Array::dft(const WireCell::Array::array_xxf &arr)
     return matc;
 }
 
-WireCell::Array::array_xxc
-WireCell::Array::dft_rc(const WireCell::Array::array_xxf &arr, int dim)
+WireCell::Array::array_xxc WireCell::Array::dft_rc(const WireCell::Array::array_xxf &arr, int dim)
 {
     const int nrows = arr.rows();
     const int ncols = arr.cols();
 
     Eigen::MatrixXcf matc(nrows, ncols);
 
-    if (dim == 0)
-    {
-        for (int irow = 0; irow < nrows; ++irow)
-        {
+    if (dim == 0) {
+        for (int irow = 0; irow < nrows; ++irow) {
             Eigen::VectorXcf fspec(ncols);
             Eigen::VectorXf tmp = arr.row(irow);
             gEigenFFT_dft_r2c_1d.fwd(fspec, tmp);  // r2c
             matc.row(irow) = fspec;
         }
     }
-    else if (dim == 1)
-    {
-        for (int icol = 0; icol < ncols; ++icol)
-        {
+    else if (dim == 1) {
+        for (int icol = 0; icol < ncols; ++icol) {
             Eigen::VectorXcf fspec(nrows);
             Eigen::VectorXf tmp = arr.col(icol);
             gEigenFFT_dft_r2c_1d.fwd(fspec, tmp);  // r2c
@@ -76,8 +68,7 @@ WireCell::Array::dft_rc(const WireCell::Array::array_xxf &arr, int dim)
     return matc;
 }
 
-WireCell::Array::array_xxc
-WireCell::Array::dft_cc(const WireCell::Array::array_xxc &arr, int dim)
+WireCell::Array::array_xxc WireCell::Array::dft_cc(const WireCell::Array::array_xxc &arr, int dim)
 {
     const int nrows = arr.rows();
     const int ncols = arr.cols();
@@ -86,19 +77,15 @@ WireCell::Array::dft_cc(const WireCell::Array::array_xxc &arr, int dim)
 
     matc = arr.matrix();
 
-    if (dim == 0)
-    {
-        for (int irow = 0; irow < nrows; ++irow)
-        {
+    if (dim == 0) {
+        for (int irow = 0; irow < nrows; ++irow) {
             Eigen::VectorXcf pspec(ncols);
             gEigenFFT_dft_1d.fwd(pspec, matc.row(irow));  // c2c
             matc.row(irow) = pspec;
         }
     }
-    else
-    {
-        for (int icol = 0; icol < ncols; ++icol)
-        {
+    else {
+        for (int icol = 0; icol < ncols; ++icol) {
             Eigen::VectorXcf pspec(nrows);
             gEigenFFT_dft_1d.fwd(pspec, matc.col(icol));  // c2c
             matc.col(icol) = pspec;
@@ -107,8 +94,7 @@ WireCell::Array::dft_cc(const WireCell::Array::array_xxc &arr, int dim)
     return matc;
 }
 
-WireCell::Array::array_xxf
-WireCell::Array::idft(const WireCell::Array::array_xxc &arr)
+WireCell::Array::array_xxf WireCell::Array::idft(const WireCell::Array::array_xxc &arr)
 {
     const int nrows = arr.rows();
     const int ncols = arr.cols();
@@ -117,8 +103,7 @@ WireCell::Array::idft(const WireCell::Array::array_xxc &arr)
     Eigen::MatrixXcf partial(nrows, ncols);
     partial = arr.matrix();
 
-    for (int icol = 0; icol < ncols; ++icol)
-    {
+    for (int icol = 0; icol < ncols; ++icol) {
         Eigen::VectorXcf pspec(nrows);                   // wire spectrum
         gEigenFFT_dft_1d.inv(pspec, partial.col(icol));  // c2c
         partial.col(icol) = pspec;
@@ -127,8 +112,7 @@ WireCell::Array::idft(const WireCell::Array::array_xxc &arr)
     // shared_array_xxf ret = std::make_shared<array_xxf> (nrows, ncols);
     array_xxf ret(nrows, ncols);
 
-    for (int irow = 0; irow < nrows; ++irow)
-    {
+    for (int irow = 0; irow < nrows; ++irow) {
         Eigen::VectorXf wave(ncols);                        // back to real-valued time series
         gEigenFFT_dft_c2r_1d.inv(wave, partial.row(irow));  // c2r
         ret.row(irow) = wave;
@@ -137,8 +121,7 @@ WireCell::Array::idft(const WireCell::Array::array_xxc &arr)
     return ret;
 }
 
-WireCell::Array::array_xxc
-WireCell::Array::idft_cc(const WireCell::Array::array_xxc &arr, int dim)
+WireCell::Array::array_xxc WireCell::Array::idft_cc(const WireCell::Array::array_xxc &arr, int dim)
 {
     const int nrows = arr.rows();
     const int ncols = arr.cols();
@@ -147,19 +130,15 @@ WireCell::Array::idft_cc(const WireCell::Array::array_xxc &arr, int dim)
     Eigen::MatrixXcf ret(nrows, ncols);
     ret = arr.matrix();
 
-    if (dim == 1)
-    {
-        for (int icol = 0; icol < ncols; ++icol)
-        {
+    if (dim == 1) {
+        for (int icol = 0; icol < ncols; ++icol) {
             Eigen::VectorXcf pspec(nrows);
             gEigenFFT_dft_1d.inv(pspec, ret.col(icol));  // c2c
             ret.col(icol) = pspec;
         }
     }
-    else if (dim == 0)
-    {
-        for (int irow = 0; irow < nrows; ++irow)
-        {
+    else if (dim == 0) {
+        for (int irow = 0; irow < nrows; ++irow) {
             Eigen::VectorXcf pspec(ncols);
             gEigenFFT_dft_1d.inv(pspec, ret.row(irow));  // c2c
             ret.row(irow) = pspec;
@@ -168,8 +147,7 @@ WireCell::Array::idft_cc(const WireCell::Array::array_xxc &arr, int dim)
     return ret;
 }
 
-WireCell::Array::array_xxf
-WireCell::Array::idft_cr(const WireCell::Array::array_xxc &arr, int dim)
+WireCell::Array::array_xxf WireCell::Array::idft_cr(const WireCell::Array::array_xxc &arr, int dim)
 {
     const int nrows = arr.rows();
     const int ncols = arr.cols();
@@ -180,19 +158,15 @@ WireCell::Array::idft_cr(const WireCell::Array::array_xxc &arr, int dim)
 
     array_xxf ret(nrows, ncols);
 
-    if (dim == 0)
-    {
-        for (int irow = 0; irow < nrows; ++irow)
-        {
+    if (dim == 0) {
+        for (int irow = 0; irow < nrows; ++irow) {
             Eigen::VectorXf wave(ncols);                        // back to real-valued time series
             gEigenFFT_dft_c2r_1d.inv(wave, partial.row(irow));  // c2r
             ret.row(irow) = wave;
         }
     }
-    else if (dim == 1)
-    {
-        for (int icol = 0; icol < ncols; ++icol)
-        {
+    else if (dim == 1) {
+        for (int icol = 0; icol < ncols; ++icol) {
             Eigen::VectorXf wave(nrows);
             gEigenFFT_dft_c2r_1d.inv(wave, partial.col(icol));  // c2r
             ret.col(icol) = wave;
@@ -203,16 +177,14 @@ WireCell::Array::idft_cr(const WireCell::Array::array_xxc &arr, int dim)
 
 // this is a cut-and-paste mashup of dft() and idft() in order to avoid
 // temporaries.
-WireCell::Array::array_xxf
-WireCell::Array::deconv(const WireCell::Array::array_xxf &arr,
-                        const WireCell::Array::array_xxc &filter)
+WireCell::Array::array_xxf WireCell::Array::deconv(const WireCell::Array::array_xxf &arr,
+                                                   const WireCell::Array::array_xxc &filter)
 {
     const int nrows = arr.rows();
     const int ncols = arr.cols();
 
     Eigen::MatrixXcf matc(nrows, ncols);
-    for (int irow = 0; irow < nrows; ++irow)
-    {
+    for (int irow = 0; irow < nrows; ++irow) {
         Eigen::VectorXcf fspec(ncols);  // frequency spectrum
         // gEigenFFT wants vectors, also input arr is const
         Eigen::VectorXf tmp = arr.row(irow);
@@ -220,8 +192,7 @@ WireCell::Array::deconv(const WireCell::Array::array_xxf &arr,
         matc.row(irow) = fspec;
     }
 
-    for (int icol = 0; icol < ncols; ++icol)
-    {
+    for (int icol = 0; icol < ncols; ++icol) {
         Eigen::VectorXcf pspec(nrows);                // periodicity spectrum
         gEigenFFT_dft_1d.fwd(pspec, matc.col(icol));  // c2c
         matc.col(icol) = pspec;
@@ -230,8 +201,7 @@ WireCell::Array::deconv(const WireCell::Array::array_xxf &arr,
     // deconvolution via multiplication in frequency space
     Eigen::MatrixXcf filt = matc.array() * filter;
 
-    for (int icol = 0; icol < ncols; ++icol)
-    {
+    for (int icol = 0; icol < ncols; ++icol) {
         Eigen::VectorXcf pspec(nrows);                // wire spectrum
         gEigenFFT_dft_1d.inv(pspec, filt.col(icol));  // c2c
         filt.col(icol) = pspec;
@@ -239,8 +209,7 @@ WireCell::Array::deconv(const WireCell::Array::array_xxf &arr,
 
     array_xxf ret(nrows, ncols);
 
-    for (int irow = 0; irow < nrows; ++irow)
-    {
+    for (int irow = 0; irow < nrows; ++irow) {
         Eigen::VectorXf wave(ncols);                     // back to real-valued time series
         gEigenFFT_dft_c2r_1d.inv(wave, filt.row(irow));  // c2r
         ret.row(irow) = wave;
@@ -249,24 +218,18 @@ WireCell::Array::deconv(const WireCell::Array::array_xxf &arr,
     return ret;
 }
 
-WireCell::Array::array_xxf
-WireCell::Array::downsample(const Array::array_xxf &in, const unsigned int k,
-                            const int dim)
+WireCell::Array::array_xxf WireCell::Array::downsample(const Array::array_xxf &in, const unsigned int k, const int dim)
 {
-    if (dim == 0)
-    {
+    if (dim == 0) {
         Array::array_xxf out = Array::array_xxf::Zero(in.rows() / k, in.cols());
-        for (unsigned int i = 0; i < in.rows(); ++i)
-        {
+        for (unsigned int i = 0; i < in.rows(); ++i) {
             out.row(i / k) = out.row(i / k) + in.row(i);
         }
         return out / k;
     }
-    if (dim == 1)
-    {
+    if (dim == 1) {
         Array::array_xxf out = Array::array_xxf::Zero(in.rows(), in.cols() / k);
-        for (unsigned int i = 0; i < in.cols(); ++i)
-        {
+        for (unsigned int i = 0; i < in.cols(); ++i) {
             out.col(i / k) = out.col(i / k) + in.col(i);
         }
         return out / k;
@@ -274,24 +237,18 @@ WireCell::Array::downsample(const Array::array_xxf &in, const unsigned int k,
     THROW(ValueError() << errmsg{"dim should be 0 or 1"});
 }
 
-WireCell::Array::array_xxf WireCell::Array::upsample(const Array::array_xxf &in,
-                                                     const unsigned int k,
-                                                     const int dim)
+WireCell::Array::array_xxf WireCell::Array::upsample(const Array::array_xxf &in, const unsigned int k, const int dim)
 {
-    if (dim == 0)
-    {
+    if (dim == 0) {
         Array::array_xxf out = Array::array_xxf::Zero(in.rows() * k, in.cols());
-        for (unsigned int i = 0; i < in.rows() * k; ++i)
-        {
+        for (unsigned int i = 0; i < in.rows() * k; ++i) {
             out.row(i) = in.row(i / k);
         }
         return out;
     }
-    if (dim == 1)
-    {
+    if (dim == 1) {
         Array::array_xxf out = Array::array_xxf::Zero(in.rows(), in.cols() * k);
-        for (unsigned int i = 0; i < in.cols() * k; ++i)
-        {
+        for (unsigned int i = 0; i < in.cols() * k; ++i) {
             out.col(i) = in.col(i / k);
         }
         return out;
@@ -299,45 +256,33 @@ WireCell::Array::array_xxf WireCell::Array::upsample(const Array::array_xxf &in,
     THROW(ValueError() << errmsg{"dim should be 0 or 1"});
 }
 
-WireCell::Array::array_xxf WireCell::Array::mask(const Array::array_xxf &in,
-                                                 const Array::array_xxf &mask,
+WireCell::Array::array_xxf WireCell::Array::mask(const Array::array_xxf &in, const Array::array_xxf &mask,
                                                  const float th)
 {
     Array::array_xxf ret = Eigen::ArrayXXf::Zero(in.rows(), in.cols());
-    if (in.rows() != mask.rows() || in.cols() != mask.cols())
-    {
-        THROW(ValueError() << errmsg{
-                  "in.rows()!=mask.rows() || in.cols()!=mask.cols()"});
+    if (in.rows() != mask.rows() || in.cols() != mask.cols()) {
+        THROW(ValueError() << errmsg{"in.rows()!=mask.rows() || in.cols()!=mask.cols()"});
     }
     return (mask > th).select(in, ret);
 }
 
-WireCell::Array::array_xxf
-WireCell::Array::baseline_subtraction(const Array::array_xxf &in)
+WireCell::Array::array_xxf WireCell::Array::baseline_subtraction(const Array::array_xxf &in)
 {
     Array::array_xxf ret = Eigen::ArrayXXf::Zero(in.rows(), in.cols());
-    for (int ich = 0; ich < in.cols(); ++ich)
-    {
+    for (int ich = 0; ich < in.cols(); ++ich) {
         int sta = 0;
         int end = 0;
-        for (int it = 0; it < in.rows(); ++it)
-        {
-            if (in(it, ich) == 0)
-            {
-                if (sta < end)
-                {
-                    for (int i = sta; i < end + 1; ++i)
-                    {
+        for (int it = 0; it < in.rows(); ++it) {
+            if (in(it, ich) == 0) {
+                if (sta < end) {
+                    for (int i = sta; i < end + 1; ++i) {
                         ret(i, ich) =
-                            in(i, ich) -
-                            (in(sta, ich) +
-                             (i - sta) * (in(end, ich) - in(sta, ich)) / (end - sta));
+                            in(i, ich) - (in(sta, ich) + (i - sta) * (in(end, ich) - in(sta, ich)) / (end - sta));
                     }
                 }
                 sta = it + 1;  // first tick in ROI
             }
-            else
-            {
+            else {
                 end = it;  // last tick in ROI
             }
         }

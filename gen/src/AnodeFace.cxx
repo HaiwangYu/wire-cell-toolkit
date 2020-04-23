@@ -3,8 +3,7 @@
 using namespace WireCell;
 using namespace WireCell::Gen;
 
-static ray_pair_vector_t get_raypairs(const BoundingBox &bb,
-                                      const IWirePlane::vector &planes)
+static ray_pair_vector_t get_raypairs(const BoundingBox &bb, const IWirePlane::vector &planes)
 {
     ray_pair_vector_t raypairs;
 
@@ -32,8 +31,7 @@ static ray_pair_vector_t get_raypairs(const BoundingBox &bb,
     raypairs.push_back(ray_pair_t(v1, v2));
 
     // Now the wire planes.
-    for (const auto &plane : planes)
-    {
+    for (const auto &plane : planes) {
         const auto &wires = plane->wires();
         const auto wray0 = wires[0]->ray();
         const auto wray1 = wires[1]->ray();
@@ -55,8 +53,7 @@ static ray_pair_vector_t get_raypairs(const BoundingBox &bb,
     return raypairs;
 }
 
-AnodeFace::AnodeFace(int ident, IWirePlane::vector planes,
-                     const BoundingBox &bb)
+AnodeFace::AnodeFace(int ident, IWirePlane::vector planes, const BoundingBox &bb)
   : m_ident(ident)
   , m_planes(planes)
   , m_bb(bb)
@@ -66,10 +63,8 @@ AnodeFace::AnodeFace(int ident, IWirePlane::vector planes,
 
 IWirePlane::pointer AnodeFace::plane(int ident) const
 {
-    for (auto ptr : m_planes)
-    {
-        if (ptr->ident() == ident)
-        {
+    for (auto ptr : m_planes) {
+        if (ptr->ident() == ident) {
             return ptr;
         }
     }

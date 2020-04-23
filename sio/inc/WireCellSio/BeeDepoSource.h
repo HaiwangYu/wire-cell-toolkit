@@ -32,12 +32,9 @@
 #include "WireCellIface/IConfigurable.h"
 #include "WireCellIface/IDepoSource.h"
 
-namespace WireCell
-{
-    namespace Sio
-    {
-        class BeeDepoSource : public IDepoSource, public IConfigurable
-        {
+namespace WireCell {
+    namespace Sio {
+        class BeeDepoSource : public IDepoSource, public IConfigurable {
            public:
             BeeDepoSource();
             virtual ~BeeDepoSource();

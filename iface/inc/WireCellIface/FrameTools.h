@@ -9,10 +9,8 @@
 #include "WireCellIface/IFrame.h"
 #include "WireCellUtil/Array.h"
 
-namespace WireCell
-{
-    namespace FrameTools
-    {
+namespace WireCell {
+    namespace FrameTools {
         /// Return a vector of traces which have no trace tags.  Here,
         /// any frame tags are ignored.  Returned vector of traces has
         /// undefined order.
@@ -58,9 +56,8 @@ namespace WireCell
         /// refered to in the channel list or which are outside the
         /// array are ignored and not all channels need to have
         /// associated traces.
-        void fill(Array::array_xxf &array, const ITrace::vector &traces,
-                  channel_list::iterator ch_begin, channel_list::iterator ch_end,
-                  int tbin = 0);
+        void fill(Array::array_xxf &array, const ITrace::vector &traces, channel_list::iterator ch_begin,
+                  channel_list::iterator ch_end, int tbin = 0);
 
         /// Compare the time span of a frame to a time.
         ///
@@ -86,8 +83,7 @@ namespace WireCell
         ///
         /// Note, the frame pointer must be valid and the frame must
         /// have traces.
-        std::pair<IFrame::pointer, IFrame::pointer> split(IFrame::pointer frame,
-                                                          double time);
+        std::pair<IFrame::pointer, IFrame::pointer> split(IFrame::pointer frame, double time);
 
     }  // namespace FrameTools
 }  // namespace WireCell

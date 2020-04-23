@@ -27,8 +27,7 @@ $ diff -u build/linux.gcc.inc{~,}
 #include <iostream>
 #include <tuple>
 
-struct CountDown
-{
+struct CountDown {
     const int index;
     int count;
     CountDown(int index, int n = 10)
@@ -39,8 +38,7 @@ struct CountDown
     }
     bool operator()(int &x)
     {
-        if (!count)
-        {
+        if (!count) {
             std::cerr << "CountDown(" << index << "): EOS\n";
             return false;
         }
@@ -50,22 +48,18 @@ struct CountDown
     }
 };
 
-class Adder
-  : public tbb::flow::composite_node<std::tuple<int, int>, std::tuple<int>>
-{
+class Adder : public tbb::flow::composite_node<std::tuple<int, int>, std::tuple<int>> {
     tbb::flow::join_node<std::tuple<int, int>, queueing> j;
     tbb::flow::function_node<std::tuple<int, int>, int> f;
-    typedef tbb::flow::composite_node<std::tuple<int, int>, std::tuple<int>>
-        base_type;
+    typedef tbb::flow::composite_node<std::tuple<int, int>, std::tuple<int>> base_type;
 
-    struct f_body
-    {
+    struct f_body {
         int operator()(const std::tuple<int, int> &t)
         {
             int n = (std::get<1>(t) + 1) / 2;
             int sum = std::get<0>(t) + std::get<1>(t);
-            std::cout << "Sum of the first " << n << " positive odd numbers is  " << n
-                      << " squared: " << sum << std::endl;
+            std::cout << "Sum of the first " << n << " positive odd numbers is  " << n << " squared: " << sum
+                      << std::endl;
             return sum;
         }
     };

@@ -18,14 +18,10 @@ void test_matrix_by_array(ExecMon &em)
     mat4 = mat1 * mat2;
     // mat5 = mat1 * mat2.array(); compilation error, can't mix!
 
-    cerr << "mat1:\n"
-         << mat1 << endl;
-    cerr << "mat2:\n"
-         << mat2 << endl;
-    cerr << "mat3:\n"
-         << mat3 << endl;
-    cerr << "mat4:\n"
-         << mat4 << endl;
+    cerr << "mat1:\n" << mat1 << endl;
+    cerr << "mat2:\n" << mat2 << endl;
+    cerr << "mat3:\n" << mat3 << endl;
+    cerr << "mat4:\n" << mat4 << endl;
 }
 
 int main()

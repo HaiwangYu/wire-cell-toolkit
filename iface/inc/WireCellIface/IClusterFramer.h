@@ -8,10 +8,8 @@
 #include "WireCellIface/IFrame.h"
 #include "WireCellIface/IFunctionNode.h"
 
-namespace WireCell
-{
-    class IClusterFramer : public IFunctionNode<ICluster, IFrame>
-    {
+namespace WireCell {
+    class IClusterFramer : public IFunctionNode<ICluster, IFrame> {
        public:
         virtual ~IClusterFramer();
 

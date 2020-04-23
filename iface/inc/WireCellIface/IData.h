@@ -3,11 +3,9 @@
 
 #include <memory>  // std::shared_ptr
 #include <vector>
-namespace WireCell
-{
+namespace WireCell {
     template <class Type>
-    class IData
-    {
+    class IData {
        public:
         virtual ~IData() {}
 

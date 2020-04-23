@@ -92,8 +92,7 @@ int main(int argc, char *argv[])
     cout << mu("Made wire summary") << endl;
 
     WireCell::BoundingBox boundingbox;
-    for (size_t ind = 0; ind < wires->size(); ++ind)
-    {
+    for (size_t ind = 0; ind < wires->size(); ++ind) {
         boundingbox(wires->at(ind)->ray());
     }
     const Ray &bbox = boundingbox.bounds();
@@ -120,13 +119,11 @@ int main(int argc, char *argv[])
     cout << tk("Made TCanvas") << endl;
     cout << mu("Made TCanvas") << endl;
 
-    TH1F *frame = pdf.canvas.DrawFrame(bbox.first.z(), bbox.first.y(),
-                                       bbox.second.z(), bbox.second.y());
+    TH1F *frame = pdf.canvas.DrawFrame(bbox.first.z(), bbox.first.y(), bbox.second.z(), bbox.second.y());
     frame->SetTitle("Wires, red=U, blue=V, thicker=increasing index");
     frame->SetXTitle("Z transverse direction");
     frame->SetYTitle("Y transverse direction");
-    for (auto wit = wires->begin(); wit != wires->end(); ++wit)
-    {
+    for (auto wit = wires->begin(); wit != wires->end(); ++wit) {
         IWire::pointer wire = *wit;
 
         Ray wray = wire->ray();
@@ -137,8 +134,7 @@ int main(int argc, char *argv[])
 
         l.SetLineColor(colors[iplane]);
         l.SetLineWidth(width);
-        l.DrawLine(wray.first.z(), wray.first.y(), wray.second.z(),
-                   wray.second.y());
+        l.DrawLine(wray.first.z(), wray.first.y(), wray.second.z(), wray.second.y());
         Point cent = wire->center();
         m.SetMarkerColor(colors[iplane]);
         m.DrawMarker(cent.z(), cent.y());
@@ -148,10 +144,8 @@ int main(int argc, char *argv[])
 
     pdf();
 
-    cout << "Timing summary:\n"
-         << tk.summary() << endl;
-    cout << "Memory summary:\n"
-         << mu.summary() << endl;
+    cout << "Timing summary:\n" << tk.summary() << endl;
+    cout << "Memory summary:\n" << mu.summary() << endl;
 
     return 0;
 }

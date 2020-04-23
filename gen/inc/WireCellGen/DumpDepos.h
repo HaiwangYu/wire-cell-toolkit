@@ -3,10 +3,8 @@
 
 #include "WireCellIface/IDepoSink.h"
 
-namespace WireCell
-{
-    class DumpDepos : public IDepoSink
-    {
+namespace WireCell {
+    class DumpDepos : public IDepoSink {
        public:
         DumpDepos();
         virtual ~DumpDepos();

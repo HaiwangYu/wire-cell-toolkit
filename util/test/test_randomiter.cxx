@@ -20,8 +20,7 @@ int main()
     typedef RandomIter<container, value> iterator;
 
     iterator beg(array), end(true, array);
-    for (iterator it = beg; it != end; ++it)
-    {
+    for (iterator it = beg; it != end; ++it) {
         std::cout << *it << std::endl;
     }
 

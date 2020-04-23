@@ -32,10 +32,8 @@
 #include <memory>
 #include <vector>
 
-namespace WireCell
-{
-    namespace Array
-    {
+namespace WireCell {
+    namespace Array {
         typedef Eigen::ArrayXf array_xf;
         typedef Eigen::ArrayXcf array_xc;
 
@@ -72,32 +70,32 @@ namespace WireCell
         array_xxf idft(const array_xxc &arr);
 
         /** Partial, 1D DFT and inverse DFT along one dimension of an
- * array.  Each row is transformed if dim=0, each column if
- * dim=1.  The transfer is either real->complex (rc),
- * complex->complex(cc) or complex->real(cr).
- *
- * The full 2D DFT should be used unless an intermediate
- * filter is required as it will avoid producing some
- * temporaries.
- *
- * Conceptually:
- *
- *    auto xxc = dft(xxf);
- *
- * is equivalent to
- *
- *    auto tmp = dft_rc(xxf, 0);
- *    auto xxc = dft_cc(tmp, 1);
- *
- * and:
- *
- *     auto xxf = idft(xxc)
- *
- * is equivalent to:
- *
- *     auto tmp = idft_cc(xxc, 1);
- *     auto xxf = idft_rc(tmp, 0);
- */
+         * array.  Each row is transformed if dim=0, each column if
+         * dim=1.  The transfer is either real->complex (rc),
+         * complex->complex(cc) or complex->real(cr).
+         *
+         * The full 2D DFT should be used unless an intermediate
+         * filter is required as it will avoid producing some
+         * temporaries.
+         *
+         * Conceptually:
+         *
+         *    auto xxc = dft(xxf);
+         *
+         * is equivalent to
+         *
+         *    auto tmp = dft_rc(xxf, 0);
+         *    auto xxc = dft_cc(tmp, 1);
+         *
+         * and:
+         *
+         *     auto xxf = idft(xxc)
+         *
+         * is equivalent to:
+         *
+         *     auto tmp = idft_cc(xxc, 1);
+         *     auto xxf = idft_rc(tmp, 0);
+         */
         array_xxc dft_rc(const array_xxf &arr, int dim = 0);
         array_xxc dft_cc(const array_xxc &arr, int dim = 1);
         array_xxc idft_cc(const array_xxc &arr, int dim = 1);
@@ -114,29 +112,26 @@ namespace WireCell
         array_xxf deconv(const array_xxf &arr, const array_xxc &filter);
 
         /** downsample a 2D array along one axis by k
- *  simple average of all numbers in a bin
- *  e.g: MxN -> Mxfloor(N/k)
- *  extra rows/cols are ignored
- */
-        array_xxf downsample(const array_xxf &in, const unsigned int k,
-                             const int dim = 0);
+         *  simple average of all numbers in a bin
+         *  e.g: MxN -> Mxfloor(N/k)
+         *  extra rows/cols are ignored
+         */
+        array_xxf downsample(const array_xxf &in, const unsigned int k, const int dim = 0);
 
         /** upsample a 2D array along one axis by k
- *  e.g: MxN -> MxN*k
- *  all numbers in a new bin are assigned with same value
- */
-        array_xxf upsample(const array_xxf &in, const unsigned int k,
-                           const int dim = 0);
+         *  e.g: MxN -> MxN*k
+         *  all numbers in a new bin are assigned with same value
+         */
+        array_xxf upsample(const array_xxf &in, const unsigned int k, const int dim = 0);
 
         /** put a mask on in
- *  in and mask need to have same shape
- *  values > th in mask are considered pass
- */
-        array_xxf mask(const array_xxf &in, const array_xxf &mask,
-                       const float th = 0.5);
+         *  in and mask need to have same shape
+         *  values > th in mask are considered pass
+         */
+        array_xxf mask(const array_xxf &in, const array_xxf &mask, const float th = 0.5);
 
         /** linear baseline subtraction along row direction
- */
+         */
         array_xxf baseline_subtraction(const array_xxf &in);
 
     }  // namespace Array

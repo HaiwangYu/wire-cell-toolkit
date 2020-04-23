@@ -4,13 +4,10 @@
 #include "WireCellIface/IDepo.h"
 #include "WireCellIface/IHydraNode.h"
 
-namespace WireCell
-{
+namespace WireCell {
     // FIXME: this is wrong with the shared_ptr.
     // see comments in IHydraNode.  Needs fixes in TupleHelper.
-    class IDepoMerger
-      : public IHydraNode<std::tuple<IDepo, IDepo>, std::tuple<IDepo>>
-    {
+    class IDepoMerger : public IHydraNode<std::tuple<IDepo, IDepo>, std::tuple<IDepo>> {
        public:
         typedef std::shared_ptr<IDepoMerger> pointer;
         virtual ~IDepoMerger();

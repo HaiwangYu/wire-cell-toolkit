@@ -22,20 +22,16 @@ int main(int argc, char *argv[])
     // initialize C vector: NCELL cells with NZERO zeros. (true charge in each
     // cell)
     VectorXd C = VectorXd::Random(N_CELL) * 50 + VectorXd::Constant(N_CELL, 150);
-    VectorXd r =
-        N_CELL / 2 * (VectorXd::Random(N_ZERO) + VectorXd::Constant(N_ZERO, 1));
-    for (int i = 0; i < N_ZERO; i++)
-    {
+    VectorXd r = N_CELL / 2 * (VectorXd::Random(N_ZERO) + VectorXd::Constant(N_ZERO, 1));
+    for (int i = 0; i < N_ZERO; i++) {
         C(int(r(i))) = 0;
     }
 
     // initialize G matrix: N_WIRE rows and N_CELL columns. (geometry matrix)
     MatrixXd G = MatrixXd::Zero(N_WIRE, N_CELL);
-    for (int i = 0; i < N_WIRE; i++)
-    {
+    for (int i = 0; i < N_WIRE; i++) {
         VectorXd t = VectorXd::Random(N_CELL);
-        for (int j = 0; j < N_CELL; j++)
-        {
+        for (int j = 0; j < N_CELL; j++) {
             G(i, j) = int(t(j) + 1);
         }
     }
@@ -44,15 +40,13 @@ int main(int argc, char *argv[])
     VectorXd W = G * C;
 
     cout << "geometry matrix:" << endl;
-    cout << G << endl
-         << endl;
+    cout << G << endl << endl;
 
     // cout << "measured charge on each wire:" << endl;
     // cout << W.transpose() << endl << endl;
 
     cout << "true charge of each cell:" << endl;
-    cout << C.transpose() << endl
-         << endl;
+    cout << C.transpose() << endl << endl;
     double lambda = 0.01;
 
     // WireCell::ElasticNetModel m(lambda, 0.95, 100000, 1e-4);
@@ -82,9 +76,7 @@ void test_lasso(WireCell::LassoModel &m, MatrixXd &G, VectorXd &W)
     // m.SetLambdaWeight(6, 10.);
     m.Fit();
 
-    cout << "chi2: " << m.name << ": base=" << m.chi2_base()
-         << ", l1=" << m.chi2_l1() << endl
-         << endl;
+    cout << "chi2: " << m.name << ": base=" << m.chi2_base() << ", l1=" << m.chi2_l1() << endl << endl;
 }
 
 void print_results(WireCell::LinearModel &m, VectorXd &C)
@@ -92,14 +84,12 @@ void print_results(WireCell::LinearModel &m, VectorXd &C)
     VectorXd beta = m.Getbeta();
 
     cout << "fitted charge of each cell: " << m.name << endl;
-    cout << beta.transpose() << endl
-         << endl;
+    cout << beta.transpose() << endl << endl;
 
     // cout << "predicted charge on each wire: Lasso" << endl;
     // cout << m.Predict().transpose() << endl << endl;
 
-    cout << "average residual charge difference per wire: " << m.name << ": "
-         << m.MeanResidual() << endl;
+    cout << "average residual charge difference per wire: " << m.name << ": " << m.MeanResidual() << endl;
 
     int nbeta = beta.size();
 
@@ -107,14 +97,10 @@ void print_results(WireCell::LinearModel &m, VectorXd &C)
     int n_zero_beta = 0;
     int n_zero_correct = 0;
 
-    for (int i = 0; i < nbeta; i++)
-    {
-        if (fabs(C(i)) < 0.1)
-            n_zero_true++;
-        if (fabs(beta(i)) < 5)
-            n_zero_beta++;
-        if (fabs(C(i)) < 0.1 && (fabs(C(i) - beta(i)) < 10))
-            n_zero_correct++;
+    for (int i = 0; i < nbeta; i++) {
+        if (fabs(C(i)) < 0.1) n_zero_true++;
+        if (fabs(beta(i)) < 5) n_zero_beta++;
+        if (fabs(C(i)) < 0.1 && (fabs(C(i) - beta(i)) < 10)) n_zero_correct++;
     }
     cout << "true zeros: " << n_zero_true << endl;
     cout << "fitted zeros: " << n_zero_beta << endl;

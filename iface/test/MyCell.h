@@ -3,8 +3,7 @@
 
 #include "WireCellIface/ICell.h"
 
-class MyCell : public WireCell::ICell
-{
+class MyCell : public WireCell::ICell {
     int m_ident;
     double m_area;
 

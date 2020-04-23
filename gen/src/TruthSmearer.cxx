@@ -10,8 +10,7 @@
 
 #include <string>
 
-WIRECELL_FACTORY(TruthSmearer, WireCell::Gen::TruthSmearer, WireCell::IDuctor,
-                 WireCell::IConfigurable)
+WIRECELL_FACTORY(TruthSmearer, WireCell::Gen::TruthSmearer, WireCell::IDuctor, WireCell::IConfigurable)
 
 using namespace std;
 using namespace WireCell;
@@ -105,10 +104,8 @@ void Gen::TruthSmearer::configure(const WireCell::Configuration &cfg)
 {
     m_anode_tn = get<string>(cfg, "anode", m_anode_tn);
     m_anode = Factory::find_tn<IAnodePlane>(m_anode_tn);
-    if (!m_anode)
-    {
-        cerr << "TruthSmearer[" << (void *) this << "]: failed to get anode: \""
-             << m_anode_tn << "\"\n";
+    if (!m_anode) {
+        cerr << "TruthSmearer[" << (void *) this << "]: failed to get anode: \"" << m_anode_tn << "\"\n";
         return;  // fixme: should throw something!
     }
 
@@ -116,8 +113,7 @@ void Gen::TruthSmearer::configure(const WireCell::Configuration &cfg)
     m_continuous = get<bool>(cfg, "continuous", m_continuous);
     m_fluctuate = get<bool>(cfg, "fluctuate", m_fluctuate);
     m_rng = nullptr;
-    if (m_fluctuate)
-    {
+    if (m_fluctuate) {
         m_rng_tn = get(cfg, "rng", m_rng_tn);
         m_rng = Factory::find_tn<IRandom>(m_rng_tn);
     }
@@ -143,65 +139,51 @@ void Gen::TruthSmearer::process(output_queue &frames)
     ITrace::vector traces;
     double tick = -1;
 
-    for (auto face : m_anode->faces())
-    {
+    for (auto face : m_anode->faces()) {
         // Select the depos which are in this face's sensitive volume
         IDepo::vector face_depos;
         auto bb = face->sensitive();
-        for (auto depo : m_depos)
-        {
-            if (bb.inside(depo->pos()))
-            {
+        for (auto depo : m_depos) {
+            if (bb.inside(depo->pos())) {
                 face_depos.push_back(depo);
             }
         }
 
         {  // debugging
             auto ray = bb.bounds();
-            cerr << "TruthSmearer: anode:" << m_anode->ident()
-                 << " face:" << face->ident() << ": processing " << face_depos.size()
-                 << " depos "
+            cerr << "TruthSmearer: anode:" << m_anode->ident() << " face:" << face->ident() << ": processing "
+                 << face_depos.size() << " depos "
                  << "with bb: " << ray.first << " --> " << ray.second << "\n";
         }
 
-        for (auto plane : face->planes())
-        {
+        for (auto plane : face->planes()) {
             const Pimpos *pimpos = plane->pimpos();
 
-            Binning tbins(m_readout_time / m_tick, m_start_time,
-                          m_start_time + m_readout_time);
+            Binning tbins(m_readout_time / m_tick, m_start_time, m_start_time + m_readout_time);
 
-            if (tick < 0)
-            {  // fixme: assume same tick for all.
+            if (tick < 0) {  // fixme: assume same tick for all.
                 tick = tbins.binsize();
             }
 
             Gen::BinnedDiffusion bindiff(*pimpos, tbins, m_nsigma, m_rng);
-            for (auto depo : face_depos)
-            {
+            for (auto depo : face_depos) {
                 // time filter smearing
                 double extent_time = depo->extent_long() / m_drift_speed;
-                bindiff.add(
-                    depo, sqrt(extent_time * extent_time + m_time_smear * m_time_smear),
-                    depo->extent_tran());
+                bindiff.add(depo, sqrt(extent_time * extent_time + m_time_smear * m_time_smear), depo->extent_tran());
             }
 
             auto &wires = plane->wires();
             int planeid = plane->ident();
 
             double wire_smear = 1.0;
-            if (planeid == 2)
-            {
+            if (planeid == 2) {
                 wire_smear = m_wire_smear_col;
             }
-            else if (planeid == 0 || planeid == 1)
-            {
+            else if (planeid == 0 || planeid == 1) {
                 wire_smear = m_wire_smear_ind;
             }
-            else
-            {
-                std::cerr << "Truthsmearer: planeid " << planeid
-                          << " cannot be identified!" << std::endl;
+            else {
+                std::cerr << "Truthsmearer: planeid " << planeid << " cannot be identified!" << std::endl;
             }
 
             auto ib = pimpos->impact_binning();
@@ -210,8 +192,7 @@ void Gen::TruthSmearer::process(output_queue &frames)
             const double pitch = rb.binsize();
             const double impact = ib.binsize();
             const int nwires = rb.nbins();
-            for (int iwire = 0; iwire < nwires; ++iwire)
-            {
+            for (int iwire = 0; iwire < nwires; ++iwire) {
                 ///  Similar to ImpactZipper::waveform
                 ///  No convolution
                 ///  m_waveform from BinnedDiffusion::impact_data()
@@ -219,18 +200,15 @@ void Gen::TruthSmearer::process(output_queue &frames)
                 const double wire_pos = rb.center(iwire);
 
                 // impact positions within +/-1 wires
-                const int min_impact =
-                    ib.edge_index(wire_pos - 1.5 * pitch + 0.1 * impact);
-                const int max_impact =
-                    ib.edge_index(wire_pos + 1.5 * pitch - 0.1 * impact);
+                const int min_impact = ib.edge_index(wire_pos - 1.5 * pitch + 0.1 * impact);
+                const int max_impact = ib.edge_index(wire_pos + 1.5 * pitch - 0.1 * impact);
                 const int nsamples = bindiff.tbins().nbins();
 
                 // total waveform for iwire
                 Waveform::realseq_t total_spectrum(nsamples, 0.0);
 
                 // ATTENTION: the bin center of max_imapct is in +2 wire pitch
-                for (int imp = min_impact; imp < max_impact; imp++)
-                {
+                for (int imp = min_impact; imp < max_impact; imp++) {
                     // charge weight
                     double wire_weight = 1.0;
 
@@ -239,36 +217,28 @@ void Gen::TruthSmearer::process(output_queue &frames)
                     /// fo each wire (or impact position) smear
                     const double rel_imp_pos = ib.center(imp) - wire_pos;
                     const double dist_to_wire = abs(rel_imp_pos / rb.binsize());
-                    if (dist_to_wire < 0.5)
-                    {
+                    if (dist_to_wire < 0.5) {
                         wire_weight = wire_smear * 1.0;
                     }
-                    else if (dist_to_wire > 0.5 && dist_to_wire < 1.5)
-                    {
+                    else if (dist_to_wire > 0.5 && dist_to_wire < 1.5) {
                         wire_weight = 0.5 * (1.0 - wire_smear);
                     }
-                    else
-                    {
+                    else {
                         // should not happen
                         wire_weight = 0.0;
-                        std::cerr
-                            << "TruthSmearer: impact " << imp
-                            << " position: " << ib.center(imp)
-                            << " out of +/-1 wire region or at wire boundary,  wire pitch: "
-                            << rb.binsize() << ", " << pitch
-                            << ", target wire position: " << wire_pos << std::endl;
+                        std::cerr << "TruthSmearer: impact " << imp << " position: " << ib.center(imp)
+                                  << " out of +/-1 wire region or at wire boundary,  wire pitch: " << rb.binsize()
+                                  << ", " << pitch << ", target wire position: " << wire_pos << std::endl;
                     }
 
                     // ImpactData
                     auto id = bindiff.impact_data(imp);
-                    if (!id)
-                    {
+                    if (!id) {
                         continue;
                     }
 
                     Waveform::realseq_t charge_spectrum = id->waveform();
-                    if (charge_spectrum.empty())
-                    {
+                    if (charge_spectrum.empty()) {
                         std::cerr << "impactZipper: no charge spectrum for absolute impact "
                                      "number: "
                                   << imp << endl;
@@ -277,13 +247,13 @@ void Gen::TruthSmearer::process(output_queue &frames)
 
                     // debugging
                     /* std::cout<<"TruthSmearer: planeid: " << planeid << " relative
-           * impact position: "<< rel_imp_pos */
+                     * impact position: "<< rel_imp_pos */
                     /*     << " charge weight: "<<wire_weight*m_truth_gain<<endl; */
                     /* auto xx = Waveform::edge(charge_spectrum); */
                     /* //debugging */
                     /* std::cout<<"TruthSmearer: wire: "<< iwire << " impact: " << imp <<
-           * " charge spectrum edges: "<< xx.first << ", " << xx.second <<
-           * std::endl; */
+                     * " charge spectrum edges: "<< xx.first << ", " << xx.second <<
+                     * std::endl; */
                     Waveform::scale(charge_spectrum, wire_weight * m_truth_gain);
                     Waveform::increase(total_spectrum, charge_spectrum);
                 }
@@ -293,8 +263,7 @@ void Gen::TruthSmearer::process(output_queue &frames)
                 /// end: charge wire smearing per wire filter
 
                 auto mm = Waveform::edge(total_spectrum);
-                if (mm.first == (int) total_spectrum.size())
-                {  // all zero
+                if (mm.first == (int) total_spectrum.size()) {  // all zero
                     // std::cout<<"TruthSmearer: all zero wave spectrum at wire: "<< iwire
                     // << std::endl;
                     continue;
@@ -302,16 +271,14 @@ void Gen::TruthSmearer::process(output_queue &frames)
 
                 int chid = wires[iwire]->channel();
                 int tbin = mm.first;
-                ITrace::ChargeSequence charge(total_spectrum.begin() + mm.first,
-                                              total_spectrum.begin() + mm.second);
+                ITrace::ChargeSequence charge(total_spectrum.begin() + mm.first, total_spectrum.begin() + mm.second);
                 auto trace = make_shared<SimpleTrace>(chid, tbin, charge);
                 traces.push_back(trace);
             }
         }
     }
 
-    auto frame =
-        make_shared<SimpleFrame>(m_frame_count, m_start_time, traces, tick);
+    auto frame = make_shared<SimpleFrame>(m_frame_count, m_start_time, traces, tick);
     frames.push_back(frame);
 
     // fixme: what about frame overflow here?  If the depos extend
@@ -329,15 +296,12 @@ void Gen::TruthSmearer::process(output_queue &frames)
 // in continuous mode.
 bool Gen::TruthSmearer::start_processing(const input_pointer &depo)
 {
-    if (!depo)
-    {
+    if (!depo) {
         return true;
     }
 
-    if (!m_continuous)
-    {
-        if (m_depos.empty())
-        {
+    if (!m_continuous) {
+        if (m_depos.empty()) {
             m_start_time = depo->time();
             return false;
         }
@@ -349,20 +313,16 @@ bool Gen::TruthSmearer::start_processing(const input_pointer &depo)
     return ok;
 }
 
-bool Gen::TruthSmearer::operator()(const input_pointer &depo,
-                                   output_queue &frames)
+bool Gen::TruthSmearer::operator()(const input_pointer &depo, output_queue &frames)
 {
-    if (start_processing(depo))
-    {
+    if (start_processing(depo)) {
         process(frames);
     }
 
-    if (depo)
-    {
+    if (depo) {
         m_depos.push_back(depo);
     }
-    else
-    {
+    else {
         frames.push_back(nullptr);
     }
 

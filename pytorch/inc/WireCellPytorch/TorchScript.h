@@ -10,12 +10,9 @@
 
 #include <torch/script.h>  // One-stop header.
 
-namespace WireCell
-{
-    namespace Pytorch
-    {
-        class TorchScript : public ITensorSetFilter, public IConfigurable
-        {
+namespace WireCell {
+    namespace Pytorch {
+        class TorchScript : public ITensorSetFilter, public IConfigurable {
            public:
             TorchScript();
             virtual ~TorchScript() {}
@@ -25,8 +22,7 @@ namespace WireCell
             virtual WireCell::Configuration default_configuration() const;
 
             // ITensorSetFilter interface
-            virtual bool operator()(const ITensorSet::pointer &in,
-                                    ITensorSet::pointer &out);
+            virtual bool operator()(const ITensorSet::pointer &in, ITensorSet::pointer &out);
 
            private:
             Log::logptr_t l;

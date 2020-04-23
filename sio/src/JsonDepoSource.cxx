@@ -8,8 +8,7 @@
 #include "WireCellUtil/Persist.h"
 #include "WireCellUtil/Point.h"
 
-WIRECELL_FACTORY(JsonDepoSource, WireCell::Sio::JsonDepoSource,
-                 WireCell::IDepoSource, WireCell::IConfigurable)
+WIRECELL_FACTORY(JsonDepoSource, WireCell::Sio::JsonDepoSource, WireCell::IDepoSource, WireCell::IConfigurable)
 
 #include <iostream>
 #include <locale>  // for std::tolower
@@ -23,14 +22,12 @@ using namespace WireCell;
 // two cases a real RecombinationModel is used to return amount of
 // drifting charge for given point energy deposition "q" or as both
 // q=dE and s=dX.
-class Sio::JsonRecombinationAdaptor
-{
+class Sio::JsonRecombinationAdaptor {
    public:
     virtual ~JsonRecombinationAdaptor() {}
     virtual double operator()(Json::Value depo) const = 0;
 };
-class ElectronsAdapter : public Sio::JsonRecombinationAdaptor
-{
+class ElectronsAdapter : public Sio::JsonRecombinationAdaptor {
     double m_scale;
 
    public:
@@ -39,13 +36,9 @@ class ElectronsAdapter : public Sio::JsonRecombinationAdaptor
     {
     }
     virtual ~ElectronsAdapter(){};
-    virtual double operator()(Json::Value depo) const
-    {
-        return m_scale * depo["n"].asInt() * (-1.0 * units::eplus);
-    }
+    virtual double operator()(Json::Value depo) const { return m_scale * depo["n"].asInt() * (-1.0 * units::eplus); }
 };
-class PointAdapter : public Sio::JsonRecombinationAdaptor
-{
+class PointAdapter : public Sio::JsonRecombinationAdaptor {
     IRecombinationModel::pointer m_model;
 
    public:
@@ -60,8 +53,7 @@ class PointAdapter : public Sio::JsonRecombinationAdaptor
         return (*m_model)(dE);
     }
 };
-class StepAdapter : public Sio::JsonRecombinationAdaptor
-{
+class StepAdapter : public Sio::JsonRecombinationAdaptor {
     IRecombinationModel::pointer m_model;
 
    public:
@@ -91,13 +83,11 @@ Sio::JsonDepoSource::~JsonDepoSource() {}
 
 bool Sio::JsonDepoSource::operator()(IDepo::pointer &out)
 {
-    if (m_eos)
-    {
+    if (m_eos) {
         return false;
     }
 
-    if (m_depos.empty())
-    {
+    if (m_depos.empty()) {
         m_eos = true;
         out = nullptr;
         return true;
@@ -123,46 +113,35 @@ IDepo::pointer Sio::JsonDepoSource::jdepo2idepo(Json::Value jdepo)
 {
     const double q = (*m_adapter)(jdepo);
     auto idepo = std::make_shared<SimpleDepo>(
-        get(jdepo, "t", 0.0),
-        Point(get(jdepo, "x", 0.0), get(jdepo, "y", 0.0), get(jdepo, "z", 0.0)),
-        q);
+        get(jdepo, "t", 0.0), Point(get(jdepo, "x", 0.0), get(jdepo, "y", 0.0), get(jdepo, "z", 0.0)), q);
     return idepo;
 }
 
 void Sio::JsonDepoSource::configure(const WireCell::Configuration &cfg)
 {
     m_depos.clear();
-    if (m_adapter)
-    {
+    if (m_adapter) {
         delete m_adapter;
         m_adapter = nullptr;
     }
     std::string model_tn = cfg["model"].asString();
     std::string model_type = String::split(model_tn)[0];
 
-    if (model_type ==
-        "electrons")
-    {  // "n" already gives number of ionization electrons
+    if (model_type == "electrons") {  // "n" already gives number of ionization electrons
         double scale = get(cfg, "scale", 1.0);
         cerr << "Sio::JsonDepoSource: using electrons with scale=" << scale << endl;
         m_adapter = new ElectronsAdapter(scale);
     }
-    else
-    {
+    else {
         auto model = Factory::lookup_tn<IRecombinationModel>(model_tn);
-        if (!model)
-        {
-            cerr << "Sio::JsonDepoSource::configure: unknown recombination model: \""
-                 << model_tn << "\"\n";
+        if (!model) {
+            cerr << "Sio::JsonDepoSource::configure: unknown recombination model: \"" << model_tn << "\"\n";
             return;
         }
-        if (model_type == "MipRecombination")
-        {
+        if (model_type == "MipRecombination") {
             m_adapter = new PointAdapter(model);
         }
-        if (model_type == "BirksRecombination" ||
-            model_type == "BoxRecombination")
-        {
+        if (model_type == "BirksRecombination" || model_type == "BoxRecombination") {
             m_adapter = new StepAdapter(model);
         }
     }
@@ -170,8 +149,7 @@ void Sio::JsonDepoSource::configure(const WireCell::Configuration &cfg)
     // get and load JSON file.
     string filename = get<string>(cfg, "filename");
     string dotpath = get<string>(cfg, "jsonpath", "depos");
-    if (filename.empty())
-    {
+    if (filename.empty()) {
         cerr << "JsonDepoSource::configure: no JSON filename given" << endl;
         return;  // fixme: uh, error handle much?
     }
@@ -179,8 +157,7 @@ void Sio::JsonDepoSource::configure(const WireCell::Configuration &cfg)
 
     double qtot = 0;
     auto jdepos = branch(top, dotpath);
-    for (auto jdepo : jdepos)
-    {
+    for (auto jdepo : jdepos) {
         auto idepo = jdepo2idepo(jdepo);
         m_depos.push_back(idepo);
         qtot += idepo->charge();

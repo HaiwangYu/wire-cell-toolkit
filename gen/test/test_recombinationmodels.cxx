@@ -33,8 +33,7 @@ const std::vector<int> nvec{3380, 2259, 37, 847};
 void spin(IRecombinationModel &model, const std::string &label)
 {
     cerr << "Model: " << label << endl;
-    for (size_t ind = 0; ind < nvec.size(); ++ind)
-    {
+    for (size_t ind = 0; ind < nvec.size(); ++ind) {
         // values from larsoft dump
         double lsenergy = evec[ind] * units::MeV;
         double lsstep = svec[ind] * units::cm;

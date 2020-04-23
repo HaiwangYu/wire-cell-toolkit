@@ -4,8 +4,7 @@
 #include "WireCellIface/IWire.h"
 #include "WireCellUtil/Point.h"
 
-class MyWire : public WireCell::IWire
-{
+class MyWire : public WireCell::IWire {
     WireCell::WirePlaneId m_wpid;
     int m_index;
     WireCell::Ray m_ray;

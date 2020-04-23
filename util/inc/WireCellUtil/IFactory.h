@@ -3,10 +3,8 @@
 
 #include "WireCellUtil/IComponent.h"
 
-namespace WireCell
-{
-    class IFactory : public IComponent<IFactory>
-    {
+namespace WireCell {
+    class IFactory : public IComponent<IFactory> {
        public:
         virtual ~IFactory();
 
@@ -17,8 +15,7 @@ namespace WireCell
         virtual Interface::pointer find(const std::string &name) = 0;
     };
 
-    class INamedFactory : public IFactory
-    {
+    class INamedFactory : public IFactory {
        public:
         typedef std::shared_ptr<INamedFactory> pointer;
 

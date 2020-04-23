@@ -9,8 +9,7 @@
 
 using namespace std;
 
-struct Counter
-{
+struct Counter {
     int count;
     Counter(int c = 0)
       : count(c)
@@ -19,8 +18,7 @@ struct Counter
     int operator()() { return count++; }
 };
 
-struct Echoer
-{
+struct Echoer {
     int operator()(int x) { return x; }
 };
 
@@ -38,8 +36,7 @@ struct Echoer
 //     }
 // };
 
-struct Consumer
-{
+struct Consumer {
     typedef boost::signals2::signal<int()> signal;
     typedef signal::slot_type slot_type;
     signal sig;
@@ -66,11 +63,9 @@ void test_plug_and_play()
     // pre-register
     fanout.address(4);
 
-    for (int ind = 0; addresses[ind] >= 0; ++ind)
-    {
+    for (int ind = 0; addresses[ind] >= 0; ++ind) {
         int addr = addresses[ind];
-        if (addr < 0)
-        {
+        if (addr < 0) {
             break;
         }
         int want = want_val[ind];
@@ -132,12 +127,10 @@ int test_fanin()
     sig.connect(c2);
     sig.connect(c3);
 
-    for (int ind = 0; ind < 10; ++ind)
-    {
+    for (int ind = 0; ind < 10; ++ind) {
         auto vec = sig();
         cerr << ind;
-        for (auto x : vec)
-        {
+        for (auto x : vec) {
             cerr << " " << x;
         }
         cerr << endl;

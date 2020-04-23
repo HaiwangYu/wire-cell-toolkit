@@ -8,8 +8,7 @@ using namespace WireCell::Waveform;
 int main()
 {
     int nsamples = 10;
-    while (nsamples >= 0)
-    {
+    while (nsamples >= 0) {
         realseq_t wave(nsamples, 0);
         median(wave);
         --nsamples;

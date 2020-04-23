@@ -18,8 +18,7 @@ int *suck(MemUsage &mu, long siz)
         cout << ss.str() << " " << mu(ss.str()) << endl;
     }
 
-    for (int ind = 0; ind < siz; ++ind)
-    {
+    for (int ind = 0; ind < siz; ++ind) {
         buf[ind] = 0;
     }
     {
@@ -52,14 +51,12 @@ int main()
     vector<int *> bufs;
 
     int ind = 0;
-    for (; sizes[ind] > 0; ++ind)
-    {
+    for (; sizes[ind] > 0; ++ind) {
         int *buf = suck(mu, sizes[ind]);
         bufs.push_back(buf);
     }
 
-    for (--ind; ind >= 0; --ind)
-    {
+    for (--ind; ind >= 0; --ind) {
         blow(mu, sizes[ind], bufs[ind]);
     }
 
