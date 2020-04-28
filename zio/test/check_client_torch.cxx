@@ -4,7 +4,7 @@
 #include "WireCellAux/SimpleTensorSet.h"
 #include "WireCellAux/SimpleTensor.h"
 #include "WireCellIface/ITensorSet.h"
-#include "WireCellZio/FlowConfigurable.h"
+#include "WireCellZio/TensUtil.h"
 #include "WireCellUtil/Exceptions.h"
 
 #include "zio/domo/client.hpp"
@@ -138,7 +138,7 @@ int main()
     auto iitens = to_itensor(inputs);
     std::cout << "torch -> itens ... OK\n";
 
-    auto msg = Zio::FlowConfigurable::pack(iitens);
+    auto msg = Zio::pack(iitens);
     std::cout << "itens -> msg ... OK\n";
     // std::cout << dump(msg) << "\n";
     
@@ -154,7 +154,7 @@ int main()
 
     msg.fromparts(mmsg);
     // std::cout << dump(msg) << "\n";
-    auto oitens = Zio::FlowConfigurable::unpack(msg);
+    auto oitens = Zio::unpack(msg);
     std::cout << "msg -> itens ... OK\n";
     // std::cout << dump(oitens);
 
