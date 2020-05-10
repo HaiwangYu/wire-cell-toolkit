@@ -12,7 +12,7 @@
 #include <Eigen/Sparse>
 
 #include "config.h"
-#ifdef HAVE_CUDA_H
+#ifdef HAVE_CUDA_INC
   #include <cuda.h>
   #include <curand.h>
 #endif
@@ -60,7 +60,7 @@ namespace WireCell {
 	    BinnedDiffusion_transform(const Pimpos& pimpos, const Binning& tbins,
 			    double nsigma=3.0, IRandom::pointer fluctuate=nullptr,
                             ImpactDataCalculationStrategy calcstrat = linear);
-            #ifdef HAVE_CUDA_H
+            #ifdef HAVE_CUDA_INC
             virtual ~BinnedDiffusion_transform();
             #endif
 
@@ -130,7 +130,7 @@ namespace WireCell {
             int m_outside_pitch;
             int m_outside_time;
 
-            #ifdef HAVE_CUDA_H
+            #ifdef HAVE_CUDA_INC
             double* m_pvec_D;
             double* m_tvec_D;
             float* m_patch_D;
@@ -139,7 +139,7 @@ namespace WireCell {
             #endif
 
         private:
-            #ifdef HAVE_CUDA_H
+            #ifdef HAVE_CUDA_INC
             void init_Device();
             void clear_Device();
             #endif

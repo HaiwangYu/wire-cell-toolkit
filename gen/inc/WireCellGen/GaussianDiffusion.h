@@ -10,7 +10,7 @@
 #include <iostream>
 
 #include "config.h"
-#ifdef HAVE_CUDA_H
+#ifdef HAVE_CUDA_INC
   #include <cuda.h>
   #include <curand.h>
 #endif
@@ -107,7 +107,7 @@ namespace WireCell {
                               double nsigma = 3.0, 
                               IRandom::pointer fluctuate=nullptr, 
                               unsigned int weightstrat = 1/*see BinnedDiffusion ImpactDataCalculationStrategy*/);
-            #ifdef HAVE_CUDA_H
+            #ifdef HAVE_CUDA_INC
             void set_sampling_CUDA(double* pvec_D, double* tvec_D, float* patch_D, float* rand_D, curandGenerator_t* gen,
                               const Binning& tbin, const Binning& pbin,
                               double nsigma = 3.0, 
@@ -154,7 +154,7 @@ namespace WireCell {
             int m_poffset_bin;
 
         private:
-            #ifdef HAVE_CUDA_H
+            #ifdef HAVE_CUDA_INC
             void sampling_CUDA(double* pvec, const size_t npss, double* tvec, const size_t ntss, float* output, const double sign, const double charge, double* pvec_D, double* tvec_D, float* patch_D, bool fluc, float* rand_D, curandGenerator_t* gen);
             #endif
 

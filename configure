@@ -1,0 +1,33 @@
+#/bin/env bash
+
+sw=/home/yuhw/sl7/
+#export PKG_CONFIG_PATH="$sw/libzmq/lib/pkgconfig:$sw/czmq/lib/pkgconfig:$sw/zyre/lib/pkgconfig:$sw/spdlog/lib65/pkgconfig"
+
+#FFTW_FQ_DIR=/home/yuhw/sw/fftw-3.5.7/
+#FFTW_INC=$FFTW_FQ_DIR/include/
+#FFTW_LIBRARY=$FFTW_FQ_DIR/lib/
+
+./wcb configure \
+\ #--with-zio="/home/yuhw/sl7/zio" \
+\ #--with-zio-lib="/home/yuhw/sl7/zio/lib64" \
+--with-tbb="$TBBROOT" \
+--with-jsoncpp="$JSONCPP_FQ_DIR" \
+\ #--with-jsonnet="$JSONNET_FQ_DIR" \
+--with-jsonnet="/home/yuhw/jsonnet/install/" \
+\ #--with-eigen-include="$EIGEN_DIR/include/eigen3/" \
+--with-eigen-include="/home/yuhw/sw/eigen-3.3.7/" \
+--with-root="$ROOTSYS" \
+--with-fftw="$FFTW_FQ_DIR" \
+--with-fftw-include="$FFTW_INC" \
+--with-fftw-lib="$FFTW_LIBRARY" \
+--with-fftwthreads="$FFTW_FQ_DIR" \
+--boost-includes="$BOOST_INC" \
+--boost-libs="$BOOST_LIB" \
+--boost-mt \
+--with-hdf5="$HDF5_FQ_DIR" \
+--with-h5cpp="$H5CPP_DIR" \
+--with-cuda="/usr/local/cuda" \
+--with-cuda-lib="/usr/local/cuda/lib64" \
+--with-libtorch="/home/yuhw/torch/libtorch" \
+--prefix=$WIRECELL_FQ_DIR
+

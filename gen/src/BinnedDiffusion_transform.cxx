@@ -47,13 +47,13 @@ Gen::BinnedDiffusion_transform::BinnedDiffusion_transform(const Pimpos& pimpos, 
     , m_outside_pitch(0)
     , m_outside_time(0)
 {
-#ifdef HAVE_CUDA_H    
+#ifdef HAVE_CUDA_INC    
     init_Device();
 #endif    
 }
 
 
-#ifdef HAVE_CUDA_H    
+#ifdef HAVE_CUDA_INC    
 Gen::BinnedDiffusion_transform::~BinnedDiffusion_transform() {
     clear_Device();
 }
@@ -301,7 +301,7 @@ void Gen::BinnedDiffusion_transform::get_charge_vec(std::vector<std::vector<std:
   for (auto diff : m_diffs){
     if(diff->depo()->charge()==0) continue;
     wstart2 = omp_get_wtime();
-    #ifdef HAVE_CUDA_H
+    #ifdef HAVE_CUDA_INC
     diff->set_sampling_CUDA(m_pvec_D, m_tvec_D, m_patch_D, m_rand_D, &m_Gen, m_tbins, ib, m_nsigma, m_fluctuate, m_calcstrat);
     #else
     diff->set_sampling(m_tbins, ib, m_nsigma, m_fluctuate, m_calcstrat);
@@ -373,7 +373,7 @@ void Gen::BinnedDiffusion_transform::get_charge_vec(std::vector<std::vector<std:
   cout << "get_charge_vec() : set_sampling() running time : " << g_get_charge_vec_time_part4 << ", counter : " << counter << endl;
   cout << "get_charge_vec() : m_fluctuate : " << m_fluctuate << endl;
 
-#ifdef HAVE_CUDA_H
+#ifdef HAVE_CUDA_INC
   cout << "get_charge_vec() CUDA : set_sampling() part1 time : " << g_set_sampling_part1 << ", part2 (CUDA) time : " << g_set_sampling_part2 << endl;
   cout << "GaussianDiffusion::sampling_CUDA() part3 time : " << g_set_sampling_part3 << ", part4 time : " << g_set_sampling_part4 << ", part5 time : " << g_set_sampling_part5 << endl;
   cout << "GaussianDiffusion::sampling_CUDA() : g_total_sample_size : " << g_total_sample_size << endl;

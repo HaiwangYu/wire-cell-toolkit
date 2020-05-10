@@ -66,7 +66,7 @@ __shared__ float finalSum;
 
 
 
-#ifdef HAVE_CUDA_H
+#ifdef HAVE_CUDA_INC
 
 
 
