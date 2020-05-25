@@ -1435,7 +1435,10 @@ bool OmnibusSigProc::operator()(const input_pointer& in, output_pointer& out)
         }
     }
 
+    double duration = 0;
+    std::clock_t start;
     for (int iplane = 0; iplane != 3; ++iplane) {
+        start = std::clock();
         auto it = std::find(m_process_planes.begin(), m_process_planes.end(), iplane);
         if (it == m_process_planes.end()) continue;
 
@@ -1465,6 +1468,7 @@ bool OmnibusSigProc::operator()(const input_pointer& in, output_pointer& out)
             roi_refine.CleanUpInductionROIs(iplane);
         }
         roi_refine.ExtendROIs(iplane);
+        duration += (std::clock() - start) / (double)CLOCKS_PER_SEC;
 
         if (m_use_roi_debug_mode) {
             save_ext_roi(*itraces, extend_roi_traces, iplane, roi_refine.get_rois_by_plane(iplane));
@@ -1489,6 +1493,7 @@ bool OmnibusSigProc::operator()(const input_pointer& in, output_pointer& out)
         m_c_data[iplane].resize(0, 0);  // clear memory
         m_r_data[iplane].resize(0, 0);  // clear memory
     }
+    log->info("OmnibugSigProc::Timer: ROI_refinement: {} sec/event", duration);
 
     SimpleFrame* sframe = new SimpleFrame(in->ident(), in->time(), ITrace::shared_vector(itraces), in->tick(), m_cmm);
     sframe->tag_frame(m_frame_tag);
