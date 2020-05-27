@@ -102,8 +102,18 @@ __global__ void ker_normalize(float* out, double charge, float sum, size_t len, 
 __global__ void ker_patching(double* p, size_t plen,  double* t, size_t tlen, float* out, double charge) {
 
   int index = threadIdx.x + blockIdx.x * blockDim.x;
-  int pidx = index / tlen;
-  int tidx = index % tlen;
+  
+  /* layout 1: current
+   * index = tidx + pidx * tlen;
+   */
+//   int pidx = index / tlen;
+//   int tidx = index % tlen;
+
+  /* layout 2: consistent result with CPU
+   * index = pidx + tidx * plen;
+   */
+  int pidx = index % plen;
+  int tidx = index / plen;
 
   size_t len = plen*tlen;
 
