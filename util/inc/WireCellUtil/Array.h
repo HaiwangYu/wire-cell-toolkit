@@ -52,6 +52,7 @@ namespace WireCell {
 
 	/// A real, 2D array
 	typedef Eigen::ArrayXXf array_xxf;
+    // typedef Eigen::Array<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> array_xxf;
 
 	/// A complex, 2D array
 	typedef Eigen::ArrayXXcf array_xxc;
