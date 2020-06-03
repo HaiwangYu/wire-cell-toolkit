@@ -76,6 +76,7 @@
 #include "WireCellIface/IStripeSet.h"
 #include "WireCellIface/ITerminal.h"
 #include "WireCellIface/ITensorPacker.h"
+#include "WireCellIface/ITensorFanout.h"
 #include "WireCellIface/ITensorSetFilter.h"
 #include "WireCellIface/ITensorSetUnpacker.h"
 #include "WireCellIface/ITiling.h"
@@ -166,6 +167,7 @@ ISplitNodeBase::~ISplitNodeBase() {}
 IStripe::~IStripe() {}
 IStripeSet::~IStripeSet() {}
 ITerminal::~ITerminal() {}
+ITensorFanout::~ITensorFanout() {}
 ITensorPacker::~ITensorPacker() {}
 ITensorSetFilter::~ITensorSetFilter() {}
 ITensorSetUnpacker::~ITensorSetUnpacker() {}
