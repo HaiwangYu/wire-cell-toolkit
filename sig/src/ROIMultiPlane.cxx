@@ -1,4 +1,4 @@
-#include "WireCellSig/ROIRefine.h"
+#include "WireCellSig/ROIMultiPlane.h"
 #include "WireCellSig/Util.h"
 
 #include "WireCellUtil/NamedFactory.h"
@@ -16,16 +16,16 @@
 #include "WireCellAux/Util.h"
 #include "WireCellAux/TensUtil.h"
 
-WIRECELL_FACTORY(ROIRefine, WireCell::Sig::ROIRefine, WireCell::ITensorSetFilter, WireCell::IConfigurable)
+WIRECELL_FACTORY(ROIMultiPlane, WireCell::Sig::ROIMultiPlane, WireCell::ITensorSetFilter, WireCell::IConfigurable)
 
 using namespace WireCell;
 
-Sig::ROIRefine::ROIRefine()
+Sig::ROIMultiPlane::ROIMultiPlane()
   : log(Log::logger("sig"))
 {
 }
 
-Configuration Sig::ROIRefine::default_configuration() const
+Configuration Sig::ROIMultiPlane::default_configuration() const
 {
     Configuration cfg;
     cfg["tag"] = "tag";
@@ -37,14 +37,14 @@ Configuration Sig::ROIRefine::default_configuration() const
     return cfg;
 }
 
-void Sig::ROIRefine::configure(const WireCell::Configuration &cfg)
+void Sig::ROIMultiPlane::configure(const WireCell::Configuration &cfg)
 {
     m_cfg = cfg;
 }
 
-bool Sig::ROIRefine::operator()(const ITensorSet::pointer &in, ITensorSet::pointer &out)
+bool Sig::ROIMultiPlane::operator()(const ITensorSet::pointer &in, ITensorSet::pointer &out)
 {
-    log->trace("ROIRefine: start");
+    log->trace("ROIMultiPlane: start");
 
     int iplane = get<int>(m_cfg, "iplane", 0);
     log->trace("iplane {}", iplane);
@@ -80,13 +80,21 @@ bool Sig::ROIRefine::operator()(const ITensorSet::pointer &in, ITensorSet::point
     }
     itv->push_back(ITensor::pointer(out_ten0));
 
+    auto out_ten1 = Aux::eigen_array_to_simple_tensor<float>(r_data);
+    {
+        auto &md = out_ten1->metadata();
+        md["tag"] = tag;
+        md["type"] = m_cfg["outtypes"][1].asString();
+    }
+    itv->push_back(ITensor::pointer(out_ten1));
+
     Configuration oset_md(in->metadata());
     oset_md["tags"] = Json::arrayValue;
     oset_md["tags"].append(tag);
 
     out = std::make_shared<Aux::SimpleTensorSet>(in->ident(), oset_md, ITensor::shared_vector(itv));
 
-    log->trace("ROIRefine: end");
+    log->trace("ROIMultiPlane: end");
 
     return true;
 }

@@ -21,7 +21,7 @@ WIRECELL_FACTORY(ROIThreshold, WireCell::Sig::ROIThreshold, WireCell::ITensorSet
 using namespace WireCell;
 
 Sig::ROIThreshold::ROIThreshold()
-  : log(Log::logger("sig"))
+  : log(Log::logger("ROIThreshold"))
 {
 }
 
@@ -31,59 +31,63 @@ Configuration Sig::ROIThreshold::default_configuration() const
     cfg["tag"] = "tag";
 
     // FIXME: get tensor by type or tag?
-    cfg["input0"] = "input0";
-    cfg["input1"] = "input1";
-    cfg["cmm"] = "bad";
+    cfg["intypes"] = Json::arrayValue;
+    cfg["outtypes"] = Json::arrayValue;
+
+    cfg["intypes"].append("bad:cmm_range");
+    cfg["intypes"].append("bad:cmm_channel");
+    cfg["intypes"].append("decon_tight");
+    cfg["intypes"].append("decon_tighter");
+
+    cfg["outtypes"].append("roi_tight");
+    cfg["outtypes"].append("rms");
 
     return cfg;
 }
 
-void Sig::ROIThreshold::configure(const WireCell::Configuration &cfg) { m_cfg = cfg; }
+void Sig::ROIThreshold::configure(const WireCell::Configuration &cfg)
+{
+    m_cfg = cfg;
+    assert(m_cfg["intypes"].size() == 4);
+}
 
 bool Sig::ROIThreshold::operator()(const ITensorSet::pointer &in, ITensorSet::pointer &out)
 {
-    log->debug("start");
+    log->trace("start");
+
+    int iplane = get<int>(m_cfg, "iplane", 0);
+    log->trace("iplane {}", iplane);
 
     if (!in) {
         out = nullptr;
         return true;
     }
-    auto set_md = in->metadata();
 
     auto tag = get<std::string>(m_cfg, "tag", "tag");
 
-    auto iten0 = Aux::get_tens(in, tag, m_cfg["input0"].asString());
-    auto iten1 = Aux::get_tens(in, tag, m_cfg["input1"].asString());
-    if (!iten0 or !iten1) {
-        log->error("Tensor->Frame: failed to get waveform tensor for tag {} type {} or type {}", tag, m_cfg["input0"].asString(), m_cfg["input1"].asString());
-        THROW(ValueError() << errmsg{"Sig::ROIThreshold::operator() !iten0 or !iten1"});
-    }
-    auto wf_shape = iten0->shape();
-    size_t nchans = wf_shape[0];
-    size_t nticks = wf_shape[1];
-    log->debug("iwf_ten->shape: {} {}", nchans, nticks);
-
-    bool have_cmm = true;
-    auto cmm_range = Aux::get_tens(in, tag, "bad:cmm_range");
-    auto cmm_channel = Aux::get_tens(in, tag, "bad:cmm_channel");
-    if (!cmm_range or !cmm_channel) {
-        log->debug("Tensor->Frame: no optional cmm_range tensor for tag {}", tag);
-        have_cmm = false;
+    std::vector<ITensor::pointer> in_tensors;
+    for (auto j : m_cfg["intypes"]) {
+        auto type = j.asString();
+        auto t = Aux::get_tens(in, tag, type);
+        if (!t) {
+            THROW(ValueError() << errmsg{"Failed to get ITensor: " + tag + ", " + type});
+        }
+        in_tensors.push_back(t);
     }
 
-    int iplane = get<int>(m_cfg, "iplane", 0);
-    log->debug("iplane {}", iplane);
-
-    int m_nwires = nchans;
-    int m_nticks = nticks;
+    assert(in_tensors.size() == 4);
+    auto cmm_range = in_tensors[0];
+    auto cmm_channel = in_tensors[1];
+    auto in_ten0 = in_tensors[2];
+    auto in_ten1 = in_tensors[3];
 
     // TensorSet to Eigen
-    WireCell::Array::array_xxf r_data = Aux::itensor_to_eigen_array<float>(iten0);
-    WireCell::Array::array_xxf r_data_tight = Aux::itensor_to_eigen_array<float>(iten1);
-    log->debug("r_data: {} {}", r_data.rows(), r_data.cols());
+    WireCell::Array::array_xxf r_data = Aux::itensor_to_eigen_array<float>(in_ten0);
+    WireCell::Array::array_xxf r_data_tight = Aux::itensor_to_eigen_array<float>(in_ten1);
+    log->trace("r_data: {} {}", r_data.rows(), r_data.cols());
 
     // apply cmm
-    if (have_cmm) {
+    {
         auto nranges = cmm_channel->shape()[0];
         assert(nranges == cmm_range->shape()[0]);
         assert(2 == cmm_range->shape()[1]);
@@ -104,18 +108,26 @@ bool Sig::ROIThreshold::operator()(const ITensorSet::pointer &in, ITensorSet::po
         }
     }
 
-    // Eigen to TensorSet
-    auto owf_ten = Aux::eigen_array_to_simple_tensor<float>(r_data);
-
     // save back to ITensorSet
     ITensor::vector *itv = new ITensor::vector;
-    auto iwf_md = iten0->metadata();
-    auto &owf_md = owf_ten->metadata();
-    owf_md["tag"] = tag;
-    owf_md["type"] = "roi_th";
-    itv->push_back(ITensor::pointer(owf_ten));
 
-    // FIXME need to change ch_ten tag to outtag
+    auto out_ten0 = Aux::eigen_array_to_simple_tensor<float>(r_data);
+    {
+        auto &md = out_ten0->metadata();
+        md["tag"] = tag;
+        md["type"] = m_cfg["outtypes"][0].asString();
+    }
+    itv->push_back(ITensor::pointer(out_ten0));
+
+    if (m_cfg["outtypes"].size() > 1) {
+        auto out_ten1 = Aux::eigen_array_to_simple_tensor<float>(r_data);
+        {
+            auto &md = out_ten1->metadata();
+            md["tag"] = tag;
+            md["type"] = m_cfg["outtypes"][1].asString();
+        }
+        itv->push_back(ITensor::pointer(out_ten1));
+    }
 
     Configuration oset_md(in->metadata());
     oset_md["tags"] = Json::arrayValue;
@@ -123,7 +135,7 @@ bool Sig::ROIThreshold::operator()(const ITensorSet::pointer &in, ITensorSet::po
 
     out = std::make_shared<Aux::SimpleTensorSet>(in->ident(), oset_md, ITensor::shared_vector(itv));
 
-    log->debug("end");
+    log->trace("end");
 
     return true;
 }
