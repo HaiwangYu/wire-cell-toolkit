@@ -12,6 +12,7 @@ double g_set_sampling_part2 = 0.0;
 double g_set_sampling_part3 = 0.0;
 double g_set_sampling_part4 = 0.0;
 double g_set_sampling_part5 = 0.0;
+double g_set_sampling_part6 = 0.0;
 
 
 
@@ -225,6 +226,7 @@ void Gen::GaussianDiffusion::set_sampling(const Binning& tbin, // overall time t
             // normalize later to approximate this multinomial distribution (how precise?)
             // how precise? better than poisson and 10000 total charge corresponds to a <1% level error.
             float number = fluctuate->binomial((int)(std::abs(m_deposition->charge())), oldval/m_deposition->charge());
+            // float number = 1.0;
             //the charge should be netagive -- ionization electrons
 	    fluc_sum += charge_sign*number;
 	    ret(ip,it) = charge_sign*number;

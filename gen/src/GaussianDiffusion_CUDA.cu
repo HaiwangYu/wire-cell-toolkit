@@ -14,6 +14,7 @@ extern double g_set_sampling_part2;
 extern double g_set_sampling_part3;
 extern double g_set_sampling_part4;
 extern double g_set_sampling_part5;
+extern double g_set_sampling_part6;
 
 size_t g_total_sample_size = 0;
 
@@ -349,7 +350,6 @@ void Gen::GaussianDiffusion::sampling_CUDA(double* pvec, const size_t npss, doub
     g_set_sampling_part3 += wend - wstart;
 
 
-    wstart = omp_get_wtime();
     size_t thSize = len / WARP_SIZE;
     if(len % WARP_SIZE) {
         thSize = (thSize + 1)*WARP_SIZE;
@@ -358,9 +358,10 @@ void Gen::GaussianDiffusion::sampling_CUDA(double* pvec, const size_t npss, doub
     }
 
 
+    wstart = omp_get_wtime();
     ker_patching<<<1, thSize>>>(pvec_D, npss, tvec_D, ntss, patch_D, charge);
-    //wend = omp_get_wtime();
-    //g_set_sampling_part3 += wend - wstart;
+    wend = omp_get_wtime();
+    g_set_sampling_part4 += wend - wstart;
 
 
     //cudaDeviceSynchronize();
@@ -380,16 +381,16 @@ void Gen::GaussianDiffusion::sampling_CUDA(double* pvec, const size_t npss, doub
         //cudaDeviceSynchronize();
         //wend = omp_get_wtime();
         //g_set_sampling_part5 += wend - wstart;
+        //cudaDeviceSynchronize();
+        wend = omp_get_wtime();
+        g_set_sampling_part5 += wend - wstart;
     }
-    //cudaDeviceSynchronize();
-    wend = omp_get_wtime();
-    g_set_sampling_part4 += wend - wstart;
 
 
     wstart = omp_get_wtime();
     CUDA_SAFE_CALL( cudaMemcpy(output, patch_D, len*sizeof(float), cudaMemcpyDeviceToHost) );
     wend = omp_get_wtime();
-    g_set_sampling_part5 += wend - wstart;
+    g_set_sampling_part6 += wend - wstart;
 
 }
 

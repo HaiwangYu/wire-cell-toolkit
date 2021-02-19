@@ -20,6 +20,7 @@ extern double g_set_sampling_part2;
 extern double g_set_sampling_part3;
 extern double g_set_sampling_part4;
 extern double g_set_sampling_part5;
+extern double g_set_sampling_part6;
 
 extern size_t g_total_sample_size;
 
@@ -375,7 +376,7 @@ void Gen::BinnedDiffusion_transform::get_charge_vec(std::vector<std::vector<std:
 
 #ifdef HAVE_CUDA_INC
   cout << "get_charge_vec() CUDA : set_sampling() part1 time : " << g_set_sampling_part1 << ", part2 (CUDA) time : " << g_set_sampling_part2 << endl;
-  cout << "GaussianDiffusion::sampling_CUDA() part3 time : " << g_set_sampling_part3 << ", part4 time : " << g_set_sampling_part4 << ", part5 time : " << g_set_sampling_part5 << endl;
+  cout << "GaussianDiffusion::sampling_CUDA() part3 time : " << g_set_sampling_part3 << ", part4 time : " << g_set_sampling_part4 << ", part5 time : " << g_set_sampling_part5 << ", part6 time : " << g_set_sampling_part6 << endl;
   cout << "GaussianDiffusion::sampling_CUDA() : g_total_sample_size : " << g_total_sample_size << endl;
 #else
   cout << "get_charge_vec() : set_sampling() part1 time : " << g_set_sampling_part1 << ", part2 time : " << g_set_sampling_part2 << ", part3 time : " << g_set_sampling_part3 << endl;
