@@ -19,7 +19,7 @@
 #define WIRECELL_PERSIST
 
 #include <json/json.h>
-#include "libjsonnet++.h"
+#include "libgojsonnet.h"
 #include <boost/filesystem.hpp>
 #include <vector>
 #include <string>
@@ -137,7 +137,7 @@ namespace WireCell {
             std::string resolve(const std::string& filename);
 
            private:
-            jsonnet::Jsonnet m_jsonnet;
+            JsonnetVm* m_jsonnet;
             std::vector<boost::filesystem::path> m_load_paths;
         };
     }  // namespace Persist

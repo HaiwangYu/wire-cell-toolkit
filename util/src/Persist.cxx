@@ -3,7 +3,7 @@
 #include "WireCellUtil/Logging.h"
 #include "WireCellUtil/Exceptions.h"
 
-#include "libjsonnet++.h"
+#include "libgojsonnet.h"
 
 #include <cstdlib>  // for getenv, see get_path()
 
@@ -159,18 +159,18 @@ Json::Value WireCell::Persist::json2object(const std::string& text)
     return res;
 }
 
-static void init_parser(jsonnet::Jsonnet& parser, const Persist::externalvars_t& extvar,
+static void init_parser(JsonnetVm* parser, const Persist::externalvars_t& extvar,
                         const Persist::externalvars_t& extcode)
 {
-    parser.init();
+    parser = jsonnet_make();
     for (auto path : get_path()) {
-        parser.addImportPath(path);
+        jsonnet_jpath_add(parser, const_cast<char*>(path.c_str()));
     }
     for (auto& vv : extvar) {
-        parser.bindExtVar(vv.first, vv.second);
+        jsonnet_ext_var(parser, const_cast<char*>(vv.first.c_str()), const_cast<char*>(vv.second.c_str()));
     }
     for (auto& vv : extcode) {
-        parser.bindExtCodeVar(vv.first, vv.second);
+        jsonnet_ext_code(parser, const_cast<char*>(vv.first.c_str()), const_cast<char*>(vv.second.c_str()));
     }
 }
 std::string WireCell::Persist::evaluate_jsonnet_file(const std::string& filename, const externalvars_t& extvar,
@@ -181,28 +181,30 @@ std::string WireCell::Persist::evaluate_jsonnet_file(const std::string& filename
         THROW(IOError() << errmsg{"no such file: " + filename + ", maybe you need to add to WIRECELL_PATH."});
     }
 
-    jsonnet::Jsonnet parser;
+    JsonnetVm* parser;
     init_parser(parser, extvar, extcode);
 
-    std::string output;
-    const bool ok = parser.evaluateFile(fname, &output);
-    if (!ok) {
-        error(parser.lastError());
-        THROW(ValueError() << errmsg{parser.lastError()});
+    int err;
+    std::string output(jsonnet_evaluate_file(parser, const_cast<char*>(fname.c_str()), &err));
+    jsonnet_destroy(parser);
+    if (err!=0) {
+        error(output);
+        THROW(ValueError() << errmsg{output});
     }
     return output;
 }
 std::string WireCell::Persist::evaluate_jsonnet_text(const std::string& text, const externalvars_t& extvar,
                                                      const externalvars_t& extcode)
 {
-    jsonnet::Jsonnet parser;
+    JsonnetVm* parser;
     init_parser(parser, extvar, extcode);
 
-    std::string output;
-    bool ok = parser.evaluateSnippet("<stdin>", text, &output);
-    if (!ok) {
-        error(parser.lastError());
-        THROW(ValueError() << errmsg{parser.lastError()});
+    int err;
+    std::string output(jsonnet_evaluate_snippet(parser, "<stdin>", const_cast<char*>(text.c_str()), &err));
+    jsonnet_destroy(parser);
+    if (err!=0) {
+        error(output);
+        THROW(ValueError() << errmsg{output});
     }
     return output;
 }
@@ -211,7 +213,7 @@ WireCell::Persist::Parser::Parser(const std::vector<std::string>& load_paths, co
                                   const externalvars_t& extcode, const externalvars_t& tlavar,
                                   const externalvars_t& tlacode)
 {
-    m_jsonnet.init();
+    m_jsonnet = jsonnet_make();
 
     // Loading: 1) cwd, 2) passed in paths 3) environment
     m_load_paths.push_back(boost::filesystem::current_path());
@@ -225,26 +227,26 @@ WireCell::Persist::Parser::Parser(const std::vector<std::string>& load_paths, co
     }
     // load paths into jsonnet backwards to counteract its reverse ordering
     for (auto pit = m_load_paths.rbegin(); pit != m_load_paths.rend(); ++pit) {
-        m_jsonnet.addImportPath(boost::filesystem::canonical(*pit).string());
+        jsonnet_jpath_add(m_jsonnet, const_cast<char*>(boost::filesystem::canonical(*pit).string().c_str()));
     }
 
     // external variables
     for (auto& vv : extvar) {
-        m_jsonnet.bindExtVar(vv.first, vv.second);
+        jsonnet_ext_var(m_jsonnet, const_cast<char*>(vv.first.c_str()), const_cast<char*>(vv.second.c_str()));
     }
     // external code
     for (auto& vv : extcode) {
-        m_jsonnet.bindExtCodeVar(vv.first, vv.second);
+        jsonnet_ext_code(m_jsonnet, const_cast<char*>(vv.first.c_str()), const_cast<char*>(vv.second.c_str()));
     }
 
     // top level argument string variables
     for (auto& vv : tlavar) {
-        debug("tla: {} = \"{}\"", vv.first, vv.second);
-        m_jsonnet.bindTlaVar(vv.first, vv.second);
+        debug("tla: {} = \"{}\"", vv.first.c_str(), vv.second.c_str());
+        jsonnet_tla_var(m_jsonnet, const_cast<char*>(vv.first.c_str()), const_cast<char*>(vv.second.c_str()));
     }
     // top level argument code variables
     for (auto& vv : tlacode) {
-        m_jsonnet.bindTlaCodeVar(vv.first, vv.second);
+        jsonnet_tla_code(m_jsonnet, const_cast<char*>(vv.first.c_str()), const_cast<char*>(vv.second.c_str()));
     }
 }
 
@@ -279,11 +281,11 @@ Json::Value WireCell::Persist::Parser::load(const std::string& filename)
     string ext = file_extension(filename);
 
     if (ext == ".jsonnet" or ext.empty()) {  // use libjsonnet++ file interface
-        std::string output;
-        const bool ok = m_jsonnet.evaluateFile(fname, &output);
-        if (!ok) {
-            error(m_jsonnet.lastError());
-            THROW(ValueError() << errmsg{m_jsonnet.lastError()});
+        int err;
+        std::string output(jsonnet_evaluate_file(m_jsonnet, const_cast<char*>(fname.c_str()), &err));
+        if (err!=0) {
+            error(output);
+            THROW(ValueError() << errmsg{output});
         }
         return json2object(output);
     }
@@ -307,11 +309,11 @@ Json::Value WireCell::Persist::Parser::load(const std::string& filename)
 
 Json::Value WireCell::Persist::Parser::loads(const std::string& text)
 {
-    std::string output;
-    bool ok = m_jsonnet.evaluateSnippet("<stdin>", text, &output);
-    if (!ok) {
-        error(m_jsonnet.lastError());
-        THROW(ValueError() << errmsg{m_jsonnet.lastError()});
+    int err;
+    std::string output(jsonnet_evaluate_snippet(m_jsonnet, "<stdin>", const_cast<char*>(text.c_str()), &err));
+    if (err!=0) {
+        error(output);
+        THROW(ValueError() << errmsg{output});
     }
     return json2object(output);
 }
