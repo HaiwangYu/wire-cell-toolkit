@@ -48,7 +48,7 @@ then tools_all {anodes: [tools_all.anodes[n] for n in std.range(32, 79)]}
 else if fcl_params.process_crm == "test1"
 then tools_all {anodes: [tools_all.anodes[n] for n in [36]]}
 else if fcl_params.process_crm == "test2"
-then tools_all {anodes: [tools_all.anodes[n] for n in [36, 44]]}
+then tools_all {anodes: [tools_all.anodes[n] for n in [36, 44, 52, 60, 68]]}
 else tools_all;
 
 local sim_maker = import 'pgrapher/experiment/dune-vd/sim.jsonnet';
@@ -249,7 +249,7 @@ local bi_manifold =
     else if fcl_params.process_crm == "test1"
     then f.multifanpipe('DepoSetFanout', multipass, 'FrameFanin', [1,1], [1,1], [1,1], [1,1], 'sn_mag', outtags, tag_rules)
     else if fcl_params.process_crm == "test2"
-    then f.multifanpipe('DepoSetFanout', multipass, 'FrameFanin', [1,2], [2,1], [1,2], [2,1], 'sn_mag', outtags, tag_rules)
+    then f.multifanpipe('DepoSetFanout', multipass, 'FrameFanin', [1,nanodes], [nanodes,1], [1,nanodes], [nanodes,1], 'sn_mag', outtags, tag_rules)
     else if fcl_params.ncrm == 112
     then f.multifanpipe('DepoSetFanout', multipass, 'FrameFanin', [1,8,16], [8,2,7], [1,8,16], [8,2,7], 'sn_mag', outtags, tag_rules);
 
