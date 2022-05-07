@@ -73,13 +73,33 @@ function (anode, ts, prefix="dnnroi", output_scale=1.0)
             multiplicity: 3,
             tag_rules: [{
                 frame: {".*": "dnnsp%d" % apaid},
-                trace: {".*": "dnnsp%d" % apaid},
-            } for plane in ["u", "v", "w"]]
+                trace: {".*": "dnnsp%d%s" % [apaid, plane]}
+            } for plane in ["u", "v", "w"]],
+            // tags: ["dnnsp%d%s" % [apaid, plane] for plane in ["u", "v", "w"]],
         },
     }, nin=3, nout=1);
+
+    local retagger = pg.pnode({
+    type: 'Retagger',
+    name: prename,
+    data: {
+        // Note: retagger keeps tag_rules an array to be like frame fanin/fanout.
+        tag_rules: [{
+        // Retagger also handles "frame" and "trace" like fanin/fanout
+        // merge separately all traces like gaussN to gauss.
+        frame: {
+            '.*': "dnnsp%d" % apaid,
+        },
+        merge: {
+            ["dnnsp%d.*" % apaid]: "dnnsp%d" % apaid
+        },
+        }],
+    },
+    }, nin=1, nout=1);
     
     pg.intern(innodes=[dnnfanout],
-              outnodes=[dnnfanin],
-              centernodes=dnnpipes,
+              outnodes=[retagger],
+              centernodes=dnnpipes + [dnnfanin],
               edges=[pg.edge(dnnfanout, dnnpipes[ind], ind, 0) for ind in [0,1,2]] +
-              [pg.edge(dnnpipes[ind], dnnfanin, 0, ind) for ind in [0,1,2]])
+              [pg.edge(dnnpipes[ind], dnnfanin, 0, ind) for ind in [0,1,2]] +
+              [pg.edge(dnnfanin, retagger, 0, 0)])
