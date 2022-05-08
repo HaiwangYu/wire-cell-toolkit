@@ -46,7 +46,7 @@ local tools =
 if fcl_params.process_crm == "partial"
 then tools_all {anodes: [tools_all.anodes[n] for n in std.range(32, 79)]}
 else if fcl_params.process_crm == "test1"
-then tools_all {anodes: [tools_all.anodes[n] for n in [36]]}
+then tools_all {anodes: [tools_all.anodes[n] for n in [2]]}
 else if fcl_params.process_crm == "test2"
 then tools_all {anodes: [tools_all.anodes[n] for n in [36, 44, 52, 60, 68]]}
 else tools_all;
@@ -163,7 +163,7 @@ local nf_pipes = [nf_maker(params, tools.anodes[n], chndb[n], n, name='nf%d' % n
 local sp_maker = import 'pgrapher/experiment/dune-vd/sp.jsonnet';
 local sp_override = if fcl_params.use_dnnroi then
 {
-    sparse: true,
+    sparse: false,
     use_roi_debug_mode: true,
     use_multi_plane_protection: true,
     process_planes: [0, 1, 2]
@@ -178,7 +178,7 @@ local ts = {
     name: "dnnroi",
     data: {
         model: "ts-model/unet-l23-cosmic500-e50.ts",
-        device: "gpucpu",
+        device: "cpu",
         concurrency: 1,
     },
 };
@@ -222,8 +222,8 @@ local multipass = [
                 // sinks.decon_pipe[n],
                 // sinks.debug_pipe[n], // use_roi_debug_mode=true in sp.jsonnet
              ] + if fcl_params.use_dnnroi then [
-                 hs.dnnroi(tools.anodes[n], ts, output_scale=1.2),
-                //  sinks.dnnroi_pipe[n],
+                 hs.dnnroi(tools.anodes[n], ts, output_scale=1.2, tick0=0, nticks=fcl_params.nticks),
+                // sinks.dnnroi_pipe[n],
              ] else [],
              'multipass%d' % n)
   for n in anode_iota
@@ -242,14 +242,14 @@ local tag_rules = {
         + {['dnnsp%d' % anode.data.ident]: ['dnnsp%d' % anode.data.ident] for anode in tools.anodes},
 };
 local bi_manifold =
-    if fcl_params.ncrm == 36
-    then f.multifanpipe('DepoSetFanout', multipass, 'FrameFanin', [1,6], [6,6], [1,6], [6,6], 'sn_mag', outtags, tag_rules)
-    else if fcl_params.ncrm == 48 || fcl_params.process_crm == "partial"
-    then f.multifanpipe('DepoSetFanout', multipass, 'FrameFanin', [1,8], [8,6], [1,8], [8,6], 'sn_mag', outtags, tag_rules)
-    else if fcl_params.process_crm == "test1"
+    if fcl_params.process_crm == "test1"
     then f.multifanpipe('DepoSetFanout', multipass, 'FrameFanin', [1,1], [1,1], [1,1], [1,1], 'sn_mag', outtags, tag_rules)
     else if fcl_params.process_crm == "test2"
     then f.multifanpipe('DepoSetFanout', multipass, 'FrameFanin', [1,nanodes], [nanodes,1], [1,nanodes], [nanodes,1], 'sn_mag', outtags, tag_rules)
+    else if fcl_params.ncrm == 36
+    then f.multifanpipe('DepoSetFanout', multipass, 'FrameFanin', [1,6], [6,6], [1,6], [6,6], 'sn_mag', outtags, tag_rules)
+    else if fcl_params.ncrm == 48 || fcl_params.process_crm == "partial"
+    then f.multifanpipe('DepoSetFanout', multipass, 'FrameFanin', [1,8], [8,6], [1,8], [8,6], 'sn_mag', outtags, tag_rules)
     else if fcl_params.ncrm == 112
     then f.multifanpipe('DepoSetFanout', multipass, 'FrameFanin', [1,8,16], [8,2,7], [1,8,16], [8,2,7], 'sn_mag', outtags, tag_rules);
 
