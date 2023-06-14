@@ -5,6 +5,8 @@
 #include "WireCellUtil/Stream.h"
 #include "WireCellUtil/String.h"
 
+#include "WireCellAux/SimpleChannel.h"
+
 #include <fstream>
 #include <unordered_set>
 #include <utility>
@@ -162,7 +164,7 @@ LayerProjection2DMap WireCell::Img::Projection2D::get_projection(const WireCell:
     // assumes one blob linked to one slice
     // use b-w-c to find all channels linked to the blob
     std::unordered_map<slice_t, std::vector<cluster_vertex_t> > map_s2vb;
-    std::unordered_map<cluster_vertex_t, std::vector<cluster_vertex_t> > map_b2c;
+    std::unordered_map<cluster_vertex_t, std::vector<IWire::pointer>> map_b2vw;
     for (const auto& bdesc : group) {
         const auto& node = cg[bdesc];
         if (node.code() == 'b') {
@@ -176,13 +178,9 @@ LayerProjection2DMap WireCell::Img::Projection2D::get_projection(const WireCell:
                 }
                 /// ASSUMPTION: only 1 w-c for each w
                 if (cg[neigh].code() == 'w') {
-                    for (const auto& wedge : boost::make_iterator_range(boost::out_edges(neigh, cg))) {
-                        cluster_vertex_t cdesc = boost::target(wedge, cg);
-                        if (cg[cdesc].code() == 'c') {
-                            map_b2c[bdesc].push_back(cdesc);
-                            break;
-                        }
-                    }
+                    /// Ident version of activity
+                    auto& iwire = std::get<wire_t>(cg[neigh].ptr);
+                    map_b2vw[bdesc].push_back(iwire);
                 }
             }
         }
@@ -199,10 +197,10 @@ LayerProjection2DMap WireCell::Img::Projection2D::get_projection(const WireCell:
             layer_charge[kVlayer] = 0;
             layer_charge[kWlayer] = 0;
 
-            for (const auto& chan_desc : map_b2c[bdesc]) {
-                const auto& chan = std::get<channel_t>(cg[chan_desc].ptr);
-                WirePlaneLayer_t layer = chan->planeid().layer();
-                int cident = chan->ident();
+            for (const auto& iwire : map_b2vw[bdesc]) {
+                WirePlaneLayer_t layer = iwire->planeid().layer();
+                int cident = iwire->channel();
+                auto chan = IChannel::pointer(new Aux::SimpleChannel(cident));
                 auto charge = activity[chan].value();
                 auto unc = activity[chan].uncertainty();
                 // TODO: make this configurable and robust
