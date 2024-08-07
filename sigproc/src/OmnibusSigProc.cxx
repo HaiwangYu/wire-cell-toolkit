@@ -790,7 +790,7 @@ void OmnibusSigProc::init_overall_response(IFrame::pointer frame)
 
     // Convert each average FR to a 2D array
     for (int iplane = 0; iplane < 3; ++iplane) {
-        auto arr = Response::as_array(fravg.planes[iplane], fine_nwires, fine_nticks);
+        auto arr = Response::as_array(*(fravg.plane(iplane)), fine_nwires, fine_nticks);
 
 
         int nrows = 0;
