@@ -233,6 +233,10 @@ namespace WireCell {
             // samples.
             bool m_sparse{false};
 
+            // If true, load plane response with an ident number, see:
+            // https://github.com/WireCell/wire-cell-toolkit/issues/322
+            bool m_load_fr_with_plane_ident{false};
+
             size_t m_count{0};
             int m_verbose{0};
 

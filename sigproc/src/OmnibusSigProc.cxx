@@ -54,6 +54,7 @@ std::string WireCell::SigProc::OmnibusSigProc::OspChan::str() const
 void OmnibusSigProc::configure(const WireCell::Configuration& config)
 {
     m_sparse = get(config, "sparse", false);
+    m_load_fr_with_plane_ident = get(config, "load_fr_with_plane_ident", false);
 
     m_fine_time_offset = get(config, "ftoffset", m_fine_time_offset);
     m_coarse_time_offset = get(config, "ctoffset", m_coarse_time_offset);
@@ -297,6 +298,7 @@ WireCell::Configuration OmnibusSigProc::default_configuration() const
     cfg["isWarped"] = m_isWrapped;  // default false
 
     cfg["sparse"] = false;
+    cfg["load_fr_with_plane_ident"] = false;
 
     return cfg;
 }
@@ -790,7 +792,15 @@ void OmnibusSigProc::init_overall_response(IFrame::pointer frame)
 
     // Convert each average FR to a 2D array
     for (int iplane = 0; iplane < 3; ++iplane) {
-        auto arr = Response::as_array(*(fravg.plane(iplane)), fine_nwires, fine_nticks);
+        Array::array_xxf arr;
+        if (m_load_fr_with_plane_ident) {
+            // Load correct field response for the swapped V&W planes in PDHD APA1. See:
+            // https://github.com/WireCell/wire-cell-toolkit/issues/322
+            arr = Response::as_array(*(fravg.plane(iplane)), fine_nwires, fine_nticks);
+        }
+        else {
+            arr = Response::as_array(fravg.planes[iplane], fine_nwires, fine_nticks);
+        }
 
 
         int nrows = 0;
