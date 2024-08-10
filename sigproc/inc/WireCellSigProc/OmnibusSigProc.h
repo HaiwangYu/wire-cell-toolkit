@@ -153,6 +153,17 @@ namespace WireCell {
             double m_r_sigma{2.0};
             double m_r_th_percent{0.1};
 
+            // Filter names
+            std::string m_ROI_tight_lf_filter{"ROI_tight_lf"};
+            std::string m_ROI_tighter_lf_filter{"ROI_tighter_lf"};
+            std::string m_ROI_loose_lf_filter{"ROI_loose_lf"};
+            
+            std::string m_Gaus_wide_filter{"Gaus_wide"};
+            
+            std::vector<std::string> m_Wiener_tight_filters{"Wiener_tight_U", "Wiener_tight_V", "Wiener_tight_W"};
+            std::vector<std::string> m_Wiener_wide_filters{"Wiener_wide_U", "Wiener_wide_V", "Wiener_wide_W"};
+            std::vector<std::string> m_Wire_filters{"Wire_ind", "Wire_ind", "Wire_col"};
+
             // specify the planes to process
             std::vector<int> m_process_planes{0,1,2};
 
