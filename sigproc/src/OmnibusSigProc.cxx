@@ -54,7 +54,6 @@ std::string WireCell::SigProc::OmnibusSigProc::OspChan::str() const
 void OmnibusSigProc::configure(const WireCell::Configuration& config)
 {
     m_sparse = get(config, "sparse", false);
-    m_load_fr_with_plane_ident = get(config, "load_fr_with_plane_ident", false);
 
     m_fine_time_offset = get(config, "ftoffset", m_fine_time_offset);
     m_coarse_time_offset = get(config, "ctoffset", m_coarse_time_offset);
@@ -144,6 +143,13 @@ void OmnibusSigProc::configure(const WireCell::Configuration& config)
         }
     }
 
+    if (config.isMember("plane2layer")) {
+        m_plane2layer.clear();
+        for (auto jplane : config["plane2layer"]) {
+            m_plane2layer.push_back(jplane.asInt());
+        }
+    }
+
     m_charge_ch_offset = get(config, "charge_ch_offset", m_charge_ch_offset);
 
     m_wiener_tag = get(config, "wiener_tag", m_wiener_tag);
@@ -204,13 +210,19 @@ void OmnibusSigProc::configure(const WireCell::Configuration& config)
         }
         for (auto plane : face->planes()) {
             int plane_index = plane->planeid().index();
-            auto& pchans = plane_channels[plane_index];
+            // Remap plane layer if necessary (default: 0,1,2), see:
+            // https://github.com/WireCell/wire-cell-toolkit/issues/322
+            int layer_index = m_plane2layer[plane_index];
+            auto& pchans = plane_channels[layer_index];
+            // auto& pchans = plane_channels[plane_index];
+           
             // These IChannel vectors are ordered in same order as wire-in-plane.
             const auto& ichans = plane->channels();
             // Append
             pchans.reserve(pchans.size() + ichans.size());
             pchans.insert(pchans.end(), ichans.begin(), ichans.end());
             ss << "\tpind" << plane_index << " "
+               << "lind" << layer_index << " "
                << "aid" << m_anode->ident() << " "
                << "fid" << face->ident() << " "
                << "pid" << plane->ident() << " "
@@ -326,7 +338,6 @@ WireCell::Configuration OmnibusSigProc::default_configuration() const
     cfg["isWarped"] = m_isWrapped;  // default false
 
     cfg["sparse"] = false;
-    cfg["load_fr_with_plane_ident"] = false;
 
     return cfg;
 }
@@ -820,16 +831,9 @@ void OmnibusSigProc::init_overall_response(IFrame::pointer frame)
 
     // Convert each average FR to a 2D array
     for (int iplane = 0; iplane < 3; ++iplane) {
-        Array::array_xxf arr;
-        if (m_load_fr_with_plane_ident) {
-            // Load correct field response for the swapped V&W planes in PDHD APA1. See:
-            // https://github.com/WireCell/wire-cell-toolkit/issues/322
-            arr = Response::as_array(*(fravg.plane(iplane)), fine_nwires, fine_nticks);
-        }
-        else {
-            arr = Response::as_array(fravg.planes[iplane], fine_nwires, fine_nticks);
-        }
-
+        int ilayer = m_plane2layer[iplane]; // Remap plane layer if necessary (default: 0,1,2), see:
+                                            // https://github.com/WireCell/wire-cell-toolkit/issues/322
+        auto arr = Response::as_array(fravg.planes[ilayer], fine_nwires, fine_nticks);
 
         int nrows = 0;
         int ncols = 0;

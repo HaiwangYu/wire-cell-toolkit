@@ -167,6 +167,12 @@ namespace WireCell {
             // specify the planes to process
             std::vector<int> m_process_planes{0,1,2};
 
+            // Assign different layer indices for U/V/W planes (default 0,1,2)
+            // Fixme: it's a temporary solution for the collective V plane in PDHD, see:
+            // https://github.com/WireCell/wire-cell-toolkit/issues/322
+            std::vector<int> m_plane2layer{0,1,2};
+
+
             // fixme: this is apparently not used:
             // channel offset
             int m_charge_ch_offset{10000};
@@ -243,10 +249,6 @@ namespace WireCell {
             // cover segments of waveforms which have non-zero signal
             // samples.
             bool m_sparse{false};
-
-            // If true, load plane response with an ident number, see:
-            // https://github.com/WireCell/wire-cell-toolkit/issues/322
-            bool m_load_fr_with_plane_ident{false};
 
             size_t m_count{0};
             int m_verbose{0};
