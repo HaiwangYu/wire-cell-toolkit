@@ -63,6 +63,7 @@ void OmnibusNoiseFilter::configure(const WireCell::Configuration& cfg)
     auto jcndb = cfg["noisedb"];
     m_noisedb = Factory::find_tn<IChannelNoiseDatabase>(jcndb.asString());
     log->debug("using channel noise DB object: \"{}\"", jcndb.asString());
+    log->warn("Use of CHND is deprecated and will be removed in the future.");
 
     // We should use multi-group channel filters, the interface below is maintained
     // to ensure backwards compatibility. See:
