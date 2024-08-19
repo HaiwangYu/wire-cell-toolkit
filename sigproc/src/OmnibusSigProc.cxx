@@ -683,8 +683,12 @@ void OmnibusSigProc::save_ext_roi(ITrace::vector& itraces, IFrame::trace_list_t&
 // save Multi-Plane ROI into the out frame (set use_roi_debug_mode=true)
 // mp_rois: osp-chid, start -> start, end
 void OmnibusSigProc::save_mproi(ITrace::vector& itraces, IFrame::trace_list_t& indices, int plane,
-                                std::multimap<std::pair<int, int>, std::pair<int, int>> mp_rois)
+                                const std::multimap<std::pair<int, int>, std::pair<int, int>> &mp_rois)
 {
+    // Process the mp_roi map. Turn it into a map of channel -> List of (start, end). Allows much more efficient access
+    std::map<int, std::vector<std::pair<int, int>>> channel_to_mproi;
+    for (auto signal_roi : mp_rois) channel_to_mproi[signal_roi.first.first].push_back(signal_roi.second);
+
     // reuse this temporary vector to hold charge for a channel.
     ITrace::ChargeSequence charge(m_nticks, 0.0);
 
@@ -692,10 +696,9 @@ void OmnibusSigProc::save_mproi(ITrace::vector& itraces, IFrame::trace_list_t& i
 
         std::fill(charge.begin(), charge.end(), 0);
 
-        for (auto signal_roi : mp_rois) {
-            if (och.channel != signal_roi.first.first) continue;
-            int start = signal_roi.second.first;
-            int end = signal_roi.second.second;
+        for (auto signal_roi : channel_to_mproi[och.channel]) {
+            int start = signal_roi.first;
+            int end = signal_roi.second;
             // end is should be included but not larger than m_nticks
             for (int i = start; i <= end && i < m_nticks; i++) {
                 charge.at(i) = 4000.;  // arbitary constant number for ROI display
