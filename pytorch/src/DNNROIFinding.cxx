@@ -92,6 +92,7 @@ void Pytorch::DNNROIFinding::configure(const WireCell::Configuration& cfg)
     m_cfg.decon_charge_tag = get(cfg, "decon_charge_tag", m_cfg.decon_charge_tag);
     m_cfg.outtag = get(cfg, "outtag", m_cfg.outtag);
     m_cfg.debugfile = get(cfg, "debugfile", m_cfg.debugfile);
+    m_cfg.nchunks = get(cfg, "nchunks", m_cfg.nchunks);
 
     m_nrows = m_chlist.size();
     m_ncols = m_cfg.nticks;
@@ -157,6 +158,7 @@ WireCell::Configuration Pytorch::DNNROIFinding::default_configuration() const
     cfg["decon_charge_tag"] = m_cfg.decon_charge_tag;
     cfg["outtag"] = m_cfg.outtag;
     cfg["debugfile"] = m_cfg.debugfile;
+    cfg["nchunks"] = m_cfg.nchunks;
     return cfg;
 }
 
@@ -202,6 +204,10 @@ ITrace::shared_vector Pytorch::DNNROIFinding::eigen_to_traces(const Array::array
 
 bool Pytorch::DNNROIFinding::operator()(const IFrame::pointer& inframe, IFrame::pointer& outframe)
 {
+
+    // Disable gradient computation, use like a mutex lock
+    torch::NoGradGuard no_grad;
+
     outframe = inframe;
     if (!inframe) {
         log->debug("EOS at call={}", m_save_count);
@@ -231,28 +237,47 @@ bool Pytorch::DNNROIFinding::operator()(const IFrame::pointer& inframe, IFrame::
     for (unsigned int i = 0; i < ch_eigen.size(); ++i) {
         ch.push_back(torch::from_blob(ch_eigen[i].data(), {ch_eigen[i].cols(), ch_eigen[i].rows()}));
     }
+    // ret: {ntags, nchannels, nticks}
     auto img = torch::stack(ch, 0);
+    // ret: {1, ntags, nticks, nchannels}
     auto batch = torch::stack({torch::transpose(img, 1, 2)}, 0);
 
-    // Create a vector of inputs.
-    std::vector<torch::jit::IValue> inputs;
-    inputs.push_back(batch);
+    auto chunks = batch.chunk(m_cfg.nchunks, 3);
+    std::vector<torch::Tensor> outputs;
 
-    log->debug(tk(fmt::format("call={} calling model \"{}\"",
-                              m_save_count, m_cfg.forward)));
-
-    // Execute the model and turn its output into a tensor.
-    auto iitens = Pytorch::to_itensor(inputs);
-    ITensorSet::pointer oitens = m_forward->forward(iitens);
-
-    if (!oitens or oitens->tensors()->size() != 1) {
-        log->critical("call={} unexpected tensor size {} 1= 1",
-                      m_save_count, oitens->tensors()->size());
-        THROW(ValueError() << errmsg{"oitens->tensors()->size()!=1"});
+    log->debug(tk(fmt::format("call={} calling model \"{}\" with {} chunks ",
+                              m_save_count, m_cfg.forward), m_cfg.nchunks));
+    for (auto chunk : chunks) {
+        std::cout << "chunk size: " << chunk.sizes() << std::endl;
+        std::vector<torch::IValue> itens {chunk};
+        auto iitens = Pytorch::to_itensor(itens);
+        auto oitens = m_forward->forward(iitens);
+        torch::Tensor ochunk = Pytorch::from_itensor({oitens}).front().toTensor().cpu();
+        std::cout << "ochunk size: " << ochunk.sizes() << std::endl;
+        outputs.push_back(ochunk);
     }
-    torch::Tensor output = Pytorch::from_itensor({oitens}).front().toTensor().cpu();
-
+    torch::Tensor output = torch::cat(outputs, 3);
     log->debug(tk(fmt::format("call={} inference done", m_save_count)));
+
+    // // Create a vector of inputs.
+    // std::vector<torch::jit::IValue> inputs;
+    // inputs.push_back(batch);
+
+    // log->debug(tk(fmt::format("call={} calling model \"{}\"",
+    //                           m_save_count, m_cfg.forward)));
+
+    // // Execute the model and turn its output into a tensor.
+    // auto iitens = Pytorch::to_itensor(inputs);
+    // ITensorSet::pointer oitens = m_forward->forward(iitens);
+
+    // if (!oitens or oitens->tensors()->size() != 1) {
+    //     log->critical("call={} unexpected tensor size {} 1= 1",
+    //                   m_save_count, oitens->tensors()->size());
+    //     THROW(ValueError() << errmsg{"oitens->tensors()->size()!=1"});
+    // }
+    // torch::Tensor output = Pytorch::from_itensor({oitens}).front().toTensor().cpu();
+
+    // log->debug(tk(fmt::format("call={} inference done", m_save_count)));
 
     // tensor to eigen
     Eigen::Map<Eigen::ArrayXXf> out_e(output[0][0].data<float>(), output.size(3), output.size(2));
