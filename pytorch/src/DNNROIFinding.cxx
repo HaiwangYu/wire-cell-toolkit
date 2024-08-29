@@ -246,7 +246,7 @@ bool Pytorch::DNNROIFinding::operator()(const IFrame::pointer& inframe, IFrame::
     std::vector<torch::Tensor> outputs;
 
     log->debug(tk(fmt::format("call={} calling model \"{}\" with {} chunks ",
-                              m_save_count, m_cfg.forward), m_cfg.nchunks));
+                              m_save_count, m_cfg.forward, m_cfg.nchunks)));
     for (auto chunk : chunks) {
         std::cout << "chunk size: " << chunk.sizes() << std::endl;
         std::vector<torch::IValue> itens {chunk};
