@@ -237,12 +237,12 @@ bool Pytorch::DNNROIFinding::operator()(const IFrame::pointer& inframe, IFrame::
     for (unsigned int i = 0; i < ch_eigen.size(); ++i) {
         ch.push_back(torch::from_blob(ch_eigen[i].data(), {ch_eigen[i].cols(), ch_eigen[i].rows()}));
     }
-    // ret: {ntags, nchannels, nticks}
+    // ret: {ntags, nticks, nchannels}
     auto img = torch::stack(ch, 0);
-    // ret: {1, ntags, nticks, nchannels}
+    // ret: {1, ntags, nchannels, nticks}
     auto batch = torch::stack({torch::transpose(img, 1, 2)}, 0);
 
-    auto chunks = batch.chunk(m_cfg.nchunks, 3);
+    auto chunks = batch.chunk(m_cfg.nchunks, 2);
     std::vector<torch::Tensor> outputs;
 
     log->debug(tk(fmt::format("call={} calling model \"{}\" with {} chunks ",
@@ -254,9 +254,14 @@ bool Pytorch::DNNROIFinding::operator()(const IFrame::pointer& inframe, IFrame::
         auto oitens = m_forward->forward(iitens);
         torch::Tensor ochunk = Pytorch::from_itensor({oitens}).front().toTensor().cpu();
         std::cout << "ochunk size: " << ochunk.sizes() << std::endl;
-        outputs.push_back(ochunk);
+        outputs.push_back(ochunk.clone());
+        // auto tmp = chunk.index({torch::indexing::Slice(), torch::indexing::Slice(1, 2), torch::indexing::Slice(), torch::indexing::Slice()});
+        // auto tmp = itens[0].toTensor().cpu().index({torch::indexing::Slice(), torch::indexing::Slice(1, 2), torch::indexing::Slice(), torch::indexing::Slice()});
+        // std::cout << "tmp size: " << tmp.sizes() << std::endl;
+        // outputs.push_back(tmp);
     }
-    torch::Tensor output = torch::cat(outputs, 3);
+    torch::Tensor output = torch::cat(outputs, 2);
+    std::cout << "output size: " << output.sizes() << std::endl;
     log->debug(tk(fmt::format("call={} inference done", m_save_count)));
 
     // // Create a vector of inputs.
@@ -303,6 +308,7 @@ bool Pytorch::DNNROIFinding::operator()(const IFrame::pointer& inframe, IFrame::
     auto sp_charge_T = Array::mask(decon_charge_eigen.transpose(), mask_e, m_cfg.mask_thresh /*0.7*/);
     sp_charge_T = Array::baseline_subtraction(sp_charge_T) * m_cfg.output_scale + m_cfg.output_offset;
     Array::array_xxf sp_charge = sp_charge_T.transpose();
+    sp_charge = mask_e.transpose();
 
 #ifdef DNNROI_HDF5_DEBUG
     // hdf5 eval

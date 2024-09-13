@@ -1,7 +1,9 @@
 #include <torch/script.h>  // One-stop header.
+#include "WireCellUtil/Eigen.h"
 #include <chrono>
 #include "WireCellUtil/ExecMon.h"
 #include "WireCellUtil/Logging.h"
+#include "WireCellPytorch/Util.h"
 using namespace WireCell;
 using spdlog::info;
 /**
@@ -21,6 +23,50 @@ int main(int argc, const char* argv[])
 
     // Disable gradient computation, use like a mutex lock
     torch::NoGradGuard no_grad;
+    if (false) {
+        torch::Tensor a = torch::rand({1, 2, 3, 3});
+        std::cout << "Tensor shape: " << a.sizes() << std::endl;
+        std::cout << a << std::endl;
+        // Extract the desired sub-tensor using the slice method
+        torch::Tensor sub_tensor = a.index({torch::indexing::Slice(), torch::indexing::Slice(1, 2), torch::indexing::Slice(), torch::indexing::Slice()});
+        // Print the shape of the extracted tensor
+        std::cout << "Sub-tensor shape: " << sub_tensor.sizes() << std::endl;
+        std::cout << sub_tensor << std::endl;
+    }
+    {
+        Eigen::MatrixXf ch_eigen = Eigen::MatrixXf::Identity(4, 4);
+        std::cout << "matrix: \n" << ch_eigen << std::endl;
+        std::vector<torch::Tensor> ch;
+        for (unsigned int i = 0; i < 2; ++i) {
+            ch.push_back(torch::from_blob(ch_eigen.data(), {ch_eigen.cols(), ch_eigen.rows()}));
+        }
+        auto img = torch::stack(ch, 0);
+        auto batch = torch::stack({torch::transpose(img, 1, 2)}, 0);
+        std::cout << "batch: \n" << batch << std::endl;
+        auto chunks = batch.chunk(4, 2);
+        std::vector<torch::Tensor> outputs;
+        for (auto chunk : chunks) {
+            std::cout << "ichunk size: " << chunk.sizes() << std::endl;
+            std::cout << "ichunk: \n" << chunk << std::endl;
+            std::vector<torch::IValue> itens {chunk};
+            auto iitens = Pytorch::to_itensor(itens);
+            auto oitens = iitens;
+            torch::Tensor ochunk = Pytorch::from_itensor({oitens}).front().toTensor().cpu();
+            std::cout << "ochunk size: " << ochunk.sizes() << std::endl;
+            std::cout << "ochunk: \n" << ochunk << std::endl;
+            outputs.push_back(ochunk.clone());
+        }
+        for (auto output : outputs) {
+            std::cout << "output size: " << output.sizes() << std::endl;
+            std::cout << "output: \n" << output << std::endl;
+        }
+        auto output = torch::cat(outputs, 2);
+        std::cout << "output size: " << output.sizes() << std::endl;
+        std::cout << "output: \n" << output << std::endl;
+        Eigen::Map<Eigen::ArrayXXf> out_e(output[0][0].data<float>(), output.size(3), output.size(2));
+        std::cout << "out_e: \n" << out_e << std::endl;
+    }
+    return 0;
 
     std::cout << "WireCell::pytorch : test loading TorchScript Model\n";
 

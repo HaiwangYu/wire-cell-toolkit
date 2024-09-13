@@ -84,7 +84,7 @@ namespace WireCell {
             // with "N" marking the anode number.
             std::string outtag{""};
 
-            size_t nchunks{1};
+            int nchunks{1};
         };
 
         class DNNROIFinding : public Aux::Logger,
