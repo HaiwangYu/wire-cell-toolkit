@@ -6,6 +6,7 @@
 #include "WireCellUtil/Spdlog.h"
 #include <ostream>
 #include <functional>
+#include "WireCellUtil/Spdlog.h"
 
 namespace WireCell {
 
@@ -40,11 +41,11 @@ namespace WireCell {
         // operator bool() const;
         bool valid() const;
 
-        bool operator==(const WirePlaneId& rhs);
+        bool operator==(const WirePlaneId& rhs) const;
 
-        bool operator!=(const WirePlaneId& rhs);
+        bool operator!=(const WirePlaneId& rhs) const;
 
-        bool operator<(const WirePlaneId& rhs);
+        bool operator<(const WirePlaneId& rhs) const;
 
        private:
         int m_pack;

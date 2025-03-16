@@ -97,6 +97,10 @@ namespace WireCell {
             // find if neighbor channels hare masked.
             bool masked_neighbors(const std::string& cmname, OspChan& ochan, int nnn);
 
+            //Unpad the data
+            void unpad_data(int plane);
+            void pad_data(int plane);
+
             // Anode plane for geometry
             std::string m_anode_tn{"AnodePlane"};
             IAnodePlane::pointer m_anode;
@@ -172,6 +176,9 @@ namespace WireCell {
             // Fixme: it's a temporary solution for the collective V plane in PDHD, see:
             // https://github.com/WireCell/wire-cell-toolkit/issues/322
             std::vector<int> m_plane2layer{0,1,2};
+
+            // MP threshold feature_val method, 0: ThreePointCheck, 1: MaxPointCheck
+            int m_MP_feature_val_method{0};
 
 
             // fixme: this is apparently not used:
@@ -257,6 +264,13 @@ namespace WireCell {
             int m_verbose{0};
 
             IDFT::pointer m_dft;
+
+            //------Padding members
+            //Needed when physically separate planes are concatenated together
+            //for processing. i.e. DUNE collection planes on opposite faces or
+            //ICARUS electrically-separate induction plane 1
+            std::vector<std::vector<int>> m_nwires_separate_planes;
+            int m_avg_response_nwires;
         };
     }  // namespace SigProc
 }  // namespace WireCell

@@ -80,6 +80,9 @@ local wcls_output = {
   // for charge reconstruction, the "wiener" is best for S/N
   // separation.  Both are used in downstream WC code.
   sp_signals: wcls.output.signals(name="spsignals", tags=["gauss", "wiener"]),
+  // save "threshold" from normal decon for each channel noise
+  // used in imaging
+  sp_thresholds: wcls.output.thresholds(name="spthresholds", tags=["threshold"]),
 };
 //local deposio = io.numpy.depos(output);
 local drifter = sim.drifter;
@@ -173,7 +176,7 @@ local retagger = g.pnode({
 local sink = sim.frame_sink;
 local graph = g.pipeline([wcls_input.depos, drifter, wcls_simchannel_sink, bagger, bi_manifold, retagger, wcls_output.sim_digits, sink]); //<- standard SimDepoSource source and Drifter
 local app = {
-  type: 'Pgrapher', 
+  type: 'Pgrapher', //TbbFlow Pgrapher changed Ewerton 2023-03-14
   data: {
     edges: g.edges(graph),
   },
