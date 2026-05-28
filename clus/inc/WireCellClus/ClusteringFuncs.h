@@ -24,9 +24,11 @@
 #include "WireCellUtil/NamedFactory.h"
 #include "WireCellUtil/Units.h"
 #include "WireCellUtil/Persist.h"
+#include "WireCellUtil/Logging.h"
 
 
 
+#include <set>
 #include <string>
 #include <fstream>
 
@@ -112,12 +114,28 @@ namespace WireCell::Clus::Facade {
     // Pointers to the newly created cluster node facades are returned.  These
     // are loaned.  As usual, the cluster node owns the facade and these nodes
     // are in turn owned by the grouping node.
-    std::vector<Cluster*> merge_clusters(cluster_connectivity_graph_t& g, // 
+    std::vector<Cluster*> merge_clusters(cluster_connectivity_graph_t& g, //
                                          Grouping& grouping,
                                          const std::string& aname="",
                                          const std::string& pcname="perblob");
 
-    
+
+    /// Format a flag-name set as a bracketed comma list for logging.
+    std::string format_flag_names(const std::set<std::string>& flag_names);
+
+    /// Ensure every cluster in a grouping carries the same set of "flag_*" keys
+    /// in its cluster_scalar PC, padding with 0 for clusters that are missing
+    /// some keys.  Without this, Aux::TensorDM::as_tensors silently drops flag
+    /// values that were set on only some clusters: Dataset::append uses the
+    /// first cluster's schema and rejects (or ignores) tails with diverging
+    /// keys.  Call right before tensorising a live grouping that has had
+    /// flags set on a subset of clusters (e.g. QLMatching tagging main_cluster
+    /// / beam_flash on one cluster, MABC writing tagger output flags, ...).
+    void normalize_cluster_flags(Grouping& grouping,
+                                 Log::logptr_t log,
+                                 const std::string& grouping_name,
+                                 int ident);
+
 
     /**
      * Extract geometry information from a grouping

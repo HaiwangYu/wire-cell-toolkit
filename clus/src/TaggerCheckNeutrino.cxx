@@ -115,6 +115,18 @@ void TaggerCheckNeutrino::visit(Ensemble& ensemble) const
         }
     }
 
+    // No upstream visitor (e.g. QLMatching) tagged a main_cluster — typically
+    // means no flash falls inside the beam window for this event.  The rest of
+    // this visitor (track fitting, vertex search, BDT input fill, …) assumes
+    // a non-null main_cluster, so skip cleanly here rather than crashing.
+    if (!main_cluster) {
+        SPDLOG_LOGGER_DEBUG(log,
+            "TaggerCheckNeutrino: no cluster has Flags::main_cluster set "
+            "({} clusters total, {} beam_flash); skipping visit.",
+            nclusters, n_in_beam_clusters);
+        return;
+    }
+
     SPDLOG_LOGGER_TRACE(log, "Found {} clusters, {} main clusters, {} in-beam clusters, {} of blobs in main cluster id {}", nclusters, n_main_clusters, n_in_beam_clusters, main_cluster->nchildren(), main_cluster->get_cluster_id());
 
 

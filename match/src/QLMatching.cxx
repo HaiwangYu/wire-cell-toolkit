@@ -6,6 +6,7 @@
 #include "WireCellAux/TensorDMdataset.h"
 #include "WireCellAux/TensorDMpointtree.h"
 #include "WireCellClus/Facade.h"
+#include "WireCellClus/ClusteringFuncs.h"   // Flags::main_cluster, Flags::beam_flash
 #include "WireCellUtil/Exceptions.h"
 #include "WireCellUtil/ExecMon.h"
 #include "WireCellUtil/NamedFactory.h"
@@ -58,6 +59,7 @@ void QLMatching::configure(const WireCell::Configuration& cfg)
     m_flash_maxtime = get(cfg, "flash_maxtime", m_flash_maxtime);
     m_beam_mintime  = get(cfg, "beam_mintime",  m_beam_mintime);
     m_beam_maxtime  = get(cfg, "beam_maxtime",  m_beam_maxtime);
+    m_max_beam_flash_time = get(cfg, "max_beam_flash_time", m_max_beam_flash_time);
     if (m_beamonly) {
         m_flash_mintime = m_beam_mintime;
         m_flash_maxtime = m_beam_maxtime;
@@ -131,6 +133,7 @@ WireCell::Configuration QLMatching::default_configuration() const
     cfg["flash_maxtime"]   = m_flash_maxtime;
     cfg["beam_mintime"]    = m_beam_mintime;
     cfg["beam_maxtime"]    = m_beam_maxtime;
+    cfg["max_beam_flash_time"] = m_max_beam_flash_time;
     cfg["QtoL"]            = m_QtoL;
     cfg["strength_cutoff"] = m_strength_cutoff;
     return cfg;
@@ -653,21 +656,60 @@ bool QLMatching::operator()(const input_vector& invec, output_pointer& out)
         log->debug(em("dump bee"));
     }
 
-    // Apply matched t0s.
+    // Apply matched t0s and tag beam-window clusters with
+    // Clus::Facade::Flags::beam_flash / main_cluster so the downstream
+    // MABC pipeline (ClusteringTaggerFlagTransfer, ClusteringRecoveringBundle,
+    // TaggerCheckNeutrino, ...) can pick the in-beam main cluster.
+    //
+    // Selection rule (mirrors WCP for uboone):
+    //   - Any matched cluster whose flash satisfies |flash_time| <
+    //     m_max_beam_flash_time gets the beam_flash flag.
+    //   - Among those, the cluster whose flash has the smallest |time|
+    //     gets the main_cluster flag.
+    Cluster* main_cluster_candidate = nullptr;
+    double main_cluster_abs_time = std::numeric_limits<double>::infinity();
     for (auto* flash : flash_iter_order(flash_bundles_map)) {
+        const double abs_flash_time = std::abs(flash->get_time());
+        const bool in_beam = abs_flash_time < m_max_beam_flash_time;
         for (auto bundle : flash_bundles_map[flash]) {
-            bundle->get_main_cluster()->set_cluster_t0(flash->get_time() * units::ns);
+            auto* cluster = bundle->get_main_cluster();
+            cluster->set_cluster_t0(flash->get_time() * units::ns);
+            if (in_beam) {
+                cluster->set_flag(Flags::beam_flash);
+                if (abs_flash_time < main_cluster_abs_time) {
+                    main_cluster_abs_time = abs_flash_time;
+                    main_cluster_candidate = cluster;
+                }
+            }
             log->debug("flash_bundles_map: flash id {} time {} ns, cluster gidx {} "
-                       "total_pred_light {} t0 {}",
+                       "total_pred_light {} t0 {} in_beam {}",
                        flash->get_flash_id(), flash->get_time(),
-                       global_cluster_idx_map[bundle->get_main_cluster()],
+                       global_cluster_idx_map[cluster],
                        bundle->get_total_pred_light(),
-                       bundle->get_main_cluster()->get_cluster_t0());
+                       cluster->get_cluster_t0(),
+                       in_beam);
         }
+    }
+    if (main_cluster_candidate) {
+        main_cluster_candidate->set_flag(Flags::main_cluster);
+        log->debug("QLMatching: main_cluster tagged on cluster gidx {} "
+                   "(|flash_time|={} ns, threshold={} ns)",
+                   global_cluster_idx_map[main_cluster_candidate],
+                   main_cluster_abs_time, m_max_beam_flash_time);
+    } else {
+        log->debug("QLMatching: no matched cluster within |flash_time| < {} ns; "
+                   "main_cluster flag not set", m_max_beam_flash_time);
     }
 
     // ---- Build outputs ----
     {
+        // Pad cluster_scalar so every live cluster carries the same flag_* keys.
+        // Without this, Aux::TensorDM::as_tensors silently drops flag values
+        // set on only a subset of clusters (Dataset::append uses the first
+        // cluster's schema), which is exactly the case here: only the chosen
+        // main_cluster / beam_flash clusters have those keys set.
+        Clus::Facade::normalize_cluster_flags(*grouping, log, "live", charge_ident);
+
         ITensor::vector outtens;
         auto tens_live = Aux::TensorDM::as_tensors(*root_live, inpath + "/live");
         outtens.insert(outtens.end(), tens_live.begin(), tens_live.end());

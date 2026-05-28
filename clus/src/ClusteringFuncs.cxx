@@ -3,6 +3,7 @@
 
 
 #include <iostream>              // temp debug
+#include <sstream>
 
 using namespace WireCell::Clus::Facade;
 
@@ -44,6 +45,60 @@ WireCell::Clus::Facade::extract_geometry_params(
     
     return std::make_tuple(drift_dir, angle_u, angle_v, angle_w);
 }
+
+std::string WireCell::Clus::Facade::format_flag_names(const std::set<std::string>& flag_names)
+{
+    std::ostringstream ss;
+    ss << "[";
+    bool first = true;
+    for (const auto& flag_name : flag_names) {
+        if (!first) {
+            ss << ",";
+        }
+        ss << flag_name;
+        first = false;
+    }
+    ss << "]";
+    return ss.str();
+}
+
+void WireCell::Clus::Facade::normalize_cluster_flags(
+    Grouping& grouping,
+    Log::logptr_t log,
+    const std::string& grouping_name,
+    int ident)
+{
+    std::set<std::string> flag_names;
+    for (const auto* cluster : grouping.children()) {
+        for (const auto& flag_name : cluster->flag_names()) {
+            flag_names.insert(flag_name);
+        }
+    }
+
+    SPDLOG_LOGGER_DEBUG(log, "normalize_cluster_flags: ident={} grouping={} nclusters={} all_flags={}",
+                        ident, grouping_name, grouping.children().size(), format_flag_names(flag_names));
+
+    if (flag_names.empty()) {
+        return;
+    }
+
+    size_t nmissing = 0;
+    for (auto* cluster : grouping.children()) {
+        const auto cluster_flags = cluster->flag_names();
+        const std::set<std::string> cluster_flag_set(cluster_flags.begin(), cluster_flags.end());
+
+        for (const auto& flag_name : flag_names) {
+            if (cluster_flag_set.count(flag_name)) {
+                continue;
+            }
+            cluster->set_flag(flag_name, 0);
+            ++nmissing;
+        }
+    }
+    SPDLOG_LOGGER_DEBUG(log, "normalize_cluster_flags: ident={} grouping={} added={} missing flag values",
+                        ident, grouping_name, nmissing);
+}
+
 
 std::vector<Cluster*> WireCell::Clus::Facade::merge_clusters(
     cluster_connectivity_graph_t& g,

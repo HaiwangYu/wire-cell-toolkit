@@ -75,54 +75,10 @@ std::string MultiAlgBlobClustering::outpath(const std::string& name, int ident)
     return format_path(m_outpath, name, ident, m_outsubpaths);
 }
 
-static std::string format_flag_names(const std::set<std::string>& flag_names)
-{
-    std::ostringstream ss;
-    ss << "[";
-    bool first = true;
-    for (const auto& flag_name : flag_names) {
-        if (!first) {
-            ss << ",";
-        }
-        ss << flag_name;
-        first = false;
-    }
-    ss << "]";
-    return ss.str();
-}
-
-static void normalize_cluster_flags(Grouping& grouping, Log::logptr_t log, const std::string& grouping_name, int ident)
-{
-    std::set<std::string> flag_names;
-    for (const auto* cluster : grouping.children()) {
-        for (const auto& flag_name : cluster->flag_names()) {
-            flag_names.insert(flag_name);
-        }
-    }
-
-    SPDLOG_LOGGER_DEBUG(log, "normalize_cluster_flags: ident={} grouping={} nclusters={} all_flags={}",
-                        ident, grouping_name, grouping.children().size(), format_flag_names(flag_names));
-
-    if (flag_names.empty()) {
-        return;
-    }
-
-    size_t nmissing = 0;
-    for (auto* cluster : grouping.children()) {
-        const auto cluster_flags = cluster->flag_names();
-        const std::set<std::string> cluster_flag_set(cluster_flags.begin(), cluster_flags.end());
-
-        for (const auto& flag_name : flag_names) {
-            if (cluster_flag_set.count(flag_name)) {
-                continue;
-            }
-            cluster->set_flag(flag_name, 0);
-            ++nmissing;
-        }
-    }
-    SPDLOG_LOGGER_DEBUG(log, "normalize_cluster_flags: ident={} grouping={} added={} missing flag values",
-                        ident, grouping_name, nmissing);
-}
+// format_flag_names() and normalize_cluster_flags() are shared utilities in
+// WireCell::Clus::Facade (clus/src/ClusteringFuncs.cxx).  They are also used
+// by QLMatching to keep cluster_scalar PC schemas consistent across the
+// QLMatching -> PointTreeMerging -> MABC tensor IO boundary.
 
 
 void MultiAlgBlobClustering::configure(const WireCell::Configuration& cfg)
