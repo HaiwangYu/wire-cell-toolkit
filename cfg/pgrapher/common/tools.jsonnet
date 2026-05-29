@@ -88,10 +88,14 @@ function(params)
         type: if std.objectHas(params.elec, "type")
               then params.elec.type
               else "ColdElecResponse", // default
-        data: sim_response_binning {
-            shaping: params.elec.shaping,
-            gain: params.elec.gain,
-            postgain: params.elec.postgain,
+        // Same optional-field handling as elec_resps below: only forward fields
+        // the caller actually set, so detectors that omit shaping/gain/postgain
+        // on params.elec (e.g. SBND) don't crash here.
+        data: sim_response_binning + {
+            [k]: params.elec[k]
+            for k in ["shaping", "gain", "postgain"]
+            if std.objectHas(params.elec, k)
+        } + {
             filename: if std.objectHas(params.elec, "filename")
                       then params.elec.filename
                       else ""
@@ -104,10 +108,16 @@ function(params)
               then elec.type
               else "ColdElecResponse",
         name: "elecresp%d" %n,
-        data: sim_response_binning {
-            shaping: elec.shaping,
-            gain: elec.gain,
-            postgain: elec.postgain,
+        // Only forward fields the caller actually set; let the C++ component
+        // fall back to its own defaults for any missing field.  Some detector
+        // params (e.g. SBND's `elec` produced by wcls-sim-drift-depoflux-nf-sp)
+        // omit shaping/gain/postgain, which used to crash here with
+        // "Field does not exist: gain".
+        data: sim_response_binning + {
+            [k]: elec[k]
+            for k in ["shaping", "gain", "postgain"]
+            if std.objectHas(elec, k)
+        } + {
             filename: if std.objectHas(elec, "filename")
                       then elec.filename
                       else ""
