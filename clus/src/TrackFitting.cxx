@@ -245,6 +245,20 @@ void TrackFitting::clear_segments(){
     m_cluster_charge_data.clear();
     m_cluster_fitted_charge_2d.clear();
     m_fitted_charge_2d.clear();
+    // Per-event state that pointed at the *previous* event's PC tree.
+    // Without this, a TrackFitting reused across events (as in
+    // TaggerCheckNeutrino which holds one m_track_fitter for the whole
+    // MABC instance) crashes in fill_global_rb_map / sync_from_graph
+    // when it dereferences a stale m_grouping facade.  STM intra-event
+    // loop callers will re-bind m_grouping on the next add_segment;
+    // BuildGeometry rebuild cost is small (only loops over anodes).
+    m_grouping = nullptr;
+    m_graph = nullptr;
+    m_cluster_edges.clear();
+    m_all_edges.clear();
+    m_ordered_nodes_vec.clear();
+    global_rb_map.clear();
+    m_charge_data.clear();
 }
 
 void TrackFitting::sync_from_graph(){

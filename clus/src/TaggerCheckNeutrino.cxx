@@ -148,6 +148,14 @@ void TaggerCheckNeutrino::visit(Ensemble& ensemble) const
     // Pre-load charge data for all beam-flash clusters once so that
     // do_multi_tracking calls throughout pattern recognition can use
     // flag_force_load_data=false and avoid redundant prepare_data() calls.
+    //
+    // clear_segments() resets m_track_fitter's per-event state
+    // (m_clusters, m_segments, ...) so that stale Facade::Cluster*
+    // pointers from previous events do not survive into this event's
+    // sync_from_graph().  Without this, multi-event runs SIGSEGV inside
+    // FacadeParent::nchildren() on dangling facades.  Mirrors the
+    // clear_segments+add pattern already used in TaggerCheckSTM.
+    m_track_fitter->clear_segments();
     {
         std::vector<WireCell::Clus::Facade::Cluster*> clusters_to_preload;
         clusters_to_preload.push_back(main_cluster);
