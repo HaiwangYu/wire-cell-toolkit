@@ -67,6 +67,7 @@ void QLMatching::configure(const WireCell::Configuration& cfg)
 
     m_QtoL = get(cfg, "QtoL", m_QtoL);
     m_strength_cutoff = get(cfg, "strength_cutoff", m_strength_cutoff);
+    m_saturation_threshold = get(cfg, "saturation_threshold", m_saturation_threshold);
 
     if (cfg["VUVEfficiency"].isArray()) {
         m_VUVEfficiency.clear();
@@ -136,6 +137,7 @@ WireCell::Configuration QLMatching::default_configuration() const
     cfg["max_beam_flash_time"] = m_max_beam_flash_time;
     cfg["QtoL"]            = m_QtoL;
     cfg["strength_cutoff"] = m_strength_cutoff;
+    cfg["saturation_threshold"] = m_saturation_threshold;
     return cfg;
 }
 
@@ -258,7 +260,7 @@ bool QLMatching::operator()(const input_vector& invec, output_pointer& out)
         std::vector<unsigned int> flash_opdet_mask = opdet_mask;
         for (std::size_t idet = 0; idet < std::size_t(flash->get_num_channels()); ++idet) {
             auto pe_det = flash->get_PE(idet);
-            if ((flash->get_total_PE() > 5000) && (pe_det == 0) && (m_data == false))
+            if (pe_det > m_saturation_threshold)
                 flash_opdet_mask[idet] = 0;
         }
 

@@ -66,6 +66,10 @@ namespace WireCell::Match {
         // dropped after each matching round. Was hard-coded 0.05 inline; pulled
         // out so it can be widened/narrowed from the jsonnet without rebuild.
         double m_strength_cutoff{0.05};
+        // PE threshold above which a flash's zero-PE OpDets are treated as
+        // saturated and masked out (sim only).  Was hard-coded 5000 inline;
+        // exposed as a config so it can be retuned without rebuild.
+        double m_saturation_threshold{5000};
 
         // Default SBND VUV/VIS efficiency arrays, indexed by OpDet (312 entries).
         // Configuration "VUVEfficiency"/"VISEfficiency" arrays override these.
