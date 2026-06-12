@@ -18,9 +18,37 @@ local f = import 'pgrapher/common/funcs.jsonnet';
 local clus = import 'pgrapher/common/clus.jsonnet';
 local dead_regions = import 'pgrapher/experiment/sbnd/dead_regions.jsonnet';
 
+// SBND ParticleDataSet (dE/dx + range LinterpFunctions + ParticleDataSet), used by
+// the downstream TaggerCheckNeutrino track fit.  Resolved via WIRECELL_PATH
+// (wcp-porting-img/sbnd/particle_dataset.jsonnet); tables are NIST/PDG.
+local pds = (import 'particle_dataset.jsonnet')();
+
 local time_offset = -205 * wc.us;  // = -tick0_time (cfg/.../sbnd/params.jsonnet sim.tick0_time)
 local drift_speed = 1.563 * wc.mm / wc.us;
 local bee_dir = 'data';
+
+// Enable the qlport-style downstream pattern-recognition chain in all_apa
+// (tagger_flag_transfer -> recover_bundle -> steiner -> fiducialutils ->
+// tagger_check_neutrino -> BDT scorers, plus the steiner/track_fit/vertices bee
+// sets and the mc particle-flow output).  Off => matching-only all-APA MABC.
+local enable_downstream_pr = true;
+
+// --- downstream pattern-recognition (qlport-style) knobs ---
+// dQ/dx calibration passed to TaggerCheckNeutrino; qlport defaults for now.
+local dQdx_scale = 0.1;
+local dQdx_offset = -1000;
+// Box recombination model (qlport constants; SBND nominal field 0.5 kV/cm).
+local sbnd_box_recomb = {
+    type: 'BoxRecombination',
+    name: 'box_recomb',
+    data: { A: 1.0, B: 0.255, Efield: 0.5, rho: 1.38, Wi: 23.6e-6 },
+};
+// uboone-trained smoke-test weights (resolved via WIRECELL_PATH against
+// wire-cell-data/).  Scores are meaningless for SBND but verify the BDT/DL C++
+// paths run end to end.  Set to '' to disable a scorer.
+local smoketest_numu_weights_dir = 'uboone/weights';
+local smoketest_nue_weights_dir = 'uboone/weights';
+local smoketest_dl_weights = 'uboone/scn_vtx/t48k-m16-l5-lr5d-res0.5-CP24.pth';
 
 local common_coords = ['x', 'y', 'z'];
 
@@ -99,6 +127,49 @@ local dvm = {
     } + (if pos_offset_on then { pos_offset: pos_offset_a1 } else {}),  // override a0's
 };
 
+// Fiducial volume for the downstream FiducialUtils / TaggerCheckNeutrino: two
+// rectangular PolyFiducial slabs (XY and ZX) approximating the dvm box.  Bounds
+// follow the dvm.overall FV above (sbnd-wires-geometry-v0206 bbox - 1 cm).
+local sbnd_fid_xy = {
+    type: 'PolyFiducial',
+    name: 'fiducial_sbnd_xy',
+    data: {
+        axis: 2,  // Z-slabs, polygons in the X-Y plane
+        slabs: [{
+            min: dvm.overall.FV_zmin,
+            max: dvm.overall.FV_zmax,
+            corners: [
+                [dvm.overall.FV_xmin, dvm.overall.FV_ymin],
+                [dvm.overall.FV_xmax, dvm.overall.FV_ymin],
+                [dvm.overall.FV_xmax, dvm.overall.FV_ymax],
+                [dvm.overall.FV_xmin, dvm.overall.FV_ymax],
+            ],
+        }],
+    },
+};
+local sbnd_fid_zx = {
+    type: 'PolyFiducial',
+    name: 'fiducial_sbnd_zx',
+    data: {
+        axis: 1,  // Y-slabs, polygons in the Z-X plane
+        slabs: [{
+            min: dvm.overall.FV_ymin,
+            max: dvm.overall.FV_ymax,
+            corners: [
+                [dvm.overall.FV_zmin, dvm.overall.FV_xmin],
+                [dvm.overall.FV_zmax, dvm.overall.FV_xmin],
+                [dvm.overall.FV_zmax, dvm.overall.FV_xmax],
+                [dvm.overall.FV_zmin, dvm.overall.FV_xmax],
+            ],
+        }],
+    },
+};
+local sbnd_fid = {
+    type: 'CompositeFiducial',
+    name: 'sbnd_fid',
+    data: { logic: 'and', fiducials: [wc.tn(sbnd_fid_xy), wc.tn(sbnd_fid_zx)] },
+};
+
 local anodes_name(anodes, face='') =
     std.join('-', [std.toString(a.data.ident) for a in anodes])
     + if face == '' then '' else '-' + std.toString(face);
@@ -139,6 +210,19 @@ local bs_dead_face(apa, face) = {
     data: {
         strategy: ['center'],
         extra: ['.*'],
+    },
+};
+// Special sampler for ImproveCluster_2 (downstream steiner retiler): enable
+// dead-cell mixing so the retiler can interpolate across dead regions.  Matches
+// qlport's bs_live_no_dead_mix.
+local bs_live_no_dead_mix_face(apa, face) = {
+    type: 'BlobSampler',
+    name: 'live_no_dead_mix-%s-%d' % [apa, face],
+    data: {
+        drift_speed: drift_speed,
+        time_offset: time_offset,
+        strategy: { name: 'charge_stepped', disable_mix_dead_cell: false },
+        extra: ['.*wire_index', '.*charge.*', 'wpid'],
     },
 };
 
@@ -296,8 +380,62 @@ local clus_all_apa(anodes, dump, output_dir, runNo, subRunNo, eventNo, bee_sink=
     local pcts = pctransforms(dv),
     local cm_old = clus.clustering_methods(
         prefix='all', detector_volumes=dv, pc_transforms=pcts, coords=common_coords),
+    // fiducial=sbnd_fid is needed by the downstream FiducialUtils /
+    // TaggerCheckNeutrino; it is inert for the merge methods (extend/regular/...).
     local cm = clus.clustering_methods(
-        prefix='all', detector_volumes=dv, pc_transforms=pcts, coords=common_corr_coords),
+        prefix='all', detector_volumes=dv, pc_transforms=pcts,
+        fiducial=sbnd_fid, coords=common_corr_coords),
+
+    // ImproveCluster_2 retiler (steiner) with the no-dead-mix sampler per anode
+    // (one face per anode in this pipeline).
+    local imp2_samplers = [
+        clus.sampler(bs_live_no_dead_mix_face(a.name, 0), apa=a.data.ident, face=0)
+        for a in anodes
+    ],
+    local improve_cluster_2_sbnd = cm.improve_cluster_2(
+        anodes=anodes, samplers=imp2_samplers, verbose=true),
+
+    // uboone-trained BDT scorers (smoke test only; scores meaningless for SBND).
+    local numu_bdt_scorer = cm.numu_bdt_scorer(
+        numu1_weights_xml=smoketest_numu_weights_dir + '/numu_tagger1.weights.xml',
+        numu2_weights_xml=smoketest_numu_weights_dir + '/numu_tagger2.weights.xml',
+        numu3_weights_xml=smoketest_numu_weights_dir + '/numu_tagger3.weights.xml',
+        cosmict10_weights_xml=smoketest_numu_weights_dir + '/cos_tagger_10.weights.xml',
+        numu_xgboost_xml=smoketest_numu_weights_dir + '/numu_scalars_scores_0923.xml',
+    ),
+    local nue_bdt_scorer = cm.nue_bdt_scorer(
+        mipid_weights_xml=smoketest_nue_weights_dir + '/mipid_BDT.weights.xml',
+        gap_weights_xml=smoketest_nue_weights_dir + '/gap_BDT.weights.xml',
+        hol_lol_weights_xml=smoketest_nue_weights_dir + '/hol_lol_BDT.weights.xml',
+        cme_anc_weights_xml=smoketest_nue_weights_dir + '/cme_anc_BDT.weights.xml',
+        mgo_mgt_weights_xml=smoketest_nue_weights_dir + '/mgo_mgt_BDT.weights.xml',
+        br1_weights_xml=smoketest_nue_weights_dir + '/br1_BDT.weights.xml',
+        br3_weights_xml=smoketest_nue_weights_dir + '/br3_BDT.weights.xml',
+        br3_3_weights_xml=smoketest_nue_weights_dir + '/br3_3_BDT.weights.xml',
+        br3_5_weights_xml=smoketest_nue_weights_dir + '/br3_5_BDT.weights.xml',
+        br3_6_weights_xml=smoketest_nue_weights_dir + '/br3_6_BDT.weights.xml',
+        stemdir_br2_weights_xml=smoketest_nue_weights_dir + '/stem_dir_br2_BDT.weights.xml',
+        trimuon_weights_xml=smoketest_nue_weights_dir + '/stl_lem_brm_BDT.weights.xml',
+        br4_tro_weights_xml=smoketest_nue_weights_dir + '/br4_tro_BDT.weights.xml',
+        mipquality_weights_xml=smoketest_nue_weights_dir + '/mipquality_BDT.weights.xml',
+        pio_1_weights_xml=smoketest_nue_weights_dir + '/pio_1_BDT.weights.xml',
+        pio_2_weights_xml=smoketest_nue_weights_dir + '/pio_2_BDT.weights.xml',
+        stw_spt_weights_xml=smoketest_nue_weights_dir + '/stw_spt_BDT.weights.xml',
+        vis_1_weights_xml=smoketest_nue_weights_dir + '/vis_1_BDT.weights.xml',
+        vis_2_weights_xml=smoketest_nue_weights_dir + '/vis_2_BDT.weights.xml',
+        stw_2_weights_xml=smoketest_nue_weights_dir + '/stw_2_BDT.weights.xml',
+        stw_3_weights_xml=smoketest_nue_weights_dir + '/stw_3_BDT.weights.xml',
+        stw_4_weights_xml=smoketest_nue_weights_dir + '/stw_4_BDT.weights.xml',
+        sig_1_weights_xml=smoketest_nue_weights_dir + '/sig_1_BDT.weights.xml',
+        sig_2_weights_xml=smoketest_nue_weights_dir + '/sig_2_BDT.weights.xml',
+        lol_1_weights_xml=smoketest_nue_weights_dir + '/lol_1_BDT.weights.xml',
+        lol_2_weights_xml=smoketest_nue_weights_dir + '/lol_2_BDT.weights.xml',
+        tro_1_weights_xml=smoketest_nue_weights_dir + '/tro_1_BDT.weights.xml',
+        tro_2_weights_xml=smoketest_nue_weights_dir + '/tro_2_BDT.weights.xml',
+        tro_4_weights_xml=smoketest_nue_weights_dir + '/tro_4_BDT.weights.xml',
+        tro_5_weights_xml=smoketest_nue_weights_dir + '/tro_5_BDT.weights.xml',
+        nue_xgboost_xml=smoketest_nue_weights_dir + '/XGB_nue_seed2_0923.xml',
+    ),
     // Combined (all-APA) clustering runs AFTER QL charge-light matching, so every
     // cluster carries a matched flash time (cluster_t0).  switch_scope applies the
     // per-cluster T0 correction (x_t0cor scope) and drops any stale per-APA
@@ -321,7 +459,28 @@ local clus_all_apa(anodes, dump, output_dir, runNo, subRunNo, eventNo, bee_sink=
     + (if cathode_connect_on then [cm.cathode_connect(cathode_x_cut=5*wc.cm, drift_cut=8*wc.cm, min_length_short=2*wc.cm, short_dir_len=25*wc.cm, conn_short_cut=30.0, flash_t0_window=800*wc.ns)] else [])
     + [
         cm.examine_bundles(use_flash_t0=true),
-    ],
+    ]
+    // --- qlport-style downstream pattern recognition (enable_downstream_pr) ---
+    // tagger_flag_transfer: WireCellMatch tags the main_clus, so the upstream
+    // 'tagger_info' PC is available to transfer onto the merged tree.
+    + (if enable_downstream_pr then [
+        cm.tagger_flag_transfer('tagger'),
+        cm.clustering_recovering_bundle('recover_bundle', graph_name='relaxed_pid'),
+        cm.steiner(retiler=improve_cluster_2_sbnd, perf=true),
+        cm.fiducialutils(),
+        cm.tagger_check_neutrino(
+            trackfitting_config_file='sbnd_track_fitting.json',
+            recombination_model=wc.tn(sbnd_box_recomb),
+            particle_dataset=wc.tn(pds.particle_dataset),
+            perf=true,
+            dl_weights=smoketest_dl_weights,
+            dQdx_scale=dQdx_scale,
+            dQdx_offset=dQdx_offset,
+            clus_geom_helper='',  // no SBND SCE in v1
+        ),
+        numu_bdt_scorer,
+        nue_bdt_scorer,
+    ] else []),
     local bee_zip_path = (if output_dir == '' then '' else output_dir + '/') + 'mabc-all-apa.zip',
     local mabc = g.pnode({
         type: 'MultiAlgBlobClustering',
@@ -386,10 +545,73 @@ local clus_all_apa(anodes, dump, output_dir, runNo, subRunNo, eventNo, bee_sink=
                     coords: common_corr_coords,
                     individual: false,
                 },
+            ]
+            // --- qlport-style downstream point sets (steiner graph / track fit /
+            // shower-track / vertices from CreateSteinerGraph + TaggerCheckNeutrino) ---
+            + (if enable_downstream_pr then [
+                {
+                    name: 'regular',
+                    visitor: 'CreateSteinerGraph:all',
+                    detector: 'sbnd',
+                    algorithm: 'regular',
+                    pcname: '3d',
+                    coords: common_corr_coords,
+                    individual: false,
+                    filter: 1,
+                },
+                {
+                    name: 'steiner',
+                    visitor: 'CreateSteinerGraph:all',
+                    detector: 'sbnd',
+                    algorithm: 'steiner',
+                    pcname: 'steiner_pc',
+                    coords: common_corr_coords,
+                    individual: false,
+                },
+                {
+                    name: 'track_fit',
+                    visitor: 'TaggerCheckNeutrino:all',
+                    grouping: 'live',
+                    detector: 'sbnd',
+                    algorithm: 'track_fit',
+                    pcname: '3d',
+                    coords: common_corr_coords,
+                    individual: false,
+                    dQdx_scale: dQdx_scale,
+                    dQdx_offset: dQdx_offset,
+                },
+                {
+                    name: 'shower_track',
+                    visitor: 'TaggerCheckNeutrino:all',
+                    grouping: 'live',
+                    detector: 'sbnd',
+                    algorithm: 'shower_track',
+                    pcname: '3d',
+                    coords: common_corr_coords,
+                    individual: false,
+                    use_associate_points: true,
+                },
+                {
+                    name: 'vertices',
+                    visitor: 'TaggerCheckNeutrino:all',
+                    grouping: 'live',
+                    detector: 'sbnd',
+                    algorithm: 'vertices',
+                    pcname: '3d',
+                    coords: common_corr_coords,
+                    individual: false,
+                    use_graph_vertices: true,
+                },
+            ] else []),
+            // Particle-flow Bee output: one JSON per event
+            // (data/{index}/{index}-mc.json) emitted after TaggerCheckNeutrino.
+            [if enable_downstream_pr then 'bee_pf']: [
+                { name: 'mc', visitor: 'TaggerCheckNeutrino:all', grouping: 'live' },
             ],
             pipeline: wc.tns(cm_pipeline),
         },
     }, nin=1, nout=1, uses=anodes + [dv, pcts] + cm_pipeline
+              + (if enable_downstream_pr then [sbnd_box_recomb, sbnd_fid, sbnd_fid_xy, sbnd_fid_zx] + pds.all else [])
               + (if bee_sink != null then [bee_sink] else [])),
     local sink = g.pnode({
         type: 'TensorFileSink',

@@ -85,7 +85,16 @@ void TaggerCheckNeutrino::visit(Ensemble& ensemble) const
 
     // Configure the track fitter with detector volume
     m_track_fitter->set_detector_volume(m_dv);
-    m_track_fitter->set_pc_transforms(m_pcts); 
+    m_track_fitter->set_pc_transforms(m_pcts);
+
+    // Reset the persistent track fitter's accumulated state from the PREVIOUS
+    // event.  m_track_fitter is a node member reused every event; without this
+    // its m_clusters/m_blobs/m_segments still hold dangling Facade::Cluster* /
+    // Blob* into the prior event's destroyed point-cloud tree, so this event's
+    // preload_clusters -> prepare_data -> sync_from_graph walks freed memory and
+    // segfaults (NaryTreeFacade children()).
+    m_track_fitter->clear_graph();
+    m_track_fitter->clear_segments();
 
     // Get the specified grouping (default: "live")
     auto groupings = ensemble.with_name(m_grouping_name);
@@ -113,6 +122,15 @@ void TaggerCheckNeutrino::visit(Ensemble& ensemble) const
         if (cluster != main_cluster && cluster->get_flag(Flags::beam_flash)) {
             other_clusters.push_back(cluster);
         }
+    }
+
+    // No cluster carries the main_cluster flag (e.g. an event with no in-beam
+    // matched candidate): there is no neutrino candidate to process.  Skip
+    // gracefully -- the remainder of visit() dereferences main_cluster
+    // unconditionally (preload, find_proto_vertex, ...).
+    if (!main_cluster) {
+        SPDLOG_LOGGER_DEBUG(log, "TaggerCheckNeutrino: no main_cluster among {} clusters ({} in-beam); skipping neutrino pattern recognition", nclusters, n_in_beam_clusters);
+        return;
     }
 
     SPDLOG_LOGGER_TRACE(log, "Found {} clusters, {} main clusters, {} in-beam clusters, {} of blobs in main cluster id {}", nclusters, n_main_clusters, n_in_beam_clusters, main_cluster->nchildren(), main_cluster->get_cluster_id());

@@ -85,6 +85,10 @@ namespace WireCell::Match {
         int    m_auto_mask_min_contrast{1};  // # bright-neighbour flashes required
         int    m_auto_mask_min_flash{3};     // skip auto-masking below this flash count
         bool m_beamonly{false};
+        // Clusters matched to a flash with |flash_time| < this get the
+        // "beam_flash" flag; the smallest-|time| one per APA gets "main_cluster"
+        // (mirrors larwirecell QLMatching).  Default 5 us.
+        double m_max_beam_flash_time{5e3};
         double m_flash_minPE{500};
         double m_flash_mintime{-1.5 * units::ms};
         double m_flash_maxtime{1.5 * units::ms};

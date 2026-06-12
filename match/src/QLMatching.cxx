@@ -17,6 +17,7 @@
 #include <algorithm>
 #include <chrono>
 #include <cmath>
+#include <limits>
 #include <set>
 
 WIRECELL_FACTORY(QLMatching,
@@ -34,6 +35,15 @@ using namespace WireCell::Clus::Facade;
 // all-APA pctree merge and stays unambiguous across APAs. Far larger than any
 // realistic per-APA flash count.
 namespace { constexpr int kFlashGidStride = 1000000; }
+
+// Defined in clus/src/MultiAlgBlobClustering.cxx (no installed header carries it).
+// Pads cluster_scalar so every live cluster shares the same flag_* keys, so the
+// beam_flash/main_cluster flags set below survive the as_tensors() schema (which
+// keys on the first cluster) at the QLMatching -> MABC tensor boundary.
+namespace WireCell::Clus::Facade {
+    void normalize_cluster_flags(Grouping& grouping, WireCell::Log::logptr_t log,
+                                 const std::string& grouping_name, int ident);
+}
 
 // ---- Per-phase profiling helpers (logging only; outputs bit-identical) ----
 // Lightweight wall-clock split of operator() so we can attribute the per-event
@@ -149,6 +159,7 @@ void QLMatching::configure(const WireCell::Configuration& cfg)
     m_pmts     = get(cfg, "pmts", m_pmts);
     m_data     = get(cfg, "data", m_data);
     m_beamonly = get(cfg, "beamonly", m_beamonly);
+    m_max_beam_flash_time = get(cfg, "max_beam_flash_time", m_max_beam_flash_time);
 
     if (cfg.isMember("active_opdet_types") && cfg["active_opdet_types"].isArray()) {
         m_active_opdet_types.clear();
@@ -338,6 +349,7 @@ WireCell::Configuration QLMatching::default_configuration() const
     for (int t : m_active_opdet_types) cfg["active_opdet_types"].append(t);
     cfg["data"]            = m_data;
     cfg["beamonly"]        = m_beamonly;
+    cfg["max_beam_flash_time"] = m_max_beam_flash_time;
     cfg["ch_mask"]         = Json::arrayValue;
     cfg["auto_mask"]              = m_auto_mask;
     cfg["auto_mask_pe_low"]       = m_auto_mask_pe_low;
@@ -519,8 +531,11 @@ bool QLMatching::operator()(const input_vector& invec, output_pointer& out)
     const int out_ident = runs.front().charge_ident;
     ITensor::vector outtens;
     if (runs.size() == 1) {
-        // Single-APA: the historical filter output verbatim (no merge/normalize).
+        // Single-APA: the historical filter output verbatim (no merge).
         ApaRun& run = runs.front();
+        // Pad flag_* keys so the beam_flash/main_cluster flags (set on a subset of
+        // clusters) survive the as_tensors schema (keyed on the first cluster).
+        normalize_cluster_flags(*run.grouping, log, "live", run.charge_ident);
         auto tens_live = Aux::TensorDM::as_tensors(*run.root_live, run.inpath + "/live");
         outtens.insert(outtens.end(), tens_live.begin(), tens_live.end());
 
@@ -541,6 +556,10 @@ bool QLMatching::operator()(const input_vector& invec, output_pointer& out)
         }
         normalize_pctree_local_pcs(root_live);
         normalize_pctree_local_pcs(root_dead.get());
+        // Pad flag_* keys across the merged live grouping so the beam_flash/
+        // main_cluster flags (set on a subset, possibly only one APA) survive the
+        // as_tensors schema (keyed on the first cluster).
+        normalize_cluster_flags(*runs.front().grouping, log, "live", out_ident);
 
         std::string outpath = m_outpath;
         if (outpath.find("%") != std::string::npos) outpath = String::format(outpath, out_ident);
@@ -1550,7 +1569,19 @@ void QLMatching::rescue_empty_flashes(ApaRun& run, const FlashBundlesMap& snapsh
 // matched_flash_gid (survives the all-APA merge), and the per-channel flashpred.
 void QLMatching::apply_matched_t0s(ApaRun& run)
 {
+    // Tag beam-window clusters with Clus::Facade "beam_flash" / "main_cluster"
+    // (mirrors larwirecell QLMatching) so the downstream MABC pipeline
+    // (ClusteringTaggerFlagTransfer, ClusteringRecoveringBundle,
+    // TaggerCheckNeutrino, ...) can pick the in-beam main cluster:
+    //   - any matched cluster whose flash has |flash_time| < m_max_beam_flash_time
+    //     gets "beam_flash";
+    //   - among those, the cluster whose flash has the smallest |time| gets
+    //     "main_cluster".  (Per APA run, as in larwirecell's per-anode node.)
+    Cluster* main_cluster_candidate = nullptr;
+    double main_cluster_abs_time = std::numeric_limits<double>::infinity();
     for (auto* flash : flash_iter_order(run.flash_bundles_map)) {
+        const double abs_flash_time = std::abs(flash->get_time());
+        const bool in_beam = abs_flash_time < m_max_beam_flash_time;
         for (auto bundle : run.flash_bundles_map[flash]) {
             auto* cluster = bundle->get_main_cluster();
             const double t0 = flash->get_time() * units::ns;
@@ -1559,6 +1590,13 @@ void QLMatching::apply_matched_t0s(ApaRun& run)
             cluster->set_scalar<int>("flash", flash->get_flash_id());
             cluster->set_scalar<int>("matched_flash_gid", flash_gid);
             cluster->put_pcarray<double>(bundle->get_pred_flash(), "pe", "flashpred");
+            if (in_beam) {
+                cluster->set_flag("beam_flash");
+                if (abs_flash_time < main_cluster_abs_time) {
+                    main_cluster_abs_time = abs_flash_time;
+                    main_cluster_candidate = cluster;
+                }
+            }
             // Propagate the group's matched flash/t0 to its associated sub-clusters.
             for (auto* oc : bundle->get_other_clusters()) {
                 oc->set_cluster_t0(t0);
@@ -1583,6 +1621,17 @@ void QLMatching::apply_matched_t0s(ApaRun& run)
                        bundle->get_flag_window_truncated(),
                        bundle->get_consistent_flag());
         }
+    }
+    if (main_cluster_candidate) {
+        main_cluster_candidate->set_flag("main_cluster");
+        log->debug("QLMatching: main_cluster tagged on cluster gidx {} "
+                   "(|flash_time|={} ns, threshold={} ns)",
+                   run.global_cluster_idx_map[main_cluster_candidate],
+                   main_cluster_abs_time, m_max_beam_flash_time);
+    }
+    else {
+        log->debug("QLMatching: no matched cluster within |flash_time| < {} ns; "
+                   "main_cluster flag not set", m_max_beam_flash_time);
     }
 }
 
