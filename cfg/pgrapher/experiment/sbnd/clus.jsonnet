@@ -1070,7 +1070,15 @@ local clus_pr(anodes, dump, output_dir, runNo, subRunNo, eventNo, rse_from_ident
               // the DL SCN prediction to accept a candidate vertex.  Threaded
               // for configurability (docs/pr/2 sec 7.4); null keeps the C++
               // default, which is coupled to the uBooNE-trained net (gap G3).
-              dl_vtx_cut=null) = {
+              dl_vtx_cut=null,
+              // stamp_matching_bundle_id (default false = byte-identical legacy
+              // tarball): write the coarse Q/L flash-bundle ident into every
+              // cluster's perblob PC before the PR visitor loop.  Required for
+              // NuGraph4 training-data preparation so the coarse bundle
+              // membership survives ClusteringUnmergeBundle.  OFF by default so
+              // production and other detectors are byte-identical; enable in
+              // the NuGraph4 preparation job only.
+              stamp_matching_bundle_id=false) = {
     // Only gate when the caller actually supplied a window; beam_window=[0,0]
     // (the arg default, i.e. "no beam window") must not silently drop every
     // cluster's tagger evaluation.
@@ -1738,6 +1746,7 @@ local clus_pr(anodes, dump, output_dir, runNo, subRunNo, eventNo, rse_from_ident
                 },
             ],
             pipeline: wc.tns(cm_pipeline),
+            [if stamp_matching_bundle_id then 'stamp_matching_bundle_id']: true,
         },
     }, nin=1, nout=1, uses=anodes + [dv, pcts] + cm_pipeline + tagger_uses),
     local sink = g.pnode({
@@ -1948,7 +1957,10 @@ function(output_dir='.', runNo=0, subRunNo=0, eventNo=0, rse_from_ident=false, r
        sp_dedx_use_recomb_model=true, sp_mean_dedx_cut=2.23,
        // dl_vtx_cut (mm) is threaded for configurability only (docs/pr/2
        // sec 7.4); null keeps the C++ 25.0 (= 2.5 cm) default.
-       dl_vtx_cut=null)::
+       dl_vtx_cut=null,
+       // stamp_matching_bundle_id: threaded through to clus_pr; see that
+       // function's arg comment.  DEFAULT FALSE = production byte-identical.
+       stamp_matching_bundle_id=false)::
         clus_pr(anodes, dump=dump,
                 output_dir=output_dir, runNo=runNo, subRunNo=subRunNo, eventNo=eventNo,
                 rse_from_ident=rse_from_ident, pos_offset_on=pos_offset_on,
@@ -2038,7 +2050,8 @@ function(output_dir='.', runNo=0, subRunNo=0, eventNo=0, rse_from_ident=false, r
                 use_power_recomb=use_power_recomb,
                 sp_dedx_use_recomb_model=sp_dedx_use_recomb_model,
                 sp_mean_dedx_cut=sp_mean_dedx_cut,
-                dl_vtx_cut=dl_vtx_cut),
+                dl_vtx_cut=dl_vtx_cut,
+                stamp_matching_bundle_id=stamp_matching_bundle_id),
     detector_volumes(anodes, face=0):: detector_volumes(anodes=anodes, face=face, pos_offset_on=pos_offset_on),
     // Primitives the entry configuration needs to build the wclsTensorSetLabeler
     // node itself (it is no longer wired inside clus_all_apa).  All are the exact
