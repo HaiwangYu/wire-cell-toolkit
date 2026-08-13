@@ -270,6 +270,31 @@ void TrackFitting::clear_segments(){
     m_cluster_charge_data.clear();
     m_cluster_fitted_charge_2d.clear();
     m_fitted_charge_2d.clear();
+
+    // Reset grouping and all geometry derived from it so that the next
+    // event's add_segment() re-drives BuildGeometry() from a live Grouping.
+    // Without this reset, TaggerCheckSTM's persistent m_track_fitter retains
+    // a dangling Grouping* after the previous event's Grouping is freed,
+    // causing a SIGSEGV on the next event's get_anode() call.
+    m_grouping = nullptr;
+    wpid_geoms.clear();
+    wpid_offsets.clear();
+    wpid_slopes.clear();
+    wpid_params.clear();
+    wpid_U_dir.clear();
+    wpid_V_dir.clear();
+    wpid_W_dir.clear();
+    apas.clear();
+    m_hot_cache.clear();
+
+    // Clear the global readout-blob map.  fill_global_rb_map() early-returns
+    // when this map is non-empty (size != 0 guard at its top), so if left
+    // populated from event N the next event reuses stale Facade::Blob* raw
+    // pointers that have since been freed — a second class of dangling pointer
+    // SIGSEGV distinct from the m_grouping issue above.  Clearing forces a
+    // full rebuild from the current event's live blobs on the next
+    // do_single_tracking call.
+    global_rb_map.clear();
 }
 
 void TrackFitting::sync_from_graph(){
