@@ -2484,7 +2484,15 @@ private:
 
         const size_t N = x_coords.size();
         if (N == 0) return;
-        
+
+        // Reset m_grouping and all geometry-derived maps so the first
+        // add_segment() call below re-drives BuildGeometry() from the
+        // CURRENT event's live Grouping.  Without this, m_grouping retains
+        // a dangling pointer to the PREVIOUS event's freed Grouping when
+        // search_other_tracks() is called on the next event, causing a
+        // SIGSEGV inside do_single_tracking() on the second event.
+        m_track_fitter.clear_segments();
+
         std::vector<bool> flag_tagged(N, false);
         int num_tagged = 0;
 
