@@ -208,6 +208,10 @@ void Root::SbndPrMagnifyTrackingVisitor::visit(Clus::Facade::Ensemble& ensemble)
     {
         const auto rse = event_rse(ensemble, m_runNo, m_subRunNo, m_eventNo);
         m_evt_runNo = rse.run; m_evt_subRunNo = rse.subrun; m_evt_eventNo = rse.event;
+        // ai-helper issue 39: the art input file of this event, stamped by
+        // larwirecell's wclsTruthInformationAttacher into the step-1 set metadata.
+        const auto& imd = ensemble.input_metadata();
+        m_evt_input_file = (imd.isObject() && imd["input_file"].isString()) ? imd["input_file"].asString() : "";
     }
 
     // Open ROOT file
@@ -646,6 +650,12 @@ void Root::SbndPrMagnifyTrackingVisitor::write_trun(TFile* output_tf, Clus::Faca
         }
         prov_keys.push_back(key);
         prov_vals.push_back(kv.second);
+    }
+    // ai-helper issue 39: the art input file (only when the input carried it, so
+    // older inputs keep the previous schema).
+    std::string input_file = m_evt_input_file;
+    if (!input_file.empty() && !tree->GetBranch("input_file")) {
+        tree->Branch("input_file", &input_file);
     }
     if (!m_provenance.empty()) {
         tree->Branch("wct_version", &wct_version);

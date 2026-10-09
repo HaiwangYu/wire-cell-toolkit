@@ -3064,6 +3064,21 @@ function(output_dir='.', runNo=0, subRunNo=0, eventNo=0, rse_from_ident=false, r
                     coords: common_corr_coords(pos_offset_on, use_sce),
                 },
             },
+            // ai-helper issue 39: every tree of the per-event tracking-pr.root as one
+            // entry of a flat, CAF-style tree (recTreeWireCell), for merging into the
+            // flat CAF.  Must run LAST (after tracking_visitor and tagger_output, the
+            // writers of that file).  Only active when named in pipeline_names, so
+            // every compiled config is byte-identical otherwise.
+            flat_tree: {
+                type: 'RootFlatTreeVisitor',
+                name: 'pr',
+                data: {
+                    output_filename: tracking_pr_root,
+                    tree_name: 'recTreeWireCell',
+                    prefix: 'wc',
+                    drop_row_trees: false,
+                },
+            },
         },
         local cm_pipeline = [cm_by_name[n] for n in pipeline_names],
         // The taggers' configs only name the recombination/particle-dataset

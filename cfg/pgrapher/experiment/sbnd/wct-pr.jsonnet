@@ -37,7 +37,11 @@ function(input='qlpctree.tar.gz',
          dl_vtx_dump=false,
          // ai-helper issue 35: TaggerCheckNeutrino keys merged over the production
          // operating point, for experiments, e.g. --tla-code 'pr_knobs={dl_vtx_dual_chain: false}'.
-         pr_knobs={})
+         pr_knobs={},
+         // ai-helper issue 39: also write recTreeWireCell into every
+         // pr_evt<E>/tracking-pr.root -- all its trees as ONE flat, CAF-style
+         // entry, for merging into the flat CAF.  Default off.
+         flat_tree=false)
 
 local g = import 'pgraph.jsonnet';
 local wc = import 'wirecell.jsonnet';
@@ -70,7 +74,7 @@ local bee = {
 // tagger_bee: the tagger verdict Bee sets (tagger_stm/_tgm/_fc/_lm), which the
 // 1-step's art-side labeler_tagger writes, come from TaggerBeeVisitor here.
 local pr_node = pr_stage.node(clus_maker, tools.anodes, bee, enable_tracking_root, tagger_bee=true,
-                              dl_vtx_dump=dl_vtx_dump, pr_knobs=pr_knobs);
+                              dl_vtx_dump=dl_vtx_dump, pr_knobs=pr_knobs, flat_tree=flat_tree);
 
 local sink = g.pnode({
     type: 'TensorFileSink',

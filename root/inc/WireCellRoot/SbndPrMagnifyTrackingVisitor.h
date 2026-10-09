@@ -67,6 +67,7 @@ namespace WireCell {
             // constant for every event in the group.  Set at the top of
             // visit(), which is const.
             mutable int m_evt_runNo{0};
+            mutable std::string m_evt_input_file;   // ai-helper issue 39: from the input set metadata "input_file"
             mutable int m_evt_subRunNo{0};
             mutable int m_evt_eventNo{0};
             std::vector<IAnodePlane::pointer> m_anodes;

@@ -4024,6 +4024,8 @@ bool MultiAlgBlobClustering::operator()(const input_pointer& ints, output_pointe
     // previous event has already advanced it), for visitors that write into
     // the same sink -- one owner of the index.
     ensemble.set_bee_index((int) m_bee_event_index);
+    // ai-helper issue 39: the input set metadata (e.g. "input_file"), for visitors.
+    ensemble.set_input_metadata(m_in_metadata);
     // Publish the RSE this node resolved (config, auto-increment, ident or
     // rse_map) so the per-event writers downstream stamp THIS event rather than
     // their own configure-time constant.  Only when a multi-event mode is on:
